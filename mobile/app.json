@@ -1,0 +1,33 @@
+{
+  "name": "AquapuriteMobile",
+  "displayName": "Aquapurite ERP",
+  "version": "1.0.0",
+  "description": "Aquapurite ERP Mobile App for iOS and Android",
+  "expo": {
+    "name": "Aquapurite ERP",
+    "slug": "aquapurite-erp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0066CC"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aquapurite.erp"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0066CC"
+      },
+      "package": "com.aquapurite.erp"
+    }
+  }
+}

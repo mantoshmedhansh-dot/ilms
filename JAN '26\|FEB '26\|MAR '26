@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Purchase Order - PO-20260108-0001</title>
+    <style>
+        @page { size: A4; margin: 10mm; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; font-size: 11px; line-height: 1.4; padding: 10px; background: #fff; }
+        .document { max-width: 210mm; margin: 0 auto; border: 2px solid #000; }
+
+        /* Header */
+        .header { background: linear-gradient(135deg, #1a5f7a 0%, #0d3d4d 100%); color: white; padding: 15px; text-align: center; }
+        .header h1 { font-size: 24px; margin-bottom: 8px; letter-spacing: 2px; }
+        .header .contact { font-size: 9px; }
+
+        /* Document Title */
+        .doc-title { background: #f0f0f0; padding: 12px; text-align: center; border-bottom: 2px solid #000; }
+        .doc-title h2 { font-size: 18px; color: #1a5f7a; }
+
+        /* Info Grid */
+        .info-grid { display: flex; flex-wrap: wrap; border-bottom: 1px solid #000; }
+        .info-box { flex: 1; min-width: 25%; padding: 8px 10px; border-right: 1px solid #000; }
+        .info-box:last-child { border-right: none; }
+        .info-box label { display: block; font-size: 9px; color: #666; text-transform: uppercase; margin-bottom: 3px; }
+        .info-box value { display: block; font-weight: bold; font-size: 11px; }
+
+        /* Party Section */
+        .party-section { display: flex; border-bottom: 1px solid #000; }
+        .party-box { flex: 1; padding: 10px; border-right: 1px solid #000; }
+        .party-box:last-child { border-right: none; }
+        .party-header { background: #1a5f7a; color: white; padding: 5px 8px; margin: -10px -10px 10px -10px; font-size: 10px; font-weight: bold; }
+        .party-box p { margin-bottom: 3px; }
+        .party-box .company-name { font-weight: bold; font-size: 12px; color: #1a5f7a; }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #1a5f7a; color: white; padding: 8px 5px; font-size: 10px; text-align: center; border: 1px solid #000; }
+        td { padding: 8px 5px; border: 1px solid #000; font-size: 10px; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .fg-code { font-family: 'Courier New', monospace; font-weight: bold; color: #1a5f7a; font-size: 9px; }
+        .item-code { font-family: 'Courier New', monospace; font-weight: bold; color: #333; font-size: 9px; }
+
+        /* Totals */
+        .totals-section { display: flex; border-bottom: 1px solid #000; }
+        .totals-left { flex: 1; padding: 10px; border-right: 1px solid #000; }
+        .totals-right { width: 300px; }
+        .totals-row { display: flex; padding: 5px 10px; border-bottom: 1px solid #ddd; }
+        .totals-row:last-child { border-bottom: none; }
+        .totals-label { flex: 1; text-align: right; padding-right: 15px; }
+        .totals-value { width: 110px; text-align: right; font-weight: bold; }
+        .grand-total { background: #1a5f7a; color: white; font-size: 12px; }
+        .advance-paid { background: #28a745; color: white; }
+        .balance-due { background: #dc3545; color: white; }
+
+        /* Amount in Words */
+        .amount-words { padding: 10px; background: #f9f9f9; border-bottom: 1px solid #000; font-style: italic; }
+
+        /* Payment Section */
+        .payment-section { padding: 10px; border-bottom: 1px solid #000; background: #e8f5e9; }
+        .payment-section h4 { color: #2e7d32; margin-bottom: 8px; }
+        .payment-detail { display: flex; margin-bottom: 5px; }
+        .payment-detail label { width: 150px; font-weight: bold; }
+
+        /* Bank Details */
+        .bank-section { padding: 10px; border-bottom: 1px solid #000; background: #fff3cd; }
+        .bank-section h4 { color: #856404; margin-bottom: 8px; }
+
+        /* Terms */
+        .terms { padding: 10px; font-size: 9px; border-bottom: 1px solid #000; }
+        .terms h4 { margin-bottom: 5px; color: #1a5f7a; }
+        .terms ol { margin-left: 15px; }
+        .terms li { margin-bottom: 3px; }
+
+        /* Signature */
+        .signature-section { display: flex; padding: 20px; }
+        .signature-box { flex: 1; text-align: center; }
+        .signature-line { border-top: 1px solid #000; margin-top: 50px; padding-top: 5px; width: 180px; margin-left: auto; margin-right: auto; }
+
+        /* Footer */
+        .footer { background: #f0f0f0; padding: 8px; text-align: center; font-size: 9px; color: #666; }
+
+        /* Print Button */
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #1a5f7a 0%, #0d3d4d 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+        .print-btn:hover {
+            background: linear-gradient(135deg, #0d3d4d 0%, #1a5f7a 100%);
+        }
+
+        @media print {
+            body { padding: 0; }
+            .document { border: 1px solid #000; }
+            .print-btn { display: none !important; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Print PDF Button -->
+    <button class="print-btn no-print" onclick="window.print()">Print PDF</button>
+
+    <div class="document">
+        <!-- Header -->
+        <div class="header">
+            <h1>AQUAPURITE PRIVATE LIMITED</h1>
+            <div class="contact">
+                PLOT 36-A KH NO 181, PH-1, Najafgarh, Delhi - 110043<br>
+                GSTIN: 07ABDCA6170C1Z5 | CIN: U32909DL2025PTC454115<br>
+                Phone: +91-9311939076 | Email: accounts@aquapurite.com
+            </div>
+        </div>
+
+        <!-- Document Title -->
+        <div class="doc-title">
+            <h2>PURCHASE ORDER</h2>
+        </div>
+
+        <!-- PO Info Grid -->
+        <div class="info-grid">
+            <div class="info-box">
+                <label>PO Number</label>
+                <value style="font-size: 13px; color: #1a5f7a;">PO-20260108-0001</value>
+            </div>
+            <div class="info-box">
+                <label>PO Date</label>
+                <value>08.01.2026</value>
+            </div>
+            <div class="info-box">
+                <label>PI Reference</label>
+                <value>N/A</value>
+            </div>
+            <div class="info-box">
+                <label>PI Date</label>
+                <value>N/A</value>
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-box">
+                <label>Expected Delivery</label>
+                <value style="color: #dc3545;">31.03.2026</value>
+            </div>
+            <div class="info-box">
+                <label>Delivery Terms</label>
+                <value>Ex-Works</value>
+            </div>
+            <div class="info-box">
+                <label>Payment Terms</label>
+                <value>45 days credit</value>
+            </div>
+            <div class="info-box">
+                <label>Tax Type</label>
+                <value>IGST (Inter-State)</value>
+            </div>
+        </div>
+
+        <!-- Vendor & Delivery Details -->
+        <div class="party-section">
+            <div class="party-box">
+                <div class="party-header">SUPPLIER / VENDOR DETAILS</div>
+                <p class="company-name">STOS INDUSTRIAL CORPORATION PRIVATE LIMITED</p>
+                <p>E-180, Sector-17, Kavi Nagar Industrial Area, Ghaziabad, Uttar Pradesh, 201002</p>
+                <p><strong>GSTIN:</strong> 09AACCO4091J1Z6</p>
+                <p><strong>State Code:</strong> 09</p>
+                <p><strong>Contact:</strong> Saurabh Garg</p>
+                <p><strong>Phone:</strong> None</p>
+                <p><strong>Vendor Code:</strong> VND-00002</p>
+            </div>
+            <div class="party-box">
+                <div class="party-header">SHIP TO / DELIVERY ADDRESS</div>
+                <p class="company-name">AQUAPURITE PRIVATE LIMITED</p>
+                <p>Industrial Area, Phase 1, Delhi, Delhi, 110001</p>
+                <p><strong>Warehouse:</strong> Central Warehouse Delhi</p>
+                <p><strong>GSTIN:</strong> 07ABDCA6170C1Z5</p>
+                <p><strong>State Code:</strong> 07</p>
+                <p><strong>Contact:</strong> Store Manager</p>
+                <p><strong>Phone:</strong> +91-9311939076</p>
+            </div>
+        </div>
+
+        <!-- Order Items Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:4%">S.N.</th>
+                    <th style="width:10%">SKU</th>
+                    <th style="width:15%">Description</th>
+                    <th style="width:8%">HSN</th>
+                    <th style="width:6%">JAN '26</th><th style="width:6%">FEB '26</th><th style="width:6%">MAR '26</th>
+                    <th style="width:7%">TOTAL</th>
+                    <th style="width:5%">UOM</th>
+                    <th style="width:10%">Rate</th>
+                    <th style="width:12%">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                <tr>
+                    <td class="text-center">1</td>
+                    <td class="item-code">SP-BDV-001</td>
+                    <td>
+                        <strong>Brass Diverter Valve</strong>
+                    </td>
+                    <td class="text-center">84212190</td>
+                    <td class="text-center">500</td><td class="text-center">500</td><td class="text-center">500</td>
+                    <td class="text-center"><strong>1500</strong></td>
+                    <td class="text-center">PCS</td>
+                    <td class="text-right">Rs. 250.00</td>
+                    <td class="text-right"><strong>Rs. 375,000.00</strong></td>
+                </tr>
+                <tr style="background: #f5f5f5; font-weight: bold;">
+                    <td colspan="4" class="text-right">TOTAL QUANTITIES</td>
+                    <td class="text-center"><strong>500</strong></td><td class="text-center"><strong>500</strong></td><td class="text-center"><strong>500</strong></td>
+                    <td class="text-center">1500</td>
+                    <td class="text-center">Nos</td>
+                    <td></td>
+                    <td class="text-right">Rs. 375,000.00</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Totals Section -->
+        <div class="totals-section">
+            <div class="totals-left">
+                <strong>HSN Summary (IGST (Inter-State)):</strong>
+                <table style="margin-top: 5px; font-size: 9px;">
+                    <tr style="background: #e0e0e0;">
+                        <th>HSN Code</th>
+                        <th>Taxable Value</th>
+                        <th>CGST @9%</th>
+                        <th>SGST @9%</th>
+                        <th>Total Tax</th>
+                    </tr>
+                    <tr>
+                        <td class="text-center">84212110</td>
+                        <td class="text-right">Rs. 375,000.00</td>
+                        <td class="text-right">Rs. 33,750.00</td>
+                        <td class="text-right">Rs. 33,750.00</td>
+                        <td class="text-right">Rs. 67,500.00</td>
+                    </tr>
+                </table>
+                <p style="margin-top: 10px; font-size: 9px; color: #666;">
+                    <strong>Note:</strong> IGST (Inter-State) applicable
+                </p>
+            </div>
+            <div class="totals-right">
+                <div class="totals-row">
+                    <span class="totals-label">Sub Total:</span>
+                    <span class="totals-value">Rs. 375,000.00</span>
+                </div>
+                <div class="totals-row">
+                    <span class="totals-label">CGST @ 9%:</span>
+                    <span class="totals-value">Rs. 33,750.00</span>
+                </div>
+                <div class="totals-row">
+                    <span class="totals-label">SGST @ 9%:</span>
+                    <span class="totals-value">Rs. 33,750.00</span>
+                </div>
+                <div class="totals-row grand-total">
+                    <span class="totals-label">GRAND TOTAL:</span>
+                    <span class="totals-value">Rs. 442,500.00</span>
+                </div>
+                <div class="totals-row advance-paid">
+                    <span class="totals-label">Advance Paid:</span>
+                    <span class="totals-value">Rs. 0.00</span>
+                </div>
+                <div class="totals-row balance-due">
+                    <span class="totals-label">Balance Due:</span>
+                    <span class="totals-value">Rs. 442,500.00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Amount in Words -->
+        <div class="amount-words">
+            <strong>Grand Total in Words:</strong> Rupees Four Lakh Forty Two Thousand Five Hundred Only<br>
+            <strong>Advance Paid in Words:</strong> Zero
+        </div>
+
+        
+        <!-- Delivery Schedule Section -->
+        <div style="margin-top: 15px; border: 2px solid #1a5f7a; page-break-inside: avoid;">
+            <div style="background: #1a5f7a; color: white; padding: 10px; font-weight: bold; font-size: 12px;">
+                DELIVERY SCHEDULE & LOT-WISE PAYMENT PLAN
+            </div>
+            <table style="font-size: 10px;">
+                <thead>
+                    <tr style="background: #e0e0e0;">
+                        <th style="width: 14%">LOT</th>
+                        <th style="width: 12%">DELIVERY DATE</th>
+                        <th style="width: 8%">QTY</th>
+                        <th style="width: 14%">LOT VALUE (incl. GST)</th>
+                        <th style="width: 12%">ADVANCE (25%)</th>
+                        <th style="width: 12%">ADVANCE DUE</th>
+                        <th style="width: 12%">BALANCE (75%)</th>
+                        <th style="width: 12%">BALANCE DUE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                <tr>
+                    <td class="text-center"><strong>LOT 1 (JAN 2026)</strong></td>
+                    <td class="text-center">15 Jan 2026</td>
+                    <td class="text-center">500</td>
+                    <td class="text-right">Rs. 147,500.00</td>
+                    <td class="text-right">Rs. 36,875.00</td>
+                    <td class="text-center">With PO</td>
+                    <td class="text-right">Rs. 110,625.00</td>
+                    <td class="text-center">01 Mar 2026</td>
+                </tr>
+                <tr>
+                    <td class="text-center"><strong>LOT 2 (FEB 2026)</strong></td>
+                    <td class="text-center">15 Feb 2026</td>
+                    <td class="text-center">500</td>
+                    <td class="text-right">Rs. 147,500.00</td>
+                    <td class="text-right">Rs. 36,875.00</td>
+                    <td class="text-center">15 Feb 2026</td>
+                    <td class="text-right">Rs. 110,625.00</td>
+                    <td class="text-center">01 Apr 2026</td>
+                </tr>
+                <tr>
+                    <td class="text-center"><strong>LOT 3 (MAR 2026)</strong></td>
+                    <td class="text-center">15 Mar 2026</td>
+                    <td class="text-center">500</td>
+                    <td class="text-right">Rs. 147,500.00</td>
+                    <td class="text-right">Rs. 36,875.00</td>
+                    <td class="text-center">15 Mar 2026</td>
+                    <td class="text-right">Rs. 110,625.00</td>
+                    <td class="text-center">29 Apr 2026</td>
+                </tr>
+                    <tr style="background: #f5f5f5; font-weight: bold;">
+                        <td class="text-center">TOTAL</td>
+                        <td class="text-center"></td>
+                        <td class="text-center">1,500</td>
+                        <td class="text-right">Rs. 442,500.00</td>
+                        <td class="text-right">Rs. 110,625.00</td>
+                        <td class="text-center"></td>
+                        <td class="text-right">Rs. 331,875.00</td>
+                        <td class="text-center"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="padding: 8px; font-size: 9px; color: #666; background: #fff3cd;">
+                <strong>Note:</strong> Advance for each lot must be paid before delivery. Balance is due 45 days after each lot's delivery.
+            </p>
+        </div>
+        
+
+        <!-- Payment Details -->
+        <div class="payment-section">
+            <h4>ADVANCE PAYMENT DETAILS</h4>
+            <div class="payment-detail">
+                <label>Payment Date:</label>
+                <span>N/A</span>
+            </div>
+            <div class="payment-detail">
+                <label>Transaction Reference:</label>
+                <span>RTGS/NEFT Transfer</span>
+            </div>
+            <div class="payment-detail">
+                <label>Amount Transferred:</label>
+                <span><strong>Rs. 0.00</strong></span>
+            </div>
+            <div class="payment-detail">
+                <label>Balance Payment:</label>
+                <span><strong>Rs. 442,500.00</strong></span>
+            </div>
+        </div>
+
+        <!-- Bank Details -->
+        <div class="bank-section">
+            <h4>SUPPLIER BANK DETAILS (For Future Payments)</h4>
+            <div class="payment-detail">
+                <label>Bank Name:</label>
+                <span>ICICI Bank</span>
+            </div>
+            <div class="payment-detail">
+                <label>Branch:</label>
+                <span>Ghaziabad - Choudhary More Branch</span>
+            </div>
+            <div class="payment-detail">
+                <label>Account Number:</label>
+                <span><strong>125605002916</strong></span>
+            </div>
+            <div class="payment-detail">
+                <label>IFSC Code:</label>
+                <span>ICIC0001256</span>
+            </div>
+            <div class="payment-detail">
+                <label>Account Name:</label>
+                <span>STOS INDUSTRIAL CORPORATION PRIVATE LIMITED</span>
+            </div>
+        </div>
+
+        <!-- Terms & Conditions -->
+        <div class="terms">
+            <h4>TERMS & CONDITIONS:</h4>
+            <ol>
+                <li><strong>Payment Terms:</strong>
+                    <ul style="margin-left: 15px;">
+                        <li>25% Advance against Proforma Invoice</li>
+                        <li>25% at the time of dispatch</li>
+                        <li>Balance 50% against Post Dated Cheque</li>
+                    </ul>
+                </li>
+                <li><strong>Delivery:</strong> Within 30 days from receipt of advance payment and packing material design from buyer.</li>
+                <li><strong>Warranty:</strong>
+                    <ul style="margin-left: 15px;">
+                        <li>18 months on electronic parts from date of invoice</li>
+                        <li>1 year general service warranty</li>
+                    </ul>
+                </li>
+                <li><strong>Packing Material:</strong> UV LED to be provided by buyer.</li>
+                <li><strong>Quality:</strong> All products must meet Aquapurite quality standards and pass inspection before acceptance.</li>
+                <li><strong>Serialization:</strong> Each unit must have individual barcode label as per Aquapurite serialization format.</li>
+                <li><strong>Documentation:</strong> Packing list with barcode details (CSV/Excel) must accompany each shipment.</li>
+                <li>This PO is subject to the terms agreed in the Proforma Invoice.</li>
+                <li>All disputes subject to Delhi jurisdiction.</li>
+            </ol>
+        </div>
+
+        
+
+        <!-- Signature Section -->
+        <div class="signature-section">
+            <div class="signature-box">
+                <p><strong>Prepared By:</strong></p>
+                <div class="signature-line">Purchase Department</div>
+            </div>
+            <div class="signature-box">
+                <p><strong>Verified By:</strong></p>
+                <div class="signature-line">Accounts Department</div>
+            </div>
+            <div class="signature-box">
+                <p><strong>Approved By:</strong></p>
+                <div class="signature-line">For AQUAPURITE PRIVATE LIMITED<br>(Authorized Signatory)</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            This is a system generated Purchase Order from Aquapurite ERP | Document ID: PO-20260108-0001 | Generated on: 08-01-2026 13:52:20
+        </div>
+    </div>
+</body>
+</html>

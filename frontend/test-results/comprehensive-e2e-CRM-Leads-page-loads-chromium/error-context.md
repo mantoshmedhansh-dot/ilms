@@ -1,0 +1,151 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [active]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - navigation [ref=e7]:
+            - button "previous" [disabled] [ref=e8]:
+              - img "previous" [ref=e9]
+            - generic [ref=e11]:
+              - generic [ref=e12]: 1/
+              - text: "1"
+            - button "next" [disabled] [ref=e13]:
+              - img "next" [ref=e14]
+          - img
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - img [ref=e18]
+            - generic "Latest available version is detected (16.1.1)." [ref=e20]: Next.js 16.1.1
+            - generic [ref=e21]: Turbopack
+          - img
+      - dialog "Runtime TypeError" [ref=e23]:
+        - generic [ref=e26]:
+          - generic [ref=e27]:
+            - generic [ref=e28]:
+              - generic [ref=e30]: Runtime TypeError
+              - generic [ref=e31]:
+                - button "Copy Error Info" [ref=e32] [cursor=pointer]:
+                  - img [ref=e33]
+                - button "No related documentation found" [disabled] [ref=e35]:
+                  - img [ref=e36]
+                - button "Attach Node.js inspector" [ref=e38] [cursor=pointer]:
+                  - img [ref=e39]
+            - generic [ref=e48]: Cannot read properties of undefined (reading 'color')
+          - generic [ref=e50]:
+            - paragraph [ref=e52]:
+              - text: Call Stack
+              - generic [ref=e53]: "16"
+            - generic [ref=e54]:
+              - generic [ref=e55]:
+                - text: cell
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e56] [cursor=pointer]:
+                  - img [ref=e57]
+              - text: file:///Users/mantosh/Desktop/Consumer%20durable%202/frontend/.next/dev/static/chunks/src_eb2fa40d._.js (1864:196)
+            - generic [ref=e59]:
+              - generic [ref=e60]:
+                - text: Object.react_stack_bottom_frame
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e61] [cursor=pointer]:
+                  - img [ref=e62]
+              - text: file:///Users/mantosh/Desktop/Consumer%20durable%202/frontend/.next/dev/static/chunks/13bf0_next_dist_compiled_react-dom_c958324a._.js (14826:24)
+            - generic [ref=e64]:
+              - generic [ref=e65]:
+                - text: renderWithHooks
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e66] [cursor=pointer]:
+                  - img [ref=e67]
+              - text: file:///Users/mantosh/Desktop/Consumer%20durable%202/frontend/.next/dev/static/chunks/13bf0_next_dist_compiled_react-dom_c958324a._.js (4651:24)
+            - generic [ref=e69]:
+              - generic [ref=e70]:
+                - text: updateFunctionComponent
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e71] [cursor=pointer]:
+                  - img [ref=e72]
+              - text: file:///Users/mantosh/Desktop/Consumer%20durable%202/frontend/.next/dev/static/chunks/13bf0_next_dist_compiled_react-dom_c958324a._.js (6112:21)
+            - generic [ref=e74]:
+              - generic [ref=e75]:
+                - text: beginWork
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e76] [cursor=pointer]:
+                  - img [ref=e77]
+              - text: file:///Users/mantosh/Desktop/Consumer%20durable%202/frontend/.next/dev/static/chunks/13bf0_next_dist_compiled_react-dom_c958324a._.js (6708:24)
+            - generic [ref=e79]:
+              - generic [ref=e80]:
+                - text: runWithFiberInDEV
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e81] [cursor=pointer]:
+                  - img [ref=e82]
+              - text: file:///Users/mantosh/Desktop/Consumer%20durable%202/frontend/.next/dev/static/chunks/13bf0_next_dist_compiled_react-dom_c958324a._.js (965:74)
+            - generic [ref=e84]:
+              - generic [ref=e85]:
+                - text: performUnitOfWork
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e86] [cursor=pointer]:
+                  - img [ref=e87]
+              - text: file:///Users/mantosh/Desktop/Consumer%20durable%202/frontend/.next/dev/static/chunks/13bf0_next_dist_compiled_react-dom_c958324a._.js (9562:97)
+            - generic [ref=e89]:
+              - generic [ref=e90]:
+                - text: workLoopSync
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e91] [cursor=pointer]:
+                  - img [ref=e92]
+              - text: file:///Users/mantosh/Desktop/Consumer%20durable%202/frontend/.next/dev/static/chunks/13bf0_next_dist_compiled_react-dom_c958324a._.js (9456:40)
+            - generic [ref=e94]:
+              - generic [ref=e95]:
+                - text: renderRootSync
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e96] [cursor=pointer]:
+                  - img [ref=e97]
+              - text: file:///Users/mantosh/Desktop/Consumer%20durable%202/frontend/.next/dev/static/chunks/13bf0_next_dist_compiled_react-dom_c958324a._.js (9440:13)
+            - generic [ref=e99]:
+              - generic [ref=e100]:
+                - text: performWorkOnRoot
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e101] [cursor=pointer]:
+                  - img [ref=e102]
+              - text: file:///Users/mantosh/Desktop/Consumer%20durable%202/frontend/.next/dev/static/chunks/13bf0_next_dist_compiled_react-dom_c958324a._.js (9105:47)
+            - generic [ref=e104]:
+              - generic [ref=e105]:
+                - text: performSyncWorkOnRoot
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e106] [cursor=pointer]:
+                  - img [ref=e107]
+              - text: file:///Users/mantosh/Desktop/Consumer%20durable%202/frontend/.next/dev/static/chunks/13bf0_next_dist_compiled_react-dom_c958324a._.js (10238:9)
+            - generic [ref=e109]:
+              - generic [ref=e110]:
+                - text: flushSyncWorkAcrossRoots_impl
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e111] [cursor=pointer]:
+                  - img [ref=e112]
+              - text: file:///Users/mantosh/Desktop/Consumer%20durable%202/frontend/.next/dev/static/chunks/13bf0_next_dist_compiled_react-dom_c958324a._.js (10154:316)
+            - generic [ref=e114]:
+              - generic [ref=e115]:
+                - text: processRootScheduleInMicrotask
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e116] [cursor=pointer]:
+                  - img [ref=e117]
+              - text: file:///Users/mantosh/Desktop/Consumer%20durable%202/frontend/.next/dev/static/chunks/13bf0_next_dist_compiled_react-dom_c958324a._.js (10175:106)
+            - generic [ref=e119]:
+              - generic [ref=e120]:
+                - text: <unknown>
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e121] [cursor=pointer]:
+                  - img [ref=e122]
+              - text: file:///Users/mantosh/Desktop/Consumer%20durable%202/frontend/.next/dev/static/chunks/13bf0_next_dist_compiled_react-dom_c958324a._.js (10249:158)
+            - generic [ref=e124]:
+              - generic [ref=e125]:
+                - text: LeadsPage
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e126] [cursor=pointer]:
+                  - img [ref=e127]
+              - text: file:///Users/mantosh/Desktop/Consumer%20durable%202/frontend/.next/dev/static/chunks/src_eb2fa40d._.js (2756:423)
+            - generic [ref=e129]:
+              - generic [ref=e130]:
+                - text: ClientPageRoot
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e131] [cursor=pointer]:
+                  - img [ref=e132]
+              - text: file:///Users/mantosh/Desktop/Consumer%20durable%202/frontend/.next/dev/static/chunks/13bf0_next_dist_0e8c10d6._.js (2403:50)
+        - generic [ref=e134]: "1"
+        - generic [ref=e135]: "2"
+    - generic [ref=e140] [cursor=pointer]:
+      - button "Open Next.js Dev Tools" [ref=e141]:
+        - img [ref=e142]
+      - generic [ref=e145]:
+        - button "Open issues overlay" [ref=e146]:
+          - generic [ref=e147]:
+            - generic [ref=e148]: "0"
+            - generic [ref=e149]: "1"
+          - generic [ref=e150]: Issue
+        - button "Collapse issues badge" [ref=e151]:
+          - img [ref=e152]
+  - 'heading "Application error: a client-side exception has occurred while loading localhost (see the browser console for more information)." [level=2] [ref=e156]'
+```

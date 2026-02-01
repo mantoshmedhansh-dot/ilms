@@ -1,0 +1,170 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - link "Aquapurite Logo Aquapurite Private Limited's ERP" [ref=e5] [cursor=pointer]:
+          - /url: /dashboard
+          - img "Aquapurite Logo" [ref=e6]
+          - generic [ref=e7]: Aquapurite Private Limited's ERP
+        - button [ref=e8]:
+          - img
+      - navigation [ref=e12]:
+        - link "Dashboard" [ref=e13] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e14]
+          - generic [ref=e19]: Dashboard
+        - button "Sales Channels" [ref=e21]:
+          - img [ref=e22]
+          - generic [ref=e27]: Sales Channels
+          - img [ref=e28]
+        - button "Orders" [ref=e31]:
+          - img [ref=e32]
+          - generic [ref=e36]: Orders
+          - img [ref=e37]
+        - button "Inventory" [ref=e40]:
+          - img [ref=e41]
+          - generic [ref=e44]: Inventory
+          - img [ref=e45]
+        - button "WMS" [ref=e48]:
+          - img [ref=e49]
+          - generic [ref=e51]: WMS
+          - img [ref=e52]
+        - button "Logistics" [ref=e55]:
+          - img [ref=e56]
+          - generic [ref=e61]: Logistics
+          - img [ref=e62]
+        - button "Procurement" [ref=e65]:
+          - img [ref=e66]
+          - generic [ref=e70]: Procurement
+          - img [ref=e71]
+        - button "Finance" [ref=e74]:
+          - img [ref=e75]
+          - generic [ref=e77]: Finance
+          - img [ref=e78]
+        - button "Reports" [ref=e81]:
+          - img [ref=e82]
+          - generic [ref=e84]: Reports
+          - img [ref=e85]
+        - button "Billing" [ref=e88]:
+          - img [ref=e89]
+          - generic [ref=e92]: Billing
+          - img [ref=e93]
+        - button "Service" [ref=e96]:
+          - img [ref=e97]
+          - generic [ref=e99]: Service
+          - img [ref=e100]
+        - button "Distribution" [ref=e103]:
+          - img [ref=e104]
+          - generic [ref=e108]: Distribution
+          - img [ref=e109]
+        - button "Products" [ref=e112]:
+          - img [ref=e113]
+          - generic [ref=e117]: Products
+          - img [ref=e118]
+        - button "CRM" [ref=e121]:
+          - img [ref=e122]
+          - generic [ref=e126]: CRM
+          - img [ref=e127]
+        - button "Marketing" [ref=e130]:
+          - img [ref=e131]
+          - generic [ref=e134]: Marketing
+          - img [ref=e135]
+        - button "Access Control" [ref=e138]:
+          - img [ref=e139]
+          - generic [ref=e141]: Access Control
+          - img [ref=e142]
+        - link "Serialization" [ref=e144] [cursor=pointer]:
+          - /url: /serialization
+          - img [ref=e145]
+          - generic [ref=e146]: Serialization
+        - link "Approvals !" [ref=e147] [cursor=pointer]:
+          - /url: /approvals
+          - img [ref=e148]
+          - generic [ref=e151]: Approvals
+          - generic [ref=e152]: "!"
+        - link "Audit Logs" [ref=e153] [cursor=pointer]:
+          - /url: /audit-logs
+          - img [ref=e154]
+          - generic [ref=e158]: Audit Logs
+        - link "Settings" [ref=e159] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e160]
+          - generic [ref=e163]: Settings
+      - paragraph [ref=e165]: © 2026 Aquapurite Private Limited
+    - generic [ref=e166]:
+      - banner [ref=e167]:
+        - navigation [ref=e168]:
+          - link [ref=e169] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e170]
+          - generic [ref=e173]:
+            - img [ref=e174]
+            - link "CRM" [ref=e176] [cursor=pointer]:
+              - /url: /crm
+          - generic [ref=e177]:
+            - img [ref=e178]
+            - link "Customers" [ref=e180] [cursor=pointer]:
+              - /url: /crm/customers
+        - generic [ref=e181]:
+          - button "3" [ref=e182]:
+            - img
+            - generic [ref=e183]: "3"
+          - button "Toggle theme" [ref=e184]:
+            - img
+            - generic [ref=e185]: Toggle theme
+          - button "AU" [ref=e186]:
+            - generic [ref=e188]: AU
+      - main [ref=e189]:
+        - generic [ref=e190]:
+          - generic [ref=e191]:
+            - generic [ref=e192]:
+              - heading "Customers" [level=1] [ref=e193]
+              - paragraph [ref=e194]: Manage customer database and profiles
+            - button "Add Customer" [ref=e196]:
+              - img
+              - text: Add Customer
+          - generic [ref=e197]:
+            - generic [ref=e198]:
+              - generic [ref=e200]:
+                - img [ref=e201]
+                - textbox "Search customers..." [ref=e204]
+              - button "Columns" [ref=e205]:
+                - img
+                - text: Columns
+            - table [ref=e208]:
+              - rowgroup [ref=e209]:
+                - row "Customer Contact Type Location Status" [ref=e210]:
+                  - columnheader "Customer" [ref=e211]
+                  - columnheader "Contact" [ref=e212]
+                  - columnheader "Type" [ref=e213]
+                  - columnheader "Location" [ref=e214]
+                  - columnheader "Status" [ref=e215]
+                  - columnheader [ref=e216]
+              - rowgroup [ref=e217]:
+                - row "No results found." [ref=e218]:
+                  - cell "No results found." [ref=e219]
+            - generic [ref=e220]:
+              - generic [ref=e221]:
+                - generic [ref=e222]: "Rows per page:"
+                - combobox [ref=e223]:
+                  - generic: "10"
+                  - img
+              - generic [ref=e224]:
+                - generic [ref=e225]: Page 1 of 1
+                - generic [ref=e226]:
+                  - button [disabled]:
+                    - img
+                  - button [disabled]:
+                    - img
+                  - button [disabled]:
+                    - img
+                  - button [disabled]:
+                    - img
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e232] [cursor=pointer]:
+    - img [ref=e233]
+  - alert [ref=e236]
+```

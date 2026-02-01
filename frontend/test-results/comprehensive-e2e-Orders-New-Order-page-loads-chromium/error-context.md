@@ -1,0 +1,232 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - link "Aquapurite Logo Aquapurite Private Limited's ERP" [ref=e5] [cursor=pointer]:
+          - /url: /dashboard
+          - img "Aquapurite Logo" [ref=e6]
+          - generic [ref=e7]: Aquapurite Private Limited's ERP
+        - button [ref=e8]:
+          - img
+      - navigation [ref=e12]:
+        - link "Dashboard" [ref=e13] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e14]
+          - generic [ref=e19]: Dashboard
+        - button "Sales Channels" [ref=e21]:
+          - img [ref=e22]
+          - generic [ref=e27]: Sales Channels
+          - img [ref=e28]
+        - button "Orders" [ref=e31]:
+          - img [ref=e32]
+          - generic [ref=e36]: Orders
+          - img [ref=e37]
+        - button "Inventory" [ref=e40]:
+          - img [ref=e41]
+          - generic [ref=e44]: Inventory
+          - img [ref=e45]
+        - button "WMS" [ref=e48]:
+          - img [ref=e49]
+          - generic [ref=e51]: WMS
+          - img [ref=e52]
+        - button "Logistics" [ref=e55]:
+          - img [ref=e56]
+          - generic [ref=e61]: Logistics
+          - img [ref=e62]
+        - button "Procurement" [ref=e65]:
+          - img [ref=e66]
+          - generic [ref=e70]: Procurement
+          - img [ref=e71]
+        - button "Finance" [ref=e74]:
+          - img [ref=e75]
+          - generic [ref=e77]: Finance
+          - img [ref=e78]
+        - button "Reports" [ref=e81]:
+          - img [ref=e82]
+          - generic [ref=e84]: Reports
+          - img [ref=e85]
+        - button "Billing" [ref=e88]:
+          - img [ref=e89]
+          - generic [ref=e92]: Billing
+          - img [ref=e93]
+        - button "Service" [ref=e96]:
+          - img [ref=e97]
+          - generic [ref=e99]: Service
+          - img [ref=e100]
+        - button "Distribution" [ref=e103]:
+          - img [ref=e104]
+          - generic [ref=e108]: Distribution
+          - img [ref=e109]
+        - button "Products" [ref=e112]:
+          - img [ref=e113]
+          - generic [ref=e117]: Products
+          - img [ref=e118]
+        - button "CRM" [ref=e121]:
+          - img [ref=e122]
+          - generic [ref=e126]: CRM
+          - img [ref=e127]
+        - button "Marketing" [ref=e130]:
+          - img [ref=e131]
+          - generic [ref=e134]: Marketing
+          - img [ref=e135]
+        - button "Access Control" [ref=e138]:
+          - img [ref=e139]
+          - generic [ref=e141]: Access Control
+          - img [ref=e142]
+        - link "Serialization" [ref=e144] [cursor=pointer]:
+          - /url: /serialization
+          - img [ref=e145]
+          - generic [ref=e146]: Serialization
+        - link "Approvals !" [ref=e147] [cursor=pointer]:
+          - /url: /approvals
+          - img [ref=e148]
+          - generic [ref=e151]: Approvals
+          - generic [ref=e152]: "!"
+        - link "Audit Logs" [ref=e153] [cursor=pointer]:
+          - /url: /audit-logs
+          - img [ref=e154]
+          - generic [ref=e158]: Audit Logs
+        - link "Settings" [ref=e159] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e160]
+          - generic [ref=e163]: Settings
+      - paragraph [ref=e165]: © 2026 Aquapurite Private Limited
+    - generic [ref=e166]:
+      - banner [ref=e167]:
+        - navigation [ref=e168]:
+          - link [ref=e169] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e170]
+          - generic [ref=e173]:
+            - img [ref=e174]
+            - link "Orders" [ref=e176] [cursor=pointer]:
+              - /url: /orders
+          - generic [ref=e177]:
+            - img [ref=e178]
+            - link "New" [ref=e180] [cursor=pointer]:
+              - /url: /orders/new
+        - generic [ref=e181]:
+          - button "3" [ref=e182]:
+            - img
+            - generic [ref=e183]: "3"
+          - button "Toggle theme" [ref=e184]:
+            - img
+            - generic [ref=e185]: Toggle theme
+          - button "AU" [ref=e186]:
+            - generic [ref=e188]: AU
+      - main [ref=e189]:
+        - generic [ref=e190]:
+          - generic [ref=e191]:
+            - generic [ref=e192]:
+              - heading "Create Order" [level=1] [ref=e193]
+              - paragraph [ref=e194]: Create a new sales order
+            - link "Back to Orders" [ref=e196] [cursor=pointer]:
+              - /url: /orders
+              - img
+              - text: Back to Orders
+          - generic [ref=e198]:
+            - generic [ref=e199]:
+              - generic [ref=e200]:
+                - generic [ref=e201]:
+                  - generic [ref=e202]:
+                    - img [ref=e203]
+                    - text: Customer Details
+                  - generic [ref=e206]: Search and select customer by phone or name
+                - button "Search customer by phone or name..." [ref=e208]:
+                  - img
+                  - text: Search customer by phone or name...
+              - generic [ref=e209]:
+                - generic [ref=e210]:
+                  - generic [ref=e211]:
+                    - img [ref=e212]
+                    - text: Order Items
+                  - generic [ref=e216]: Add products to the order
+                - generic [ref=e217]:
+                  - button "Add Product" [ref=e218]:
+                    - img
+                    - text: Add Product
+                  - generic [ref=e219]:
+                    - img [ref=e220]
+                    - paragraph [ref=e224]: No items added yet
+                    - paragraph [ref=e225]: Search and add products above
+              - generic [ref=e226]:
+                - generic [ref=e228]:
+                  - img [ref=e229]
+                  - text: Order Settings
+                - generic [ref=e234]:
+                  - generic [ref=e235]:
+                    - generic [ref=e236]:
+                      - generic [ref=e237]: Channel
+                      - combobox [ref=e238]:
+                        - generic: Select channel
+                        - img
+                      - combobox [ref=e239]
+                    - generic [ref=e240]:
+                      - generic [ref=e241]: Fulfillment Warehouse
+                      - combobox [ref=e242]:
+                        - generic: Select warehouse
+                        - img
+                      - combobox [ref=e243]
+                    - generic [ref=e244]:
+                      - generic [ref=e245]: Priority
+                      - combobox [ref=e246]:
+                        - generic: Normal
+                        - img
+                      - combobox [ref=e247]
+                    - generic [ref=e248]:
+                      - generic [ref=e249]: Installation Required
+                      - generic [ref=e250]:
+                        - switch [checked] [ref=e251]
+                        - checkbox [checked]
+                        - generic [ref=e252]: Yes, schedule installation
+                  - generic [ref=e253]:
+                    - generic [ref=e254]: Order Notes
+                    - textbox "Add any special instructions or notes..." [ref=e255]
+            - generic [ref=e256]:
+              - generic [ref=e257]:
+                - generic [ref=e259]:
+                  - img [ref=e260]
+                  - text: Payment
+                - generic [ref=e263]:
+                  - generic [ref=e264]: Payment Mode
+                  - combobox [ref=e265]:
+                    - generic: Cash on Delivery
+                    - img
+                  - combobox [ref=e266]
+              - generic [ref=e267]:
+                - generic [ref=e269]:
+                  - img [ref=e270]
+                  - text: Order Summary
+                - generic [ref=e272]:
+                  - generic [ref=e273]:
+                    - generic [ref=e274]: Subtotal
+                    - generic [ref=e275]: ₹0
+                  - generic [ref=e276]:
+                    - generic [ref=e277]: Taxable Amount
+                    - generic [ref=e278]: ₹0
+                  - generic [ref=e279]:
+                    - generic [ref=e280]: GST (18%)
+                    - generic [ref=e281]: ₹0
+                  - generic [ref=e282]:
+                    - generic [ref=e283]: Total
+                    - generic [ref=e284]: ₹0
+              - button "Create Order" [disabled]:
+                - img
+                - text: Create Order
+  - region "Notifications alt+T"
+  - generic [ref=e289] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e290]:
+      - img [ref=e291]
+    - generic [ref=e294]:
+      - button "Open issues overlay" [ref=e295]:
+        - generic [ref=e296]:
+          - generic [ref=e297]: "0"
+          - generic [ref=e298]: "1"
+        - generic [ref=e299]: Issue
+      - button "Collapse issues badge" [ref=e300]:
+        - img [ref=e301]
+  - alert [ref=e303]
+```

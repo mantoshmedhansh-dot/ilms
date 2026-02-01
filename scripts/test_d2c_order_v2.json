@@ -1,0 +1,34 @@
+{
+  "channel": "D2C",
+  "customer": {
+    "name": "OMS Test Customer",
+    "phone": "9988776655",
+    "email": "oms.test@example.com"
+  },
+  "shipping_address": {
+    "name": "OMS Test",
+    "phone": "9988776655",
+    "address_line_1": "456 OMS Test Street",
+    "address_line_2": "Building B",
+    "city": "New Delhi",
+    "state": "Delhi",
+    "pincode": "110001",
+    "landmark": "Near Test Plaza",
+    "country": "India"
+  },
+  "items": [
+    {
+      "product_id": "2976506e-edc9-4ab2-b35d-b1c1681e4f53",
+      "sku": "WPRAOPT001",
+      "name": "Aquapurite Optima",
+      "quantity": 1,
+      "unit_price": 13999.00,
+      "mrp": 17999.00
+    }
+  ],
+  "payment_method": "cod",
+  "subtotal": 13999.00,
+  "discount_amount": 0,
+  "shipping_amount": 0,
+  "total_amount": 13999.00
+}

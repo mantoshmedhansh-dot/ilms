@@ -1,0 +1,283 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - link "Aquapurite Logo Aquapurite Private Limited's ERP" [ref=e5] [cursor=pointer]:
+          - /url: /dashboard
+          - img "Aquapurite Logo" [ref=e6]
+          - generic [ref=e7]: Aquapurite Private Limited's ERP
+        - button [ref=e8]:
+          - img
+      - navigation [ref=e12]:
+        - link "Dashboard" [ref=e13] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e14]
+          - generic [ref=e19]: Dashboard
+        - button "Sales Channels" [ref=e21]:
+          - img [ref=e22]
+          - generic [ref=e27]: Sales Channels
+          - img [ref=e28]
+        - button "Orders" [ref=e31]:
+          - img [ref=e32]
+          - generic [ref=e36]: Orders
+          - img [ref=e37]
+        - button "Inventory" [ref=e40]:
+          - img [ref=e41]
+          - generic [ref=e44]: Inventory
+          - img [ref=e45]
+        - button "WMS" [ref=e48]:
+          - img [ref=e49]
+          - generic [ref=e51]: WMS
+          - img [ref=e52]
+        - button "Logistics" [ref=e55]:
+          - img [ref=e56]
+          - generic [ref=e61]: Logistics
+          - img [ref=e62]
+        - button "Procurement" [ref=e65]:
+          - img [ref=e66]
+          - generic [ref=e70]: Procurement
+          - img [ref=e71]
+        - button "Finance" [ref=e74]:
+          - img [ref=e75]
+          - generic [ref=e77]: Finance
+          - img [ref=e78]
+        - button "Reports" [ref=e81]:
+          - img [ref=e82]
+          - generic [ref=e84]: Reports
+          - img [ref=e85]
+        - button "Billing" [ref=e88]:
+          - img [ref=e89]
+          - generic [ref=e92]: Billing
+          - img [ref=e93]
+        - button "Service" [ref=e96]:
+          - img [ref=e97]
+          - generic [ref=e99]: Service
+          - img [ref=e100]
+        - button "Distribution" [ref=e103]:
+          - img [ref=e104]
+          - generic [ref=e108]: Distribution
+          - img [ref=e109]
+        - button "Products" [ref=e112]:
+          - img [ref=e113]
+          - generic [ref=e117]: Products
+          - img [ref=e118]
+        - button "CRM" [ref=e121]:
+          - img [ref=e122]
+          - generic [ref=e126]: CRM
+          - img [ref=e127]
+        - button "Marketing" [ref=e130]:
+          - img [ref=e131]
+          - generic [ref=e134]: Marketing
+          - img [ref=e135]
+        - button "Access Control" [ref=e138]:
+          - img [ref=e139]
+          - generic [ref=e141]: Access Control
+          - img [ref=e142]
+        - link "Serialization" [ref=e144] [cursor=pointer]:
+          - /url: /serialization
+          - img [ref=e145]
+          - generic [ref=e146]: Serialization
+        - link "Approvals !" [ref=e147] [cursor=pointer]:
+          - /url: /approvals
+          - img [ref=e148]
+          - generic [ref=e151]: Approvals
+          - generic [ref=e152]: "!"
+        - link "Audit Logs" [ref=e153] [cursor=pointer]:
+          - /url: /audit-logs
+          - img [ref=e154]
+          - generic [ref=e158]: Audit Logs
+        - link "Settings" [ref=e159] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e160]
+          - generic [ref=e163]: Settings
+      - paragraph [ref=e165]: © 2026 Aquapurite Private Limited
+    - generic [ref=e166]:
+      - banner [ref=e167]:
+        - navigation [ref=e168]:
+          - link [ref=e169] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e170]
+          - generic [ref=e173]:
+            - img [ref=e174]
+            - link "Service" [ref=e176] [cursor=pointer]:
+              - /url: /service
+          - generic [ref=e177]:
+            - img [ref=e178]
+            - link "Installations" [ref=e180] [cursor=pointer]:
+              - /url: /service/installations
+        - generic [ref=e181]:
+          - button "3" [ref=e182]:
+            - img
+            - generic [ref=e183]: "3"
+          - button "Toggle theme" [ref=e184]:
+            - img
+            - generic [ref=e185]: Toggle theme
+          - button "AU" [ref=e186]:
+            - generic [ref=e188]: AU
+      - main [ref=e189]:
+        - generic [ref=e190]:
+          - generic [ref=e191]:
+            - generic [ref=e192]:
+              - heading "Installations" [level=1] [ref=e193]
+              - paragraph [ref=e194]: Track and manage product installations
+            - button "New Installation" [ref=e196]:
+              - img
+              - text: New Installation
+          - generic [ref=e197]:
+            - generic [ref=e198]:
+              - generic [ref=e200]:
+                - img [ref=e201]
+                - textbox "Search installations..." [ref=e204]
+              - button "Columns" [ref=e205]:
+                - img
+                - text: Columns
+            - table [ref=e208]:
+              - rowgroup [ref=e209]:
+                - 'row "Installation # Customer Product Technician Schedule Status" [ref=e210]':
+                  - 'columnheader "Installation #" [ref=e211]'
+                  - columnheader "Customer" [ref=e212]
+                  - columnheader "Product" [ref=e213]
+                  - columnheader "Technician" [ref=e214]
+                  - columnheader "Schedule" [ref=e215]
+                  - columnheader "Status" [ref=e216]
+                  - columnheader [ref=e217]
+              - rowgroup [ref=e218]:
+                - row "INST-20260106-C35D72A0 N/A N/A Not assigned Not scheduled pending" [ref=e219]:
+                  - cell "INST-20260106-C35D72A0" [ref=e220]:
+                    - generic [ref=e221]:
+                      - img [ref=e222]
+                      - generic [ref=e224]: INST-20260106-C35D72A0
+                  - cell "N/A" [ref=e225]:
+                    - generic [ref=e227]: N/A
+                  - cell "N/A" [ref=e228]:
+                    - generic [ref=e230]: N/A
+                  - cell "Not assigned" [ref=e231]
+                  - cell "Not scheduled" [ref=e232]:
+                    - generic [ref=e233]:
+                      - img [ref=e234]
+                      - generic [ref=e236]: Not scheduled
+                  - cell "pending" [ref=e237]:
+                    - generic [ref=e238]: pending
+                  - cell [ref=e239]:
+                    - button [ref=e240]:
+                      - img
+                - row "INST-20260106-3890E9DC N/A N/A Not assigned Not scheduled pending" [ref=e241]:
+                  - cell "INST-20260106-3890E9DC" [ref=e242]:
+                    - generic [ref=e243]:
+                      - img [ref=e244]
+                      - generic [ref=e246]: INST-20260106-3890E9DC
+                  - cell "N/A" [ref=e247]:
+                    - generic [ref=e249]: N/A
+                  - cell "N/A" [ref=e250]:
+                    - generic [ref=e252]: N/A
+                  - cell "Not assigned" [ref=e253]
+                  - cell "Not scheduled" [ref=e254]:
+                    - generic [ref=e255]:
+                      - img [ref=e256]
+                      - generic [ref=e258]: Not scheduled
+                  - cell "pending" [ref=e259]:
+                    - generic [ref=e260]: pending
+                  - cell [ref=e261]:
+                    - button [ref=e262]:
+                      - img
+                - row "INST-20260106-666162E1 N/A N/A Not assigned Not scheduled pending" [ref=e263]:
+                  - cell "INST-20260106-666162E1" [ref=e264]:
+                    - generic [ref=e265]:
+                      - img [ref=e266]
+                      - generic [ref=e268]: INST-20260106-666162E1
+                  - cell "N/A" [ref=e269]:
+                    - generic [ref=e271]: N/A
+                  - cell "N/A" [ref=e272]:
+                    - generic [ref=e274]: N/A
+                  - cell "Not assigned" [ref=e275]
+                  - cell "Not scheduled" [ref=e276]:
+                    - generic [ref=e277]:
+                      - img [ref=e278]
+                      - generic [ref=e280]: Not scheduled
+                  - cell "pending" [ref=e281]:
+                    - generic [ref=e282]: pending
+                  - cell [ref=e283]:
+                    - button [ref=e284]:
+                      - img
+                - row "INST-20260106-050161E4 N/A N/A Not assigned Not scheduled pending" [ref=e285]:
+                  - cell "INST-20260106-050161E4" [ref=e286]:
+                    - generic [ref=e287]:
+                      - img [ref=e288]
+                      - generic [ref=e290]: INST-20260106-050161E4
+                  - cell "N/A" [ref=e291]:
+                    - generic [ref=e293]: N/A
+                  - cell "N/A" [ref=e294]:
+                    - generic [ref=e296]: N/A
+                  - cell "Not assigned" [ref=e297]
+                  - cell "Not scheduled" [ref=e298]:
+                    - generic [ref=e299]:
+                      - img [ref=e300]
+                      - generic [ref=e302]: Not scheduled
+                  - cell "pending" [ref=e303]:
+                    - generic [ref=e304]: pending
+                  - cell [ref=e305]:
+                    - button [ref=e306]:
+                      - img
+                - row "INST-20260106-01BF8CF5 N/A N/A Not assigned Not scheduled pending" [ref=e307]:
+                  - cell "INST-20260106-01BF8CF5" [ref=e308]:
+                    - generic [ref=e309]:
+                      - img [ref=e310]
+                      - generic [ref=e312]: INST-20260106-01BF8CF5
+                  - cell "N/A" [ref=e313]:
+                    - generic [ref=e315]: N/A
+                  - cell "N/A" [ref=e316]:
+                    - generic [ref=e318]: N/A
+                  - cell "Not assigned" [ref=e319]
+                  - cell "Not scheduled" [ref=e320]:
+                    - generic [ref=e321]:
+                      - img [ref=e322]
+                      - generic [ref=e324]: Not scheduled
+                  - cell "pending" [ref=e325]:
+                    - generic [ref=e326]: pending
+                  - cell [ref=e327]:
+                    - button [ref=e328]:
+                      - img
+                - row "INST-20260106-10314 N/A N/A Not assigned 08 Jan 2026 completed" [ref=e329]:
+                  - cell "INST-20260106-10314" [ref=e330]:
+                    - generic [ref=e331]:
+                      - img [ref=e332]
+                      - generic [ref=e334]: INST-20260106-10314
+                  - cell "N/A" [ref=e335]:
+                    - generic [ref=e337]: N/A
+                  - cell "N/A" [ref=e338]:
+                    - generic [ref=e340]: N/A
+                  - cell "Not assigned" [ref=e341]
+                  - cell "08 Jan 2026" [ref=e342]:
+                    - generic [ref=e343]:
+                      - img [ref=e344]
+                      - generic [ref=e346]: 08 Jan 2026
+                  - cell "completed" [ref=e347]:
+                    - generic [ref=e348]: completed
+                  - cell [ref=e349]:
+                    - button [ref=e350]:
+                      - img
+            - generic [ref=e351]:
+              - generic [ref=e352]:
+                - generic [ref=e353]: "Rows per page:"
+                - combobox [ref=e354]:
+                  - generic: "10"
+                  - img
+              - generic [ref=e355]:
+                - generic [ref=e356]: Page 1 of 1
+                - generic [ref=e357]:
+                  - button [disabled]:
+                    - img
+                  - button [disabled]:
+                    - img
+                  - button [disabled]:
+                    - img
+                  - button [disabled]:
+                    - img
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e363] [cursor=pointer]:
+    - img [ref=e364]
+  - alert [ref=e367]
+```

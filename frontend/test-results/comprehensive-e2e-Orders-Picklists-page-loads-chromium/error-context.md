@@ -1,0 +1,479 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - link "Aquapurite Logo Aquapurite Private Limited's ERP" [ref=e5] [cursor=pointer]:
+          - /url: /dashboard
+          - img "Aquapurite Logo" [ref=e6]
+          - generic [ref=e7]: Aquapurite Private Limited's ERP
+        - button [ref=e8]:
+          - img
+      - navigation [ref=e12]:
+        - link "Dashboard" [ref=e13] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e14]
+          - generic [ref=e19]: Dashboard
+        - button "Sales Channels" [ref=e21]:
+          - img [ref=e22]
+          - generic [ref=e27]: Sales Channels
+          - img [ref=e28]
+        - button "Orders" [ref=e31]:
+          - img [ref=e32]
+          - generic [ref=e36]: Orders
+          - img [ref=e37]
+        - button "Inventory" [ref=e40]:
+          - img [ref=e41]
+          - generic [ref=e44]: Inventory
+          - img [ref=e45]
+        - button "WMS" [ref=e48]:
+          - img [ref=e49]
+          - generic [ref=e51]: WMS
+          - img [ref=e52]
+        - button "Logistics" [ref=e55]:
+          - img [ref=e56]
+          - generic [ref=e61]: Logistics
+          - img [ref=e62]
+        - button "Procurement" [ref=e65]:
+          - img [ref=e66]
+          - generic [ref=e70]: Procurement
+          - img [ref=e71]
+        - button "Finance" [ref=e74]:
+          - img [ref=e75]
+          - generic [ref=e77]: Finance
+          - img [ref=e78]
+        - button "Reports" [ref=e81]:
+          - img [ref=e82]
+          - generic [ref=e84]: Reports
+          - img [ref=e85]
+        - button "Billing" [ref=e88]:
+          - img [ref=e89]
+          - generic [ref=e92]: Billing
+          - img [ref=e93]
+        - button "Service" [ref=e96]:
+          - img [ref=e97]
+          - generic [ref=e99]: Service
+          - img [ref=e100]
+        - button "Distribution" [ref=e103]:
+          - img [ref=e104]
+          - generic [ref=e108]: Distribution
+          - img [ref=e109]
+        - button "Products" [ref=e112]:
+          - img [ref=e113]
+          - generic [ref=e117]: Products
+          - img [ref=e118]
+        - button "CRM" [ref=e121]:
+          - img [ref=e122]
+          - generic [ref=e126]: CRM
+          - img [ref=e127]
+        - button "Marketing" [ref=e130]:
+          - img [ref=e131]
+          - generic [ref=e134]: Marketing
+          - img [ref=e135]
+        - button "Access Control" [ref=e138]:
+          - img [ref=e139]
+          - generic [ref=e141]: Access Control
+          - img [ref=e142]
+        - link "Serialization" [ref=e144] [cursor=pointer]:
+          - /url: /serialization
+          - img [ref=e145]
+          - generic [ref=e146]: Serialization
+        - link "Approvals !" [ref=e147] [cursor=pointer]:
+          - /url: /approvals
+          - img [ref=e148]
+          - generic [ref=e151]: Approvals
+          - generic [ref=e152]: "!"
+        - link "Audit Logs" [ref=e153] [cursor=pointer]:
+          - /url: /audit-logs
+          - img [ref=e154]
+          - generic [ref=e158]: Audit Logs
+        - link "Settings" [ref=e159] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e160]
+          - generic [ref=e163]: Settings
+      - paragraph [ref=e165]: © 2026 Aquapurite Private Limited
+    - generic [ref=e166]:
+      - banner [ref=e167]:
+        - navigation [ref=e168]:
+          - link [ref=e169] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e170]
+          - generic [ref=e173]:
+            - img [ref=e174]
+            - link "Orders" [ref=e176] [cursor=pointer]:
+              - /url: /orders
+          - generic [ref=e177]:
+            - img [ref=e178]
+            - link "Picklists" [ref=e180] [cursor=pointer]:
+              - /url: /orders/picklists
+        - generic [ref=e181]:
+          - button "3" [ref=e182]:
+            - img
+            - generic [ref=e183]: "3"
+          - button "Toggle theme" [ref=e184]:
+            - img
+            - generic [ref=e185]: Toggle theme
+          - button "AU" [ref=e186]:
+            - generic [ref=e188]: AU
+      - main [ref=e189]:
+        - generic [ref=e190]:
+          - generic [ref=e191]:
+            - generic [ref=e192]:
+              - heading "Picklists" [level=1] [ref=e193]
+              - paragraph [ref=e194]: Manage order picking and warehouse fulfillment
+            - button "Create Picklist" [ref=e196]:
+              - img
+              - text: Create Picklist
+          - generic [ref=e197]:
+            - generic [ref=e198]:
+              - generic [ref=e199]:
+                - generic [ref=e200]: Total Picklists
+                - img [ref=e201]
+              - generic [ref=e205]: "0"
+            - generic [ref=e206]:
+              - generic [ref=e207]:
+                - generic [ref=e208]: Pending
+                - img [ref=e209]
+              - generic [ref=e213]: "0"
+            - generic [ref=e214]:
+              - generic [ref=e215]:
+                - generic [ref=e216]: In Progress
+                - img [ref=e217]
+              - generic [ref=e220]: "0"
+            - generic [ref=e221]:
+              - generic [ref=e222]:
+                - generic [ref=e223]: Completed Today
+                - img [ref=e224]
+              - generic [ref=e228]: "0"
+            - generic [ref=e229]:
+              - generic [ref=e230]:
+                - generic [ref=e231]: Avg Pick Time
+                - img [ref=e232]
+              - generic [ref=e236]: 0m
+          - combobox [ref=e238]:
+            - generic: All Status
+            - img
+          - generic [ref=e239]:
+            - generic [ref=e240]:
+              - generic [ref=e242]:
+                - img [ref=e243]
+                - textbox "Search picklists..." [ref=e246]
+              - button "Columns" [ref=e247]:
+                - img
+                - text: Columns
+            - table [ref=e250]:
+              - rowgroup [ref=e251]:
+                - 'row "Picklist # Priority Picker Orders / Items Progress Status Time" [ref=e252]':
+                  - 'columnheader "Picklist #" [ref=e253]'
+                  - columnheader "Priority" [ref=e254]
+                  - columnheader "Picker" [ref=e255]
+                  - columnheader "Orders / Items" [ref=e256]
+                  - columnheader "Progress" [ref=e257]
+                  - columnheader "Status" [ref=e258]
+                  - columnheader "Time" [ref=e259]
+                  - columnheader [ref=e260]
+              - rowgroup [ref=e261]:
+                - 'row "PL-20260106-3462 5 Unassigned 1 orders 1 items 0% 0 / 7 qty COMPLETED - Started: 06 Jan 2026" [ref=e262]':
+                  - cell "PL-20260106-3462" [ref=e263]:
+                    - generic [ref=e264]:
+                      - img [ref=e266]
+                      - generic [ref=e270]: PL-20260106-3462
+                  - cell "5" [ref=e271]
+                  - cell "Unassigned" [ref=e272]:
+                    - generic [ref=e273]:
+                      - img [ref=e274]
+                      - generic [ref=e277]: Unassigned
+                  - cell "1 orders 1 items" [ref=e278]:
+                    - generic [ref=e279]:
+                      - generic [ref=e280]: 1 orders
+                      - generic [ref=e281]: 1 items
+                  - cell "0% 0 / 7 qty" [ref=e282]:
+                    - generic [ref=e283]:
+                      - generic [ref=e284]: 0%
+                      - generic [ref=e286]: 0 / 7 qty
+                  - cell "COMPLETED" [ref=e287]
+                  - 'cell "- Started: 06 Jan 2026" [ref=e288]':
+                    - generic [ref=e289]:
+                      - generic [ref=e290]:
+                        - img [ref=e291]
+                        - text: "-"
+                      - generic [ref=e294]: "Started: 06 Jan 2026"
+                  - cell [ref=e295]:
+                    - button [ref=e296]:
+                      - img
+                - 'row "PL-20260106-6507 5 Unassigned 1 orders 1 items 0% 0 / 1 qty COMPLETED - Started: 06 Jan 2026" [ref=e297]':
+                  - cell "PL-20260106-6507" [ref=e298]:
+                    - generic [ref=e299]:
+                      - img [ref=e301]
+                      - generic [ref=e305]: PL-20260106-6507
+                  - cell "5" [ref=e306]
+                  - cell "Unassigned" [ref=e307]:
+                    - generic [ref=e308]:
+                      - img [ref=e309]
+                      - generic [ref=e312]: Unassigned
+                  - cell "1 orders 1 items" [ref=e313]:
+                    - generic [ref=e314]:
+                      - generic [ref=e315]: 1 orders
+                      - generic [ref=e316]: 1 items
+                  - cell "0% 0 / 1 qty" [ref=e317]:
+                    - generic [ref=e318]:
+                      - generic [ref=e319]: 0%
+                      - generic [ref=e321]: 0 / 1 qty
+                  - cell "COMPLETED" [ref=e322]
+                  - 'cell "- Started: 06 Jan 2026" [ref=e323]':
+                    - generic [ref=e324]:
+                      - generic [ref=e325]:
+                        - img [ref=e326]
+                        - text: "-"
+                      - generic [ref=e329]: "Started: 06 Jan 2026"
+                  - cell [ref=e330]:
+                    - button [ref=e331]:
+                      - img
+                - 'row "PL-20260106-5957 5 Unassigned 1 orders 1 items 0% 0 / 1 qty COMPLETED - Started: 05 Jan 2026" [ref=e332]':
+                  - cell "PL-20260106-5957" [ref=e333]:
+                    - generic [ref=e334]:
+                      - img [ref=e336]
+                      - generic [ref=e340]: PL-20260106-5957
+                  - cell "5" [ref=e341]
+                  - cell "Unassigned" [ref=e342]:
+                    - generic [ref=e343]:
+                      - img [ref=e344]
+                      - generic [ref=e347]: Unassigned
+                  - cell "1 orders 1 items" [ref=e348]:
+                    - generic [ref=e349]:
+                      - generic [ref=e350]: 1 orders
+                      - generic [ref=e351]: 1 items
+                  - cell "0% 0 / 1 qty" [ref=e352]:
+                    - generic [ref=e353]:
+                      - generic [ref=e354]: 0%
+                      - generic [ref=e356]: 0 / 1 qty
+                  - cell "COMPLETED" [ref=e357]
+                  - 'cell "- Started: 05 Jan 2026" [ref=e358]':
+                    - generic [ref=e359]:
+                      - generic [ref=e360]:
+                        - img [ref=e361]
+                        - text: "-"
+                      - generic [ref=e364]: "Started: 05 Jan 2026"
+                  - cell [ref=e365]:
+                    - button [ref=e366]:
+                      - img
+                - 'row "PL-20260106-9289 5 Unassigned 1 orders 1 items 0% 0 / 1 qty COMPLETED - Started: 05 Jan 2026" [ref=e367]':
+                  - cell "PL-20260106-9289" [ref=e368]:
+                    - generic [ref=e369]:
+                      - img [ref=e371]
+                      - generic [ref=e375]: PL-20260106-9289
+                  - cell "5" [ref=e376]
+                  - cell "Unassigned" [ref=e377]:
+                    - generic [ref=e378]:
+                      - img [ref=e379]
+                      - generic [ref=e382]: Unassigned
+                  - cell "1 orders 1 items" [ref=e383]:
+                    - generic [ref=e384]:
+                      - generic [ref=e385]: 1 orders
+                      - generic [ref=e386]: 1 items
+                  - cell "0% 0 / 1 qty" [ref=e387]:
+                    - generic [ref=e388]:
+                      - generic [ref=e389]: 0%
+                      - generic [ref=e391]: 0 / 1 qty
+                  - cell "COMPLETED" [ref=e392]
+                  - 'cell "- Started: 05 Jan 2026" [ref=e393]':
+                    - generic [ref=e394]:
+                      - generic [ref=e395]:
+                        - img [ref=e396]
+                        - text: "-"
+                      - generic [ref=e399]: "Started: 05 Jan 2026"
+                  - cell [ref=e400]:
+                    - button [ref=e401]:
+                      - img
+                - 'row "PL-20260106-2002 5 Unassigned 1 orders 1 items 0% 0 / 1 qty COMPLETED - Started: 05 Jan 2026" [ref=e402]':
+                  - cell "PL-20260106-2002" [ref=e403]:
+                    - generic [ref=e404]:
+                      - img [ref=e406]
+                      - generic [ref=e410]: PL-20260106-2002
+                  - cell "5" [ref=e411]
+                  - cell "Unassigned" [ref=e412]:
+                    - generic [ref=e413]:
+                      - img [ref=e414]
+                      - generic [ref=e417]: Unassigned
+                  - cell "1 orders 1 items" [ref=e418]:
+                    - generic [ref=e419]:
+                      - generic [ref=e420]: 1 orders
+                      - generic [ref=e421]: 1 items
+                  - cell "0% 0 / 1 qty" [ref=e422]:
+                    - generic [ref=e423]:
+                      - generic [ref=e424]: 0%
+                      - generic [ref=e426]: 0 / 1 qty
+                  - cell "COMPLETED" [ref=e427]
+                  - 'cell "- Started: 05 Jan 2026" [ref=e428]':
+                    - generic [ref=e429]:
+                      - generic [ref=e430]:
+                        - img [ref=e431]
+                        - text: "-"
+                      - generic [ref=e434]: "Started: 05 Jan 2026"
+                  - cell [ref=e435]:
+                    - button [ref=e436]:
+                      - img
+                - 'row "PL-20260106-5864 5 Unassigned 1 orders 1 items 0% 0 / 1 qty COMPLETED - Started: 05 Jan 2026" [ref=e437]':
+                  - cell "PL-20260106-5864" [ref=e438]:
+                    - generic [ref=e439]:
+                      - img [ref=e441]
+                      - generic [ref=e445]: PL-20260106-5864
+                  - cell "5" [ref=e446]
+                  - cell "Unassigned" [ref=e447]:
+                    - generic [ref=e448]:
+                      - img [ref=e449]
+                      - generic [ref=e452]: Unassigned
+                  - cell "1 orders 1 items" [ref=e453]:
+                    - generic [ref=e454]:
+                      - generic [ref=e455]: 1 orders
+                      - generic [ref=e456]: 1 items
+                  - cell "0% 0 / 1 qty" [ref=e457]:
+                    - generic [ref=e458]:
+                      - generic [ref=e459]: 0%
+                      - generic [ref=e461]: 0 / 1 qty
+                  - cell "COMPLETED" [ref=e462]
+                  - 'cell "- Started: 05 Jan 2026" [ref=e463]':
+                    - generic [ref=e464]:
+                      - generic [ref=e465]:
+                        - img [ref=e466]
+                        - text: "-"
+                      - generic [ref=e469]: "Started: 05 Jan 2026"
+                  - cell [ref=e470]:
+                    - button [ref=e471]:
+                      - img
+                - 'row "PL-20260106-8157 5 Unassigned 1 orders 1 items 0% 0 / 1 qty COMPLETED - Started: 05 Jan 2026" [ref=e472]':
+                  - cell "PL-20260106-8157" [ref=e473]:
+                    - generic [ref=e474]:
+                      - img [ref=e476]
+                      - generic [ref=e480]: PL-20260106-8157
+                  - cell "5" [ref=e481]
+                  - cell "Unassigned" [ref=e482]:
+                    - generic [ref=e483]:
+                      - img [ref=e484]
+                      - generic [ref=e487]: Unassigned
+                  - cell "1 orders 1 items" [ref=e488]:
+                    - generic [ref=e489]:
+                      - generic [ref=e490]: 1 orders
+                      - generic [ref=e491]: 1 items
+                  - cell "0% 0 / 1 qty" [ref=e492]:
+                    - generic [ref=e493]:
+                      - generic [ref=e494]: 0%
+                      - generic [ref=e496]: 0 / 1 qty
+                  - cell "COMPLETED" [ref=e497]
+                  - 'cell "- Started: 05 Jan 2026" [ref=e498]':
+                    - generic [ref=e499]:
+                      - generic [ref=e500]:
+                        - img [ref=e501]
+                        - text: "-"
+                      - generic [ref=e504]: "Started: 05 Jan 2026"
+                  - cell [ref=e505]:
+                    - button [ref=e506]:
+                      - img
+                - 'row "PL-20260106-3460 5 Unassigned 1 orders 1 items 0% 0 / 1 qty COMPLETED - Started: 05 Jan 2026" [ref=e507]':
+                  - cell "PL-20260106-3460" [ref=e508]:
+                    - generic [ref=e509]:
+                      - img [ref=e511]
+                      - generic [ref=e515]: PL-20260106-3460
+                  - cell "5" [ref=e516]
+                  - cell "Unassigned" [ref=e517]:
+                    - generic [ref=e518]:
+                      - img [ref=e519]
+                      - generic [ref=e522]: Unassigned
+                  - cell "1 orders 1 items" [ref=e523]:
+                    - generic [ref=e524]:
+                      - generic [ref=e525]: 1 orders
+                      - generic [ref=e526]: 1 items
+                  - cell "0% 0 / 1 qty" [ref=e527]:
+                    - generic [ref=e528]:
+                      - generic [ref=e529]: 0%
+                      - generic [ref=e531]: 0 / 1 qty
+                  - cell "COMPLETED" [ref=e532]
+                  - 'cell "- Started: 05 Jan 2026" [ref=e533]':
+                    - generic [ref=e534]:
+                      - generic [ref=e535]:
+                        - img [ref=e536]
+                        - text: "-"
+                      - generic [ref=e539]: "Started: 05 Jan 2026"
+                  - cell [ref=e540]:
+                    - button [ref=e541]:
+                      - img
+                - 'row "PL-20260106-2976 5 Unassigned 1 orders 1 items 0% 0 / 1 qty COMPLETED - Started: 05 Jan 2026" [ref=e542]':
+                  - cell "PL-20260106-2976" [ref=e543]:
+                    - generic [ref=e544]:
+                      - img [ref=e546]
+                      - generic [ref=e550]: PL-20260106-2976
+                  - cell "5" [ref=e551]
+                  - cell "Unassigned" [ref=e552]:
+                    - generic [ref=e553]:
+                      - img [ref=e554]
+                      - generic [ref=e557]: Unassigned
+                  - cell "1 orders 1 items" [ref=e558]:
+                    - generic [ref=e559]:
+                      - generic [ref=e560]: 1 orders
+                      - generic [ref=e561]: 1 items
+                  - cell "0% 0 / 1 qty" [ref=e562]:
+                    - generic [ref=e563]:
+                      - generic [ref=e564]: 0%
+                      - generic [ref=e566]: 0 / 1 qty
+                  - cell "COMPLETED" [ref=e567]
+                  - 'cell "- Started: 05 Jan 2026" [ref=e568]':
+                    - generic [ref=e569]:
+                      - generic [ref=e570]:
+                        - img [ref=e571]
+                        - text: "-"
+                      - generic [ref=e574]: "Started: 05 Jan 2026"
+                  - cell [ref=e575]:
+                    - button [ref=e576]:
+                      - img
+                - 'row "PL-20260106-8800 5 Unassigned 1 orders 1 items 0% 0 / 1 qty COMPLETED - Started: 05 Jan 2026" [ref=e577]':
+                  - cell "PL-20260106-8800" [ref=e578]:
+                    - generic [ref=e579]:
+                      - img [ref=e581]
+                      - generic [ref=e585]: PL-20260106-8800
+                  - cell "5" [ref=e586]
+                  - cell "Unassigned" [ref=e587]:
+                    - generic [ref=e588]:
+                      - img [ref=e589]
+                      - generic [ref=e592]: Unassigned
+                  - cell "1 orders 1 items" [ref=e593]:
+                    - generic [ref=e594]:
+                      - generic [ref=e595]: 1 orders
+                      - generic [ref=e596]: 1 items
+                  - cell "0% 0 / 1 qty" [ref=e597]:
+                    - generic [ref=e598]:
+                      - generic [ref=e599]: 0%
+                      - generic [ref=e601]: 0 / 1 qty
+                  - cell "COMPLETED" [ref=e602]
+                  - 'cell "- Started: 05 Jan 2026" [ref=e603]':
+                    - generic [ref=e604]:
+                      - generic [ref=e605]:
+                        - img [ref=e606]
+                        - text: "-"
+                      - generic [ref=e609]: "Started: 05 Jan 2026"
+                  - cell [ref=e610]:
+                    - button [ref=e611]:
+                      - img
+            - generic [ref=e612]:
+              - generic [ref=e613]:
+                - generic [ref=e614]: "Rows per page:"
+                - combobox [ref=e615]:
+                  - generic: "10"
+                  - img
+              - generic [ref=e616]:
+                - generic [ref=e617]: Page 1 of 2
+                - generic [ref=e618]:
+                  - button [disabled]:
+                    - img
+                  - button [disabled]:
+                    - img
+                  - button [ref=e619]:
+                    - img
+                  - button [ref=e620]:
+                    - img
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e626] [cursor=pointer]:
+    - img [ref=e627]
+  - alert [ref=e630]
+```

@@ -1,0 +1,357 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - link "Aquapurite Logo Aquapurite Private Limited's ERP" [ref=e5] [cursor=pointer]:
+          - /url: /dashboard
+          - img "Aquapurite Logo" [ref=e6]
+          - generic [ref=e7]: Aquapurite Private Limited's ERP
+        - button [ref=e8]:
+          - img
+      - navigation [ref=e12]:
+        - link "Dashboard" [ref=e13] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e14]
+          - generic [ref=e19]: Dashboard
+        - button "Sales Channels" [ref=e21]:
+          - img [ref=e22]
+          - generic [ref=e27]: Sales Channels
+          - img [ref=e28]
+        - button "Orders" [ref=e31]:
+          - img [ref=e32]
+          - generic [ref=e36]: Orders
+          - img [ref=e37]
+        - button "Inventory" [ref=e40]:
+          - img [ref=e41]
+          - generic [ref=e44]: Inventory
+          - img [ref=e45]
+        - button "WMS" [ref=e48]:
+          - img [ref=e49]
+          - generic [ref=e51]: WMS
+          - img [ref=e52]
+        - button "Logistics" [ref=e55]:
+          - img [ref=e56]
+          - generic [ref=e61]: Logistics
+          - img [ref=e62]
+        - button "Procurement" [ref=e65]:
+          - img [ref=e66]
+          - generic [ref=e70]: Procurement
+          - img [ref=e71]
+        - button "Finance" [ref=e74]:
+          - img [ref=e75]
+          - generic [ref=e77]: Finance
+          - img [ref=e78]
+        - button "Reports" [ref=e81]:
+          - img [ref=e82]
+          - generic [ref=e84]: Reports
+          - img [ref=e85]
+        - button "Billing" [ref=e88]:
+          - img [ref=e89]
+          - generic [ref=e92]: Billing
+          - img [ref=e93]
+        - button "Service" [ref=e96]:
+          - img [ref=e97]
+          - generic [ref=e99]: Service
+          - img [ref=e100]
+        - button "Distribution" [ref=e103]:
+          - img [ref=e104]
+          - generic [ref=e108]: Distribution
+          - img [ref=e109]
+        - button "Products" [ref=e112]:
+          - img [ref=e113]
+          - generic [ref=e117]: Products
+          - img [ref=e118]
+        - button "CRM" [ref=e121]:
+          - img [ref=e122]
+          - generic [ref=e126]: CRM
+          - img [ref=e127]
+        - button "Marketing" [ref=e130]:
+          - img [ref=e131]
+          - generic [ref=e134]: Marketing
+          - img [ref=e135]
+        - button "Access Control" [ref=e138]:
+          - img [ref=e139]
+          - generic [ref=e141]: Access Control
+          - img [ref=e142]
+        - link "Serialization" [ref=e144] [cursor=pointer]:
+          - /url: /serialization
+          - img [ref=e145]
+          - generic [ref=e146]: Serialization
+        - link "Approvals !" [ref=e147] [cursor=pointer]:
+          - /url: /approvals
+          - img [ref=e148]
+          - generic [ref=e151]: Approvals
+          - generic [ref=e152]: "!"
+        - link "Audit Logs" [ref=e153] [cursor=pointer]:
+          - /url: /audit-logs
+          - img [ref=e154]
+          - generic [ref=e158]: Audit Logs
+        - link "Settings" [ref=e159] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e160]
+          - generic [ref=e163]: Settings
+      - paragraph [ref=e165]: © 2026 Aquapurite Private Limited
+    - generic [ref=e166]:
+      - banner [ref=e167]:
+        - navigation [ref=e168]:
+          - link [ref=e169] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e170]
+          - generic [ref=e173]:
+            - img [ref=e174]
+            - link "Service" [ref=e176] [cursor=pointer]:
+              - /url: /service
+          - generic [ref=e177]:
+            - img [ref=e178]
+            - link "AMC" [ref=e180] [cursor=pointer]:
+              - /url: /service/amc
+        - generic [ref=e181]:
+          - button "3" [ref=e182]:
+            - img
+            - generic [ref=e183]: "3"
+          - button "Toggle theme" [ref=e184]:
+            - img
+            - generic [ref=e185]: Toggle theme
+          - button "AU" [ref=e186]:
+            - generic [ref=e188]: AU
+      - main [ref=e189]:
+        - generic [ref=e190]:
+          - generic [ref=e191]:
+            - generic [ref=e192]:
+              - heading "AMC Management" [level=1] [ref=e193]
+              - paragraph [ref=e194]: Annual Maintenance Contracts and service plans
+            - generic [ref=e196]:
+              - button "New Plan" [ref=e197]:
+                - img
+                - text: New Plan
+              - button "New Contract" [ref=e198]:
+                - img
+                - text: New Contract
+          - generic [ref=e199]:
+            - generic [ref=e200]:
+              - generic [ref=e202]: Active Contracts
+              - generic [ref=e203]:
+                - generic [ref=e204]: "892"
+                - generic [ref=e205]: of 1256 total
+            - generic [ref=e206]:
+              - generic [ref=e208]: Expiring Soon
+              - generic [ref=e209]:
+                - generic [ref=e210]: "45"
+                - generic [ref=e211]: Within 30 days
+            - generic [ref=e212]:
+              - generic [ref=e214]: Pending Renewal
+              - generic [ref=e215]:
+                - generic [ref=e216]: "28"
+                - generic [ref=e217]: Awaiting action
+            - generic [ref=e218]:
+              - generic [ref=e220]: Total Revenue
+              - generic [ref=e221]:
+                - generic [ref=e222]: ₹89,45,600
+                - generic [ref=e223]: "This month: ₹4,56,780"
+            - generic [ref=e224]:
+              - generic [ref=e226]: Renewal Rate
+              - generic [ref=e227]:
+                - generic [ref=e228]: 78.5%
+                - progressbar [ref=e229]
+          - generic [ref=e231]:
+            - tablist [ref=e232]:
+              - tab "Contracts" [selected] [ref=e233]
+              - tab "AMC Plans" [ref=e234]
+              - tab "Due for Renewal" [ref=e235]
+            - tabpanel "Contracts" [ref=e236]:
+              - generic [ref=e237]:
+                - combobox [ref=e238]:
+                  - generic: All Statuses
+                  - img
+                - button "Export" [ref=e239]:
+                  - img
+                  - text: Export
+              - generic [ref=e240]:
+                - generic [ref=e241]:
+                  - generic [ref=e243]:
+                    - img [ref=e244]
+                    - textbox "Search contracts..." [ref=e247]
+                  - button "Columns" [ref=e248]:
+                    - img
+                    - text: Columns
+                - table [ref=e251]:
+                  - rowgroup [ref=e252]:
+                    - row "Contract Customer Product Validity Visits Amount Status" [ref=e253]:
+                      - columnheader "Contract" [ref=e254]
+                      - columnheader "Customer" [ref=e255]
+                      - columnheader "Product" [ref=e256]
+                      - columnheader "Validity" [ref=e257]
+                      - columnheader "Visits" [ref=e258]
+                      - columnheader "Amount" [ref=e259]
+                      - columnheader "Status" [ref=e260]
+                      - columnheader [ref=e261]
+                  - rowgroup [ref=e262]:
+                    - row "AMC-2024-0001 Standard Care Priya Sharma +91 98765 43210 AquaPure UV Compact AP-UV-001-12345 14 Jan 2025 280 days left 1 / 4 ₹4,999 PAID ACTIVE Auto-renew" [ref=e263]:
+                      - cell "AMC-2024-0001 Standard Care" [ref=e264]:
+                        - generic [ref=e265] [cursor=pointer]:
+                          - img [ref=e267]
+                          - generic [ref=e269]:
+                            - generic [ref=e270]: AMC-2024-0001
+                            - generic [ref=e271]: Standard Care
+                      - cell "Priya Sharma +91 98765 43210" [ref=e272]:
+                        - generic [ref=e273]:
+                          - generic [ref=e274]: Priya Sharma
+                          - generic [ref=e275]: +91 98765 43210
+                      - cell "AquaPure UV Compact AP-UV-001-12345" [ref=e276]:
+                        - generic [ref=e277]:
+                          - generic [ref=e278]: AquaPure UV Compact
+                          - generic [ref=e279]: AP-UV-001-12345
+                      - cell "14 Jan 2025 280 days left" [ref=e280]:
+                        - generic [ref=e282]:
+                          - generic [ref=e283]: 14 Jan 2025
+                          - generic [ref=e284]: 280 days left
+                      - cell "1 / 4" [ref=e285]:
+                        - generic [ref=e286]:
+                          - generic [ref=e287]:
+                            - text: "1"
+                            - generic [ref=e288]: / 4
+                          - progressbar [ref=e289]
+                      - cell "₹4,999 PAID" [ref=e291]:
+                        - generic [ref=e292]:
+                          - generic [ref=e293]: ₹4,999
+                          - generic [ref=e294]: PAID
+                      - cell "ACTIVE Auto-renew" [ref=e295]:
+                        - generic [ref=e296]:
+                          - generic [ref=e297]: ACTIVE
+                          - generic [ref=e298]:
+                            - img [ref=e299]
+                            - text: Auto-renew
+                      - cell [ref=e304]:
+                        - button [ref=e305]:
+                          - img
+                    - row "AMC-2024-0002 Premium Care Rahul Verma +91 87654 32109 AquaPure RO Elite AP-RO-002-67890 30 Nov 2024 245 days left 3 / 6 ₹7,999 PAID ACTIVE" [ref=e306]:
+                      - cell "AMC-2024-0002 Premium Care" [ref=e307]:
+                        - generic [ref=e308] [cursor=pointer]:
+                          - img [ref=e310]
+                          - generic [ref=e312]:
+                            - generic [ref=e313]: AMC-2024-0002
+                            - generic [ref=e314]: Premium Care
+                      - cell "Rahul Verma +91 87654 32109" [ref=e315]:
+                        - generic [ref=e316]:
+                          - generic [ref=e317]: Rahul Verma
+                          - generic [ref=e318]: +91 87654 32109
+                      - cell "AquaPure RO Elite AP-RO-002-67890" [ref=e319]:
+                        - generic [ref=e320]:
+                          - generic [ref=e321]: AquaPure RO Elite
+                          - generic [ref=e322]: AP-RO-002-67890
+                      - cell "30 Nov 2024 245 days left" [ref=e323]:
+                        - generic [ref=e325]:
+                          - generic [ref=e326]: 30 Nov 2024
+                          - generic [ref=e327]: 245 days left
+                      - cell "3 / 6" [ref=e328]:
+                        - generic [ref=e329]:
+                          - generic [ref=e330]:
+                            - text: "3"
+                            - generic [ref=e331]: / 6
+                          - progressbar [ref=e332]
+                      - cell "₹7,999 PAID" [ref=e334]:
+                        - generic [ref=e335]:
+                          - generic [ref=e336]: ₹7,999
+                          - generic [ref=e337]: PAID
+                      - cell "ACTIVE" [ref=e338]:
+                        - generic [ref=e340]: ACTIVE
+                      - cell [ref=e341]:
+                        - button [ref=e342]:
+                          - img
+                    - row "AMC-2023-0456 Basic Care Amit Kumar +91 76543 21098 AquaPure UV Compact AP-UV-001-11111 19 Mar 2024 5 days left 2 / 2 ₹2,999 PAID PENDING RENEWAL" [ref=e343]:
+                      - cell "AMC-2023-0456 Basic Care" [ref=e344]:
+                        - generic [ref=e345] [cursor=pointer]:
+                          - img [ref=e347]
+                          - generic [ref=e349]:
+                            - generic [ref=e350]: AMC-2023-0456
+                            - generic [ref=e351]: Basic Care
+                      - cell "Amit Kumar +91 76543 21098" [ref=e352]:
+                        - generic [ref=e353]:
+                          - generic [ref=e354]: Amit Kumar
+                          - generic [ref=e355]: +91 76543 21098
+                      - cell "AquaPure UV Compact AP-UV-001-11111" [ref=e356]:
+                        - generic [ref=e357]:
+                          - generic [ref=e358]: AquaPure UV Compact
+                          - generic [ref=e359]: AP-UV-001-11111
+                      - cell "19 Mar 2024 5 days left" [ref=e360]:
+                        - generic [ref=e362]:
+                          - generic [ref=e363]: 19 Mar 2024
+                          - generic [ref=e364]: 5 days left
+                      - cell "2 / 2" [ref=e365]:
+                        - generic [ref=e366]:
+                          - generic [ref=e367]:
+                            - text: "2"
+                            - generic [ref=e368]: / 2
+                          - progressbar [ref=e369]
+                      - cell "₹2,999 PAID" [ref=e371]:
+                        - generic [ref=e372]:
+                          - generic [ref=e373]: ₹2,999
+                          - generic [ref=e374]: PAID
+                      - cell "PENDING RENEWAL" [ref=e375]:
+                        - generic [ref=e377]: PENDING RENEWAL
+                      - cell [ref=e378]:
+                        - button [ref=e379]:
+                          - img
+                    - row "AMC-2024-0003 Standard Care Sneha Patel +91 65432 10987 AquaPure RO+UV Pro AP-ROUV-003-22222 31 Jan 2025 300 days left 0 / 4 ₹4,999 PENDING PENDING ACTIVATION Auto-renew" [ref=e380]:
+                      - cell "AMC-2024-0003 Standard Care" [ref=e381]:
+                        - generic [ref=e382] [cursor=pointer]:
+                          - img [ref=e384]
+                          - generic [ref=e386]:
+                            - generic [ref=e387]: AMC-2024-0003
+                            - generic [ref=e388]: Standard Care
+                      - cell "Sneha Patel +91 65432 10987" [ref=e389]:
+                        - generic [ref=e390]:
+                          - generic [ref=e391]: Sneha Patel
+                          - generic [ref=e392]: +91 65432 10987
+                      - cell "AquaPure RO+UV Pro AP-ROUV-003-22222" [ref=e393]:
+                        - generic [ref=e394]:
+                          - generic [ref=e395]: AquaPure RO+UV Pro
+                          - generic [ref=e396]: AP-ROUV-003-22222
+                      - cell "31 Jan 2025 300 days left" [ref=e397]:
+                        - generic [ref=e399]:
+                          - generic [ref=e400]: 31 Jan 2025
+                          - generic [ref=e401]: 300 days left
+                      - cell "0 / 4" [ref=e402]:
+                        - generic [ref=e403]:
+                          - generic [ref=e404]:
+                            - text: "0"
+                            - generic [ref=e405]: / 4
+                          - progressbar [ref=e406]
+                      - cell "₹4,999 PENDING" [ref=e408]:
+                        - generic [ref=e409]:
+                          - generic [ref=e410]: ₹4,999
+                          - generic [ref=e411]: PENDING
+                      - cell "PENDING ACTIVATION Auto-renew" [ref=e412]:
+                        - generic [ref=e413]:
+                          - generic [ref=e414]: PENDING ACTIVATION
+                          - generic [ref=e415]:
+                            - img [ref=e416]
+                            - text: Auto-renew
+                      - cell [ref=e421]:
+                        - button [ref=e422]:
+                          - img
+                - generic [ref=e423]:
+                  - generic [ref=e424]:
+                    - generic [ref=e425]: "Rows per page:"
+                    - combobox [ref=e426]:
+                      - generic: "10"
+                      - img
+                  - generic [ref=e427]:
+                    - generic [ref=e428]: Page 1 of 1
+                    - generic [ref=e429]:
+                      - button [disabled]:
+                        - img
+                      - button [disabled]:
+                        - img
+                      - button [disabled]:
+                        - img
+                      - button [disabled]:
+                        - img
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e435] [cursor=pointer]:
+    - img [ref=e436]
+  - alert [ref=e439]
+```

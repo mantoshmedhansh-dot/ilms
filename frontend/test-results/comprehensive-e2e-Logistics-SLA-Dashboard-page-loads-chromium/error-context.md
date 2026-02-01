@@ -1,0 +1,202 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - link "Aquapurite Logo Aquapurite Private Limited's ERP" [ref=e5] [cursor=pointer]:
+          - /url: /dashboard
+          - img "Aquapurite Logo" [ref=e6]
+          - generic [ref=e7]: Aquapurite Private Limited's ERP
+        - button [ref=e8]:
+          - img
+      - navigation [ref=e12]:
+        - link "Dashboard" [ref=e13] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e14]
+          - generic [ref=e19]: Dashboard
+        - button "Sales Channels" [ref=e21]:
+          - img [ref=e22]
+          - generic [ref=e27]: Sales Channels
+          - img [ref=e28]
+        - button "Orders" [ref=e31]:
+          - img [ref=e32]
+          - generic [ref=e36]: Orders
+          - img [ref=e37]
+        - button "Inventory" [ref=e40]:
+          - img [ref=e41]
+          - generic [ref=e44]: Inventory
+          - img [ref=e45]
+        - button "WMS" [ref=e48]:
+          - img [ref=e49]
+          - generic [ref=e51]: WMS
+          - img [ref=e52]
+        - button "Logistics" [ref=e55]:
+          - img [ref=e56]
+          - generic [ref=e61]: Logistics
+          - img [ref=e62]
+        - button "Procurement" [ref=e65]:
+          - img [ref=e66]
+          - generic [ref=e70]: Procurement
+          - img [ref=e71]
+        - button "Finance" [ref=e74]:
+          - img [ref=e75]
+          - generic [ref=e77]: Finance
+          - img [ref=e78]
+        - button "Reports" [ref=e81]:
+          - img [ref=e82]
+          - generic [ref=e84]: Reports
+          - img [ref=e85]
+        - button "Billing" [ref=e88]:
+          - img [ref=e89]
+          - generic [ref=e92]: Billing
+          - img [ref=e93]
+        - button "Service" [ref=e96]:
+          - img [ref=e97]
+          - generic [ref=e99]: Service
+          - img [ref=e100]
+        - button "Distribution" [ref=e103]:
+          - img [ref=e104]
+          - generic [ref=e108]: Distribution
+          - img [ref=e109]
+        - button "Products" [ref=e112]:
+          - img [ref=e113]
+          - generic [ref=e117]: Products
+          - img [ref=e118]
+        - button "CRM" [ref=e121]:
+          - img [ref=e122]
+          - generic [ref=e126]: CRM
+          - img [ref=e127]
+        - button "Marketing" [ref=e130]:
+          - img [ref=e131]
+          - generic [ref=e134]: Marketing
+          - img [ref=e135]
+        - button "Access Control" [ref=e138]:
+          - img [ref=e139]
+          - generic [ref=e141]: Access Control
+          - img [ref=e142]
+        - link "Serialization" [ref=e144] [cursor=pointer]:
+          - /url: /serialization
+          - img [ref=e145]
+          - generic [ref=e146]: Serialization
+        - link "Approvals !" [ref=e147] [cursor=pointer]:
+          - /url: /approvals
+          - img [ref=e148]
+          - generic [ref=e151]: Approvals
+          - generic [ref=e152]: "!"
+        - link "Audit Logs" [ref=e153] [cursor=pointer]:
+          - /url: /audit-logs
+          - img [ref=e154]
+          - generic [ref=e158]: Audit Logs
+        - link "Settings" [ref=e159] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e160]
+          - generic [ref=e163]: Settings
+      - paragraph [ref=e165]: © 2026 Aquapurite Private Limited
+    - generic [ref=e166]:
+      - banner [ref=e167]:
+        - navigation [ref=e168]:
+          - link [ref=e169] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e170]
+          - generic [ref=e173]:
+            - img [ref=e174]
+            - link "Logistics" [ref=e176] [cursor=pointer]:
+              - /url: /logistics
+          - generic [ref=e177]:
+            - img [ref=e178]
+            - link "Sla-dashboard" [ref=e180] [cursor=pointer]:
+              - /url: /logistics/sla-dashboard
+        - generic [ref=e181]:
+          - button "3" [ref=e182]:
+            - img
+            - generic [ref=e183]: "3"
+          - button "Toggle theme" [ref=e184]:
+            - img
+            - generic [ref=e185]: Toggle theme
+          - button "AU" [ref=e186]:
+            - generic [ref=e188]: AU
+      - main [ref=e189]:
+        - generic [ref=e190]:
+          - generic [ref=e191]:
+            - generic [ref=e192]:
+              - heading "SLA Dashboard" [level=1] [ref=e193]
+              - paragraph [ref=e194]: Monitor shipment delivery performance and SLA compliance
+            - combobox [ref=e196]:
+              - generic: This Month
+              - img
+          - generic [ref=e197]:
+            - generic [ref=e198]:
+              - generic [ref=e200]: SLA Compliance Rate
+              - generic [ref=e201]:
+                - generic [ref=e203]:
+                  - img [ref=e204]
+                  - generic [ref=e208]: 0.0%
+                - generic [ref=e209]: "Target: 95%"
+            - generic [ref=e210]:
+              - generic [ref=e211]:
+                - generic [ref=e212]: Delivery Performance
+                - generic [ref=e213]: Breakdown of shipment delivery status
+              - generic [ref=e215]:
+                - generic [ref=e216]:
+                  - img [ref=e217]
+                  - generic [ref=e221]: "0"
+                  - generic [ref=e222]: Total Shipments
+                - generic [ref=e223]:
+                  - img [ref=e224]
+                  - generic [ref=e227]: "0"
+                  - generic [ref=e228]: On Time
+                - generic [ref=e229]:
+                  - img [ref=e230]
+                  - generic [ref=e233]: "0"
+                  - generic [ref=e234]: At Risk
+                - generic [ref=e235]:
+                  - img [ref=e236]
+                  - generic [ref=e240]: "0"
+                  - generic [ref=e241]: Delayed
+          - generic [ref=e242]:
+            - generic [ref=e243]:
+              - generic [ref=e244]:
+                - generic [ref=e245]: Avg Delivery Time
+                - img [ref=e246]
+              - generic [ref=e249]:
+                - generic [ref=e250]: 0.0 days
+                - paragraph [ref=e251]: "Promised: 0.0 days"
+            - generic [ref=e252]:
+              - generic [ref=e253]:
+                - generic [ref=e254]: Avg Delay
+                - img [ref=e255]
+              - generic [ref=e258]:
+                - generic [ref=e259]: 0.0 days
+                - paragraph [ref=e260]: Behind schedule
+            - generic [ref=e261]:
+              - generic [ref=e262]:
+                - generic [ref=e263]: On-Time Rate
+                - img [ref=e264]
+              - generic [ref=e267]:
+                - generic [ref=e268]: 0%
+                - paragraph [ref=e269]: Of total delivered
+          - generic [ref=e270]:
+            - generic [ref=e271]:
+              - generic [ref=e272]: Transporter Performance
+              - generic [ref=e273]: SLA compliance by transporter
+            - generic [ref=e275]:
+              - img [ref=e276]
+              - paragraph [ref=e281]: No transporter data available
+          - generic [ref=e282]:
+            - generic [ref=e284]:
+              - generic [ref=e285]:
+                - generic [ref=e286]:
+                  - img [ref=e287]
+                  - text: At-Risk Shipments
+                - generic [ref=e289]: Shipments likely to miss SLA
+              - generic [ref=e290]: "0"
+            - generic [ref=e292]:
+              - img [ref=e293]
+              - paragraph [ref=e296]: No at-risk shipments
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e302] [cursor=pointer]:
+    - img [ref=e303]
+  - alert [ref=e306]
+```
