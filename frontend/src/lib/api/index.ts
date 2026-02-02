@@ -6291,3 +6291,4 @@ export const partnersApi = {
 };
 
 export default apiClient;
+export { onboardingApi } from './onboarding';

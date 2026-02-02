@@ -170,22 +170,22 @@ class POSerial(Base):
         default=lambda: str(uuid.uuid4())
     )
 
-    # PO linkage - using String(36) to match production database schema (VARCHAR)
-    po_id: Mapped[str] = mapped_column(
-        String(36),
+    # PO linkage - using UUID to match multi-tenant database schema
+    po_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
         ForeignKey("purchase_orders.id"),
         nullable=False,
         index=True
     )
-    po_item_id: Mapped[Optional[str]] = mapped_column(
-        String(36),
+    po_item_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
         ForeignKey("purchase_order_items.id"),
         nullable=True
     )
 
-    # Product identification - using String(36) to match production database schema
-    product_id: Mapped[Optional[str]] = mapped_column(
-        String(36),
+    # Product identification - using UUID to match multi-tenant database schema
+    product_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
         ForeignKey("products.id"),
         nullable=True
     )
@@ -206,29 +206,29 @@ class POSerial(Base):
     # Status tracking
     status: Mapped[str] = mapped_column(String(30), default="GENERATED", comment="GENERATED, PRINTED, SENT_TO_VENDOR, RECEIVED, ASSIGNED, SOLD, RETURNED, DAMAGED, CANCELLED")
 
-    # GRN linkage (when received) - using String(36) to match production database schema
-    grn_id: Mapped[Optional[str]] = mapped_column(
-        String(36),
+    # GRN linkage (when received) - using UUID to match multi-tenant database schema
+    grn_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
         ForeignKey("goods_receipt_notes.id"),
         nullable=True
     )
-    grn_item_id: Mapped[Optional[str]] = mapped_column(String(36), nullable=True)
+    grn_item_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), nullable=True)
     received_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    received_by: Mapped[Optional[str]] = mapped_column(String(36), nullable=True)
+    received_by: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), nullable=True)
 
-    # Stock item linkage (when assigned to inventory) - using String(36) to match database
-    stock_item_id: Mapped[Optional[str]] = mapped_column(
-        String(36),
+    # Stock item linkage (when assigned to inventory) - using UUID to match multi-tenant database schema
+    stock_item_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
         ForeignKey("stock_items.id"),
         nullable=True
     )
     assigned_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    # Sale linkage (when sold) - using String(36) to match production database
-    order_id: Mapped[Optional[str]] = mapped_column(String(36), nullable=True)
-    order_item_id: Mapped[Optional[str]] = mapped_column(String(36), nullable=True)
+    # Sale linkage (when sold) - UUID for multi-tenant database
+    order_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), nullable=True)
+    order_item_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), nullable=True)
     sold_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    customer_id: Mapped[Optional[str]] = mapped_column(String(36), nullable=True)
+    customer_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), nullable=True)
 
     # Warranty tracking
     warranty_start_date: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)

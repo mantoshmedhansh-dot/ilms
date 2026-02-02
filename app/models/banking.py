@@ -64,7 +64,7 @@ class BankAccount(Base):
     current_balance: Mapped[Decimal] = mapped_column(Numeric(15, 2), default=0)
 
     # Linked Ledger Account (for auto journal entries)
-    ledger_account_id: Mapped[Optional[UUID]] = mapped_column(PGUUID(as_uuid=True), ForeignKey("ledger_accounts.id"))
+    ledger_account_id: Mapped[Optional[UUID]] = mapped_column(PGUUID(as_uuid=True), ForeignKey("chart_of_accounts.id"))
 
     # Credit Limits (for CC/OD accounts)
     credit_limit: Mapped[Optional[Decimal]] = mapped_column(Numeric(15, 2))

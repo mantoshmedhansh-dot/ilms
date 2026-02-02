@@ -90,7 +90,6 @@ class CommunityPartner(Base):
     __tablename__ = "community_partners"
     __table_args__ = (
         Index('ix_community_partners_referral_code', 'referral_code'),
-        Index('ix_community_partners_phone', 'phone'),
         Index('ix_community_partners_status', 'status'),
     )
 
