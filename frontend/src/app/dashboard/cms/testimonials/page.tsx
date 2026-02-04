@@ -319,7 +319,7 @@ function TestimonialForm({ testimonial, onSubmit, onCancel, isLoading }: Testimo
             id="product_name"
             value={formData.product_name || ''}
             onChange={(e) => setFormData({ ...formData, product_name: e.target.value })}
-            placeholder="Aquapurite Pro 1000"
+            placeholder="ILMS.AI Pro 1000"
           />
         </div>
         <div>

@@ -34,8 +34,8 @@ const CONTACT_SETTINGS = [
   { key: 'contact_phone', label: 'Phone Number', type: 'text', group: 'contact', icon: Phone, description: 'Primary support phone number', placeholder: '+91 93119 39076' },
   { key: 'contact_phone_toll_free', label: 'Toll-Free Number', type: 'text', group: 'contact', icon: Phone, description: 'Optional toll-free number', placeholder: '1800-123-4567' },
   { key: 'contact_whatsapp', label: 'WhatsApp Number', type: 'text', group: 'contact', icon: MessageCircle, description: 'WhatsApp support number (include country code)', placeholder: '919311939076' },
-  { key: 'contact_email', label: 'Support Email', type: 'text', group: 'contact', icon: Mail, description: 'Primary support email address', placeholder: 'support@aquapurite.com' },
-  { key: 'contact_email_sales', label: 'Sales Email', type: 'text', group: 'contact', icon: Mail, description: 'Sales inquiry email', placeholder: 'sales@aquapurite.com' },
+  { key: 'contact_email', label: 'Support Email', type: 'text', group: 'contact', icon: Mail, description: 'Primary support email address', placeholder: 'support@ilms.ai' },
+  { key: 'contact_email_sales', label: 'Sales Email', type: 'text', group: 'contact', icon: Mail, description: 'Sales inquiry email', placeholder: 'sales@ilms.ai' },
 
   // Address
   { key: 'contact_address', label: 'Street Address', type: 'textarea', group: 'contact', icon: MapPin, description: 'Office/Corporate address', placeholder: 'Plot No. 123, Industrial Area' },
@@ -52,11 +52,11 @@ const CONTACT_SETTINGS = [
 ];
 
 const SOCIAL_SETTINGS = [
-  { key: 'social_facebook', label: 'Facebook URL', type: 'url', group: 'social', icon: Globe, description: 'Facebook page URL', placeholder: 'https://facebook.com/aquapurite' },
-  { key: 'social_instagram', label: 'Instagram URL', type: 'url', group: 'social', icon: Globe, description: 'Instagram profile URL', placeholder: 'https://instagram.com/aquapurite' },
-  { key: 'social_twitter', label: 'Twitter/X URL', type: 'url', group: 'social', icon: Globe, description: 'Twitter/X profile URL', placeholder: 'https://twitter.com/aquapurite' },
-  { key: 'social_youtube', label: 'YouTube URL', type: 'url', group: 'social', icon: Globe, description: 'YouTube channel URL', placeholder: 'https://youtube.com/@aquapurite' },
-  { key: 'social_linkedin', label: 'LinkedIn URL', type: 'url', group: 'social', icon: Globe, description: 'LinkedIn company page URL', placeholder: 'https://linkedin.com/company/aquapurite' },
+  { key: 'social_facebook', label: 'Facebook URL', type: 'url', group: 'social', icon: Globe, description: 'Facebook page URL', placeholder: 'https://facebook.com/ilms' },
+  { key: 'social_instagram', label: 'Instagram URL', type: 'url', group: 'social', icon: Globe, description: 'Instagram profile URL', placeholder: 'https://instagram.com/ilms' },
+  { key: 'social_twitter', label: 'Twitter/X URL', type: 'url', group: 'social', icon: Globe, description: 'Twitter/X profile URL', placeholder: 'https://twitter.com/ilms' },
+  { key: 'social_youtube', label: 'YouTube URL', type: 'url', group: 'social', icon: Globe, description: 'YouTube channel URL', placeholder: 'https://youtube.com/@ilms' },
+  { key: 'social_linkedin', label: 'LinkedIn URL', type: 'url', group: 'social', icon: Globe, description: 'LinkedIn company page URL', placeholder: 'https://linkedin.com/company/ilms' },
 ];
 
 export default function ContactSettingsPage() {

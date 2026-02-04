@@ -152,7 +152,7 @@ export default function ReferralPage() {
   const shareVia = (platform: string) => {
     if (!stats) return;
 
-    const message = `Hey! Use my referral code ${stats.referral_code} to get 5% off on your first water purifier from Aquapurite. Shop now at https://www.aquapurite.com?ref=${stats.referral_code}`;
+    const message = `Hey! Use my referral code ${stats.referral_code} to get 5% off on your first water purifier from ILMS.AI. Shop now at https://www.ilms.ai?ref=${stats.referral_code}`;
     const encodedMessage = encodeURIComponent(message);
 
     let url = '';
@@ -161,13 +161,13 @@ export default function ReferralPage() {
         url = `https://wa.me/?text=${encodedMessage}`;
         break;
       case 'facebook':
-        url = `https://www.facebook.com/sharer/sharer.php?u=https://www.aquapurite.com?ref=${stats.referral_code}&quote=${encodedMessage}`;
+        url = `https://www.facebook.com/sharer/sharer.php?u=https://www.ilms.ai?ref=${stats.referral_code}&quote=${encodedMessage}`;
         break;
       case 'twitter':
         url = `https://twitter.com/intent/tweet?text=${encodedMessage}`;
         break;
       case 'email':
-        url = `mailto:?subject=Get 5% off on Aquapurite Water Purifiers&body=${encodedMessage}`;
+        url = `mailto:?subject=Get 5% off on ILMS.AI Water Purifiers&body=${encodedMessage}`;
         break;
     }
 
@@ -201,7 +201,7 @@ export default function ReferralPage() {
           Share Pure Water, Earn <span className="text-primary">₹500</span> Cash
         </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
-          Love your AQUAPURITE water purifier? Share it with friends and family! They get 5% off their first purchase, and you earn ₹500 for every successful referral.
+          Love your ILMS.AI water purifier? Share it with friends and family! They get 5% off their first purchase, and you earn ₹500 for every successful referral.
         </p>
 
         {/* Quick Stats */}
@@ -493,7 +493,7 @@ export default function ReferralPage() {
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-              <span>The referred friend must be a new customer making their first purchase on AQUAPURITE.</span>
+              <span>The referred friend must be a new customer making their first purchase on ILMS.AI.</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
@@ -509,7 +509,7 @@ export default function ReferralPage() {
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-              <span>AQUAPURITE reserves the right to modify or terminate this program at any time with prior notice.</span>
+              <span>ILMS.AI reserves the right to modify or terminate this program at any time with prior notice.</span>
             </li>
           </ul>
         </CardContent>
@@ -521,7 +521,7 @@ export default function ReferralPage() {
           <CardContent className="py-6 text-center">
             <h3 className="text-lg font-semibold mb-2">Not a Customer Yet?</h3>
             <p className="text-muted-foreground mb-4">
-              Buy an AQUAPURITE water purifier today and start referring your friends to earn rewards!
+              Buy an ILMS.AI water purifier today and start referring your friends to earn rewards!
             </p>
             <Button asChild>
               <Link href="/products">

@@ -111,7 +111,7 @@ async def seed_transporters(db):
         },
         {
             "code": "SELF",
-            "name": "Aquapurite Own Fleet",
+            "name": "ILMS.AI Own Fleet",
             "transporter_type": TransporterType.SELF_SHIP,
             "supports_cod": True,
             "supports_prepaid": True,

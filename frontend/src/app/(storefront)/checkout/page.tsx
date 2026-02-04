@@ -196,7 +196,7 @@ export default function CheckoutPage() {
         const data = await companyApi.getInfo();
         setCompany(data);
       } catch (error) {
-        // Silently fail - will use fallback 'AQUAPURITE'
+        // Silently fail - will use fallback 'ILMS.AI'
       }
     };
     fetchCompany();
@@ -394,7 +394,7 @@ export default function CheckoutPage() {
           key: paymentOrder.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_xxx',
           amount: paymentOrder.amount, // Already in paise from backend
           currency: 'INR',
-          name: company?.trade_name || company?.name || 'AQUAPURITE',
+          name: company?.trade_name || company?.name || 'ILMS.AI',
           description: `Order #${order.order_number}`,
           order_id: paymentOrder.razorpay_order_id, // Use Razorpay order ID
           prefill: {

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate Purchase Order PO/APL/ST/25-26/002 from Aquapurite to STOS
+Generate Purchase Order PO/APL/ST/25-26/002 from ILMS.AI to STOS
 Spare Parts Order with MONTH-WISE breakdown for Jan-March 2026
 
 This script follows the proper architecture:
@@ -540,7 +540,7 @@ def generate_po_html(company: dict, vendor: dict, ship_to: dict) -> str:
                 <li><strong>Payment (Lot-wise):</strong> 25% Advance for each lot before delivery, 75% Balance within 45 days from each lot's delivery</li>
                 <li><strong>Delivery:</strong> As per lot-wise schedule - LOT 1 (Jan), LOT 2 (Feb), LOT 3 (Mar 2026)</li>
                 <li><strong>Advance Payment:</strong> LOT 1 advance with PO, LOT 2 advance before 1st Feb, LOT 3 advance before 1st Mar</li>
-                <li><strong>Quality:</strong> All items must meet Aquapurite quality standards</li>
+                <li><strong>Quality:</strong> All items must meet ILMS.AI quality standards</li>
                 <li><strong>Packaging:</strong> Individual packaging with barcode labels required</li>
                 <li><strong>Warranty:</strong> 6 months from date of delivery</li>
                 <li>All disputes subject to Ghaziabad/Delhi jurisdiction.</li>
@@ -560,7 +560,7 @@ def generate_po_html(company: dict, vendor: dict, ship_to: dict) -> str:
         </div>
 
         <div class="footer">
-            Purchase Order from Aquapurite ERP | {PO_NUMBER} | Generated: {datetime.now().strftime("%d-%m-%Y %H:%M:%S")}
+            Purchase Order from ILMS.AI ERP | {PO_NUMBER} | Generated: {datetime.now().strftime("%d-%m-%Y %H:%M:%S")}
         </div>
     </div>
 </body>
@@ -577,7 +577,7 @@ async def main():
 
     async with async_session_factory() as db:
         # Fetch company details
-        print("\n1. Fetching Aquapurite company details...")
+        print("\n1. Fetching ILMS.AI company details...")
         result = await db.execute(text("""
             SELECT legal_name, trade_name, gstin, state_code, cin,
                    address_line1, address_line2, city, state, pincode,

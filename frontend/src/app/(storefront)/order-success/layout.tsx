@@ -1,8 +1,8 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Order Confirmed | Aquapurite',
-  description: 'Your order has been placed successfully. Thank you for shopping with Aquapurite.',
+  title: 'Order Confirmed | ILMS.AI',
+  description: 'Your order has been placed successfully. Thank you for shopping with ILMS.AI.',
   robots: {
     index: false,
     follow: false,

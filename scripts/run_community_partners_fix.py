@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 # Production database URL
-DATABASE_URL = "postgresql+psycopg://postgres:Aquapurite2026@db.aavjhutqzwusgdwrczds.supabase.co:6543/postgres"
+DATABASE_URL = "postgresql+psycopg://postgres:ILMS.AI2026@db.aavjhutqzwusgdwrczds.supabase.co:6543/postgres"
 
 # SQL statements to fix the schema
 SQL_STATEMENTS = [

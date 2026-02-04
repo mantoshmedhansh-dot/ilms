@@ -1,8 +1,8 @@
 """
-Generate Sales Proforma Invoice / Supply Order PDF for Aquapurite.
-This is the document Aquapurite (as seller) sends to their customers.
+Generate Sales Proforma Invoice / Supply Order PDF for ILMS.AI.
+This is the document ILMS.AI (as seller) sends to their customers.
 
-Aquapurite ERP System - Sales Document
+ILMS.AI ERP System - Sales Document
 """
 import asyncio
 import sys
@@ -70,11 +70,11 @@ def amount_to_words(amount):
 
 
 async def generate_sales_proforma():
-    """Generate Sales Proforma Invoice / Supply Order from Aquapurite."""
+    """Generate Sales Proforma Invoice / Supply Order from ILMS.AI."""
 
-    # Aquapurite Company Details (Seller)
+    # ILMS.AI Company Details (Seller)
     company = {
-        "name": "AQUAPURITE PRIVATE LIMITED",
+        "name": "ILMS.AI",
         "address_line1": "PLOT 36-A KH NO 181, DINDAPUR EXT",
         "address_line2": "PH-1, SHYAM VIHAR, Najafgarh",
         "city": "New Delhi",
@@ -86,8 +86,8 @@ async def generate_sales_proforma():
         "pan": "ABDCA6170C",
         "cin": "U74999DL2020PTC000000",
         "phone": "+91-11-12345678",
-        "email": "sales@aquapurite.com",
-        "website": "www.aquapurite.com",
+        "email": "sales@ilms.ai",
+        "website": "www.ilms.ai",
         "bank_name": "ICICI BANK",
         "bank_branch": "NAJAFGARH",
         "account_no": "123456789012",
@@ -130,7 +130,7 @@ async def generate_sales_proforma():
     pi_date = date(2026, 1, 7)
     validity_date = date(2026, 2, 7)
 
-    # Sample Items (Aquapurite's Products)
+    # Sample Items (ILMS.AI's Products)
     items = [
         {"sn": 1, "description": "AquaPure RO System - 25 LPH", "part_code": "AP-RO-025", "hsn": "84212110", "qty": 5, "unit": "Nos", "price": 45000.00},
         {"sn": 2, "description": "AquaPure UV System - 50 LPH", "part_code": "AP-UV-050", "hsn": "84212110", "qty": 3, "unit": "Nos", "price": 35000.00},
@@ -233,7 +233,7 @@ async def generate_sales_proforma():
     <!-- Document Type -->
     <div class="doc-type">PROFORMA INVOICE / SUPPLY ORDER</div>
 
-    <!-- Company Name (Aquapurite - Seller) -->
+    <!-- Company Name (ILMS.AI - Seller) -->
     <div class="title">
         <h1>{company['name']}</h1>
         

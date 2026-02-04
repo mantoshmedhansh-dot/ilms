@@ -395,7 +395,7 @@ async def create_stos_spare_parts_po():
                 terms_and_conditions="""1. DELIVERY SCHEDULE:
    - 1st Batch: 15th-25th Jan 2026 (as per Jan quantities)
    - 2nd Batch: 15th Feb 2026 (as per Feb quantities)
-2. QUALITY: All items must meet Aquapurite quality standards
+2. QUALITY: All items must meet ILMS.AI quality standards
 3. PACKAGING: Individual packaging with barcode labels
 4. WARRANTY: 6 months from date of delivery
 5. RENDER IMAGES: Vendor to provide render photos of all spares for marketing material

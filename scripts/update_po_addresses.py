@@ -11,9 +11,9 @@ from sqlalchemy import select, update
 from app.database import async_session_factory
 from app.models.purchase import PurchaseOrder
 
-# Aquapurite company addresses
-AQUAPURITE_BILL_TO = {
-    "name": "Aquapurite Private Limited",
+# ILMS.AI company addresses
+ILMS.AI_BILL_TO = {
+    "name": "ILMS.AI",
     "address_line1": "PLOT 36-A KH NO 181, DINDAPUR EXT",
     "address_line2": "PH-1, SHYAM VIHAR, Najafgarh",
     "city": "New Delhi",
@@ -23,12 +23,12 @@ AQUAPURITE_BILL_TO = {
     "gstin": "07ABDCA6170C1Z0",
     "state_code": "07",
     "phone": "+91-11-12345678",
-    "email": "purchase@aquapurite.com"
+    "email": "purchase@ilms.ai"
 }
 
 # Default Ship To is same as Bill To unless specified
-AQUAPURITE_SHIP_TO = {
-    "name": "Aquapurite Private Limited",
+ILMS.AI_SHIP_TO = {
+    "name": "ILMS.AI",
     "address_line1": "PLOT 36-A KH NO 181, DINDAPUR EXT",
     "address_line2": "PH-1, SHYAM VIHAR, Najafgarh",
     "city": "New Delhi",
@@ -52,8 +52,8 @@ async def update_po_addresses():
         print(f"Found {len(pos)} Purchase Orders\n")
 
         for po in pos:
-            po.bill_to = AQUAPURITE_BILL_TO
-            po.ship_to = AQUAPURITE_SHIP_TO
+            po.bill_to = ILMS.AI_BILL_TO
+            po.ship_to = ILMS.AI_SHIP_TO
             print(f"  Updated: {po.po_number}")
 
         await db.commit()

@@ -1190,7 +1190,7 @@ export default function ProductDetailPage() {
                     <div className="flex justify-between items-center p-3 border rounded-lg">
                       <div>
                         <p className="font-medium">D2C Website</p>
-                        <p className="text-sm text-muted-foreground">www.aquapurite.com</p>
+                        <p className="text-sm text-muted-foreground">www.ilms.ai</p>
                       </div>
                       <p className="font-medium">{formatCurrency(product?.selling_price || 0)}</p>
                     </div>

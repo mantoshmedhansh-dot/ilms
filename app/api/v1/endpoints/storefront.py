@@ -123,7 +123,7 @@ async def list_products(
         all_category_ids.extend(child_category_ids)
 
         # Also get parent category IDs (products assigned to parent should show in children)
-        # This handles the case where "Aquapurite Optima" is in "Water Purifiers" (parent)
+        # This handles the case where "ILMS.AI Optima" is in "Water Purifiers" (parent)
         # but user is viewing "RO+UV Water Purifiers" (child)
         current_cat_result = await db.execute(
             select(Category.parent_id).where(Category.id == category_uuid)
@@ -654,12 +654,12 @@ async def get_storefront_company(db: DB, response: Response):
     if not company:
         # Return default company info if none configured
         result_data = StorefrontCompanyInfo(
-            name="AQUAPURITE",
-            trade_name="AQUAPURITE",
+            name="ILMS.AI",
+            trade_name="ILMS.AI",
             logo_url=None,
-            email="support@aquapurite.com",
+            email="support@ilms.ai",
             phone="1800-123-4567",
-            website="https://aquapurite.com",
+            website="https://ilms.ai",
             address="123 Industrial Area, Sector 62",
             city="Noida",
             state="Uttar Pradesh",
@@ -2025,7 +2025,7 @@ async def clear_storefront_cache(secret: str = Query(..., description="Admin sec
     Use this after updating categories, products, or menu items.
     """
     # Simple protection - in production, use proper auth
-    if secret != "aquapurite2026":
+    if secret != "ilms2026":
         raise HTTPException(status_code=403, detail="Invalid secret")
 
     cache = get_cache()
@@ -2134,7 +2134,7 @@ EXCHANGE_BRAND_VALUES = {
     "eureka_forbes": 1800,
     "blue_star": 1600,
     "ao_smith": 1700,
-    "aquapurite": 2000,
+    "ilms": 2000,
     "other": 1000,
 }
 

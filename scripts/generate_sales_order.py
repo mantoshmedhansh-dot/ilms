@@ -1,8 +1,8 @@
 """
-Generate Sales Order PDF for Aquapurite.
-This is the confirmed order document Aquapurite (as seller) issues to customers.
+Generate Sales Order PDF for ILMS.AI.
+This is the confirmed order document ILMS.AI (as seller) issues to customers.
 
-Aquapurite ERP System - Sales Document
+ILMS.AI ERP System - Sales Document
 """
 import asyncio
 import sys
@@ -68,11 +68,11 @@ def amount_to_words(amount):
 
 
 async def generate_sales_order():
-    """Generate Sales Order from Aquapurite."""
+    """Generate Sales Order from ILMS.AI."""
 
-    # Aquapurite Company Details (Seller)
+    # ILMS.AI Company Details (Seller)
     company = {
-        "name": "AQUAPURITE PRIVATE LIMITED",
+        "name": "ILMS.AI",
         "address_line1": "PLOT 36-A KH NO 181, DINDAPUR EXT",
         "address_line2": "PH-1, SHYAM VIHAR, Najafgarh",
         "city": "New Delhi",
@@ -84,8 +84,8 @@ async def generate_sales_order():
         "pan": "ABDCA6170C",
         "cin": "U74999DL2020PTC000000",
         "phone": "+91-11-12345678",
-        "email": "sales@aquapurite.com",
-        "website": "www.aquapurite.com",
+        "email": "sales@ilms.ai",
+        "website": "www.ilms.ai",
     }
 
     # Sample Customer (Buyer) - Bill To

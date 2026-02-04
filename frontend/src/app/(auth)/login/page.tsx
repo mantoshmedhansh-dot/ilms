@@ -57,7 +57,7 @@ export default function LoginPage() {
           <div className="flex justify-center mb-4">
             <Image
               src="/logo.png"
-              alt="Aquapurite Logo"
+              alt="ILMS.AI Logo"
               width={180}
               height={180}
               priority

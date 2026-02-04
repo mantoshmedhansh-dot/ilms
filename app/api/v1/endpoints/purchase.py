@@ -1172,10 +1172,10 @@ async def download_purchase_requisition(
     requester = requester_result.scalar_one_or_none()
 
     # Company info
-    company_name = company.legal_name if company else "AQUAPURITE INDIA PRIVATE LIMITED"
+    company_name = company.legal_name if company else "ILMS.AI"
     company_address = f"{company.address_line1 if company else 'Plot No. 123, Sector 5'}, {company.city if company else 'New Delhi'}, {company.state if company else 'Delhi'} - {company.pincode if company else '110001'}"
     company_phone = company.phone if company else "+91-11-12345678"
-    company_email = company.email if company else "info@aquapurite.com"
+    company_email = company.email if company else "info@ilms.ai"
 
     # Warehouse info
     warehouse_name = warehouse.name if warehouse else "Not Specified"
@@ -2449,7 +2449,7 @@ async def send_po_to_vendor(
 
     # Default supplier code - check if vendor has a code assigned
     from app.models.serialization import SupplierCode
-    supplier_code = "AP"  # Default to Aquapurite
+    supplier_code = "AP"  # Default to ILMS.AI
 
     if vendor:
         # Find supplier code for this vendor
@@ -4474,12 +4474,12 @@ async def download_purchase_order(
     balance_due = grand_total - advance_required
 
     # Company info
-    company_name = company.legal_name if company else "AQUAPURITE INDIA PRIVATE LIMITED"
+    company_name = company.legal_name if company else "ILMS.AI"
     company_gstin = company.gstin if company else "07AADCA1234L1ZP"
     company_cin = getattr(company, 'cin', None) if company else "U12345DL2024PTC123456"
     company_address = f"{company.address_line1 if company else 'Plot No. 123, Sector 5'}, {company.city if company else 'New Delhi'}, {company.state if company else 'Delhi'} - {company.pincode if company else '110001'}"
     company_phone = company.phone if company else "+91-11-12345678"
-    company_email = company.email if company else "info@aquapurite.com"
+    company_email = company.email if company else "info@ilms.ai"
     company_state_code = getattr(company, 'state_code', '07') if company else "07"
 
     # Vendor info
@@ -5049,14 +5049,14 @@ async def download_purchase_order(
                 <strong>SYSTEM GENERATED PURCHASE ORDER</strong>
             </p>
             <p style="margin: 5px 0 0 0; font-size: 10px; color: #6c757d;">
-                This is an electronically generated document from Aquapurite ERP System.<br>
+                This is an electronically generated document from ILMS.AI ERP System.<br>
                 No signature required. Document ID: {po.po_number}
             </p>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            System Generated Purchase Order | Aquapurite ERP | Document ID: {po.po_number} | Generated: {datetime.now().strftime("%d-%m-%Y %H:%M:%S")}
+            System Generated Purchase Order | ILMS.AI ERP | Document ID: {po.po_number} | Generated: {datetime.now().strftime("%d-%m-%Y %H:%M:%S")}
         </div>
     </div>
 </body>
@@ -5266,7 +5266,7 @@ async def download_grn(
         <button class="print-btn no-print" onclick="window.print()">🖨️ Print / Save PDF</button>
 
         <div class="header">
-            <div class="company-name">{company.legal_name if company else 'AQUAPURITE PRIVATE LIMITED'}</div>
+            <div class="company-name">{company.legal_name if company else 'ILMS.AI'}</div>
             <div style="font-size: 12px; color: #666;">
                 {company.address_line1 if company else 'PLOT 36-A, KH NO 181, PH-1, SHYAM VIHAR, DINDAPUR EXT'}, {company.city if company else 'New Delhi'} - {company.pincode if company else '110043'}, {company.state if company else 'Delhi'}
             </div>
@@ -5571,7 +5571,7 @@ async def download_vendor_invoice(
         <button class="print-btn no-print" onclick="window.print()">🖨️ Print / Save PDF</button>
 
         <div class="header">
-            <div class="company-name">{company.legal_name if company else 'AQUAPURITE PRIVATE LIMITED'}</div>
+            <div class="company-name">{company.legal_name if company else 'ILMS.AI'}</div>
             <div style="font-size: 12px; color: #666;">
                 {company.address_line1 if company else 'PLOT 36-A, KH NO 181, PH-1, SHYAM VIHAR, DINDAPUR EXT'}, {company.city if company else 'New Delhi'} - {company.pincode if company else '110043'}, {company.state if company else 'Delhi'}<br>
                 GSTIN: {company.gstin if company else '07ABDCA6170C1Z0'} | PAN: {company.pan if company else 'ABDCA6170C'}
@@ -6323,7 +6323,7 @@ async def download_vendor_proforma(
         <button class="print-btn no-print" onclick="window.print()">Print / Save PDF</button>
 
         <div class="header">
-            <div class="company-name">{company.legal_name if company else 'AQUAPURITE PRIVATE LIMITED'}</div>
+            <div class="company-name">{company.legal_name if company else 'ILMS.AI'}</div>
             <div style="font-size: 12px; color: #666;">
                 {company.address_line1 if company else 'PLOT 36-A, KH NO 181, PH-1, SHYAM VIHAR, DINDAPUR EXT'}, {company.city if company else 'New Delhi'} - {company.pincode if company else '110043'}, {company.state if company else 'Delhi'}<br>
                 GSTIN: {company.gstin if company else '07ABDCA6170C1Z0'} | PAN: {company.pan if company else 'ABDCA6170C'}
@@ -7497,7 +7497,7 @@ async def download_srn_pdf(
         <button class="print-btn no-print" onclick="window.print()">Print / Save PDF</button>
 
         <div class="header">
-            <div class="company-name">AQUAPURITE PRIVATE LIMITED</div>
+            <div class="company-name">ILMS.AI</div>
             <div style="font-size: 12px; color: #666;">
                 PLOT 36-A, KH NO 181, PH-1, SHYAM VIHAR, DINDAPUR EXT, New Delhi - 110043, Delhi<br>
                 GSTIN: 07ABDCA6170C1Z0 | PAN: ABDCA6170C

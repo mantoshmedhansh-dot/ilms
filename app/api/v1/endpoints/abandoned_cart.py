@@ -674,7 +674,7 @@ async def trigger_recovery_email(
         status="PENDING",
         recipient=recipient,
         template_used=f"cart_recovery_{sequence}",
-        subject=f"Complete your purchase at Aquapurite" if request.channel == "EMAIL" else None,
+        subject=f"Complete your purchase at ILMS.AI" if request.channel == "EMAIL" else None,
         discount_code=request.discount_code,
         discount_value=request.discount_value,
         scheduled_at=datetime.now(timezone.utc),
@@ -741,7 +741,7 @@ async def process_abandoned_carts(
                 status="PENDING",
                 recipient=cart.email,
                 template_used="cart_recovery_1",
-                subject="You left something behind at Aquapurite!",
+                subject="You left something behind at ILMS.AI!",
                 scheduled_at=datetime.now(timezone.utc) + timedelta(hours=1),  # Send after 1 hour
             )
             db.add(recovery_email)

@@ -1233,7 +1233,7 @@ export default function SerializationPage() {
                     value={newProduct.brand_code}
                     onChange={(e) => setNewProduct({ ...newProduct, brand_code: e.target.value.toUpperCase() })}
                   />
-                  <p className="text-xs text-muted-foreground mt-1">A=Aquapurite</p>
+                  <p className="text-xs text-muted-foreground mt-1">A=ILMS.AI</p>
                 </div>
                 <div>
                   <Label className="text-xs">Model (3) *</Label>

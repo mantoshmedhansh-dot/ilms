@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate Purchase Order PO/APL/ST/25-26/002 from Aquapurite to STOS
+Generate Purchase Order PO/APL/ST/25-26/002 from ILMS.AI to STOS
 Spare Parts Order for Jan-March 2026
 
 Vendor: STOS Industrial Corporation (VND-00002)
@@ -368,7 +368,7 @@ def generate_po_html(company: dict, vendor: dict) -> str:
                 </li>
                 <li><strong>Delivery Schedule:</strong> As per monthly schedule (15th Jan - 25th Jan & 15th Feb 2026)</li>
                 <li><strong>Pricing:</strong> Ex-Works + Freight charged as actual</li>
-                <li><strong>Quality:</strong> All items must meet Aquapurite quality standards</li>
+                <li><strong>Quality:</strong> All items must meet ILMS.AI quality standards</li>
                 <li><strong>Packaging:</strong> Standard packaging; pouches and packaging materials as agreed - no design change until 90% pouches utilized</li>
                 <li><strong>Documentation:</strong> Delivery challan with item-wise barcode details required</li>
                 <li><strong>Lead Time:</strong> 14 days from order confirmation (as per quotation)</li>
@@ -390,7 +390,7 @@ def generate_po_html(company: dict, vendor: dict) -> str:
         </div>
 
         <div class="footer">
-            Purchase Order from Aquapurite ERP | Document: {PO_NUMBER} | Generated: {datetime.now().strftime("%d-%m-%Y %H:%M:%S")}
+            Purchase Order from ILMS.AI ERP | Document: {PO_NUMBER} | Generated: {datetime.now().strftime("%d-%m-%Y %H:%M:%S")}
         </div>
     </div>
 </body>
@@ -407,7 +407,7 @@ async def main():
 
     async with async_session_factory() as db:
         # Fetch company details
-        print("\n1. Fetching Aquapurite company details...")
+        print("\n1. Fetching ILMS.AI company details...")
         result = await db.execute(text("""
             SELECT legal_name, trade_name, gstin, state_code, cin,
                    address_line1, address_line2, city, state, pincode,

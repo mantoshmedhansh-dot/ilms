@@ -14,12 +14,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Products to assign to Water Purifiers category
 WATER_PURIFIER_SLUGS = [
-    "aquapurite-i-elitz",
-    "aquapurite-i-premiuo",
-    "aquapurite-blitz",
-    "aquapurite-neura",
-    "aquapurite-premiuo-uv",
-    "aquapurite-optima",
+    "ilms-i-elitz",
+    "ilms-i-premiuo",
+    "ilms-blitz",
+    "ilms-neura",
+    "ilms-premiuo-uv",
+    "ilms-optima",
 ]
 
 

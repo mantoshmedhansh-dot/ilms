@@ -1,5 +1,5 @@
 """
-AI Services Module for Aquapurite ERP
+AI Services Module for ILMS.AI ERP
 
 This module provides AI-powered capabilities:
 - Demand Forecasting (Time-series prediction)

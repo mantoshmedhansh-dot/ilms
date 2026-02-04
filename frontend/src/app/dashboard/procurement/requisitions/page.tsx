@@ -650,7 +650,7 @@ export default function PurchaseRequisitionsPage() {
         </head>
         <body>
           <div class="company-header">
-            <p class="company-name">${company?.legal_name || 'AQUAPURITE PRIVATE LIMITED'}</p>
+            <p class="company-name">${company?.legal_name || 'ILMS.AI'}</p>
             <p class="company-details">
               ${company?.address_line1 || 'PLOT 36-A, KH NO 181, PH-1, SHYAM VIHAR, DINDAPUR EXT'}${company?.address_line2 ? ', ' + company.address_line2 : ', Najafgarh'}<br/>
               ${company?.city || 'New Delhi'} - ${company?.pincode || '110043'}, ${company?.state || 'Delhi'}

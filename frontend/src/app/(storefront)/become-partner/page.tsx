@@ -45,7 +45,7 @@ const iconMap: Record<string, React.ElementType> = {
 
 // Default content (used as fallback if CMS settings not configured)
 const defaultContent = {
-  hero_title: 'Become an AQUAPURITE Partner',
+  hero_title: 'Become an ILMS.AI Partner',
   hero_subtitle: 'Join India\'s fastest-growing water purifier partner network. Zero investment required, unlimited earning potential with 10-15% commission on every sale!',
   benefit_1_title: 'High Commission',
   benefit_1_description: 'Earn 10-15% commission on every successful sale. No caps, no limits!',
@@ -57,8 +57,8 @@ const defaultContent = {
   benefit_3_description: 'Unlock higher commission tiers as you grow. Top partners earn ₹1 Lakh+/month',
   benefit_3_icon: 'TrendingUp',
   form_title: 'Partner Registration',
-  form_subtitle: 'Join 5,000+ active partners earning with AQUAPURITE',
-  success_title: 'Welcome to AQUAPURITE Partner Network!',
+  form_subtitle: 'Join 5,000+ active partners earning with ILMS.AI',
+  success_title: 'Welcome to ILMS.AI Partner Network!',
   success_message: 'Your partner application has been approved. You can now login with your mobile number and start earning!',
 };
 
@@ -318,7 +318,7 @@ export default function BecomePartnerPage() {
         {/* Additional Benefits */}
         <Card className="mb-8 bg-gradient-to-r from-primary/5 to-secondary/5">
           <CardContent className="py-6">
-            <h3 className="font-semibold text-center mb-4">Why Partners Love AQUAPURITE</h3>
+            <h3 className="font-semibold text-center mb-4">Why Partners Love ILMS.AI</h3>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
               {additionalBenefits.map((benefit, index) => (
                 <div key={index} className="flex items-center gap-2 text-sm">
@@ -594,7 +594,7 @@ export default function BecomePartnerPage() {
                   </a>
                 </Button>
                 <Button variant="outline" asChild>
-                  <a href="mailto:partners@aquapurite.com">
+                  <a href="mailto:partners@ilms.ai">
                     Email Us
                   </a>
                 </Button>

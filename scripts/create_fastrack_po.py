@@ -107,7 +107,7 @@ async def create_fastrack_po():
             # Order items from email
             order_items = [
                 {
-                    "name": "AQUAPURITE BLITZ",
+                    "name": "ILMS.AI BLITZ",
                     "sku": "AP-BLT-001",
                     "hsn": "842121",
                     "qty": 150,
@@ -115,7 +115,7 @@ async def create_fastrack_po():
                     "description": "RO+UV Water Purifier - Blitz Model"
                 },
                 {
-                    "name": "AQUAPURITE NEURA",
+                    "name": "ILMS.AI NEURA",
                     "sku": "AP-NEU-001",
                     "hsn": "842121",
                     "qty": 150,
@@ -123,7 +123,7 @@ async def create_fastrack_po():
                     "description": "RO+UV Water Purifier - Neura Model (Alkaline)"
                 },
                 {
-                    "name": "AQUAPURITE ELITZ",
+                    "name": "ILMS.AI ELITZ",
                     "sku": "AP-ELT-001",
                     "hsn": "842121",
                     "qty": 20,
@@ -332,9 +332,9 @@ PAYMENT SCHEDULE:
                 description=f"""Purchase Order for FastTrack Filtration Pvt. Ltd.
 
 Items:
-- AQUAPURITE BLITZ x 150 @ ₹2,304 = ₹3,45,600
-- AQUAPURITE NEURA x 150 @ ₹2,509 = ₹3,76,350
-- AQUAPURITE ELITZ x 20 @ ₹12,185 = ₹2,43,700
+- ILMS.AI BLITZ x 150 @ ₹2,304 = ₹3,45,600
+- ILMS.AI NEURA x 150 @ ₹2,509 = ₹3,76,350
+- ILMS.AI ELITZ x 20 @ ₹12,185 = ₹2,43,700
 
 Subtotal: ₹{subtotal:,.2f}
 CGST (9%): ₹{cgst_amount:,.2f}

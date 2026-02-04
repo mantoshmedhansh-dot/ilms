@@ -28,7 +28,7 @@ const LAST_SYNC_KEY = 'aq_serviceability_sync';
 const SYNC_INTERVAL = 6 * 60 * 60 * 1000;
 
 // API URL for edge export
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://aquapurite-erp-api.onrender.com';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://ilms-erp-api.onrender.com';
 const EDGE_EXPORT_URL = `${API_BASE}/api/v1/serviceability/export/edge`;
 
 // In-memory cache for fastest access

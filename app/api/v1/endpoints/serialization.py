@@ -344,7 +344,7 @@ async def generate_fg_code(
     Example: WPRAIEL001
     - category_code: WP (Water Purifier)
     - subcategory_code: R (RO)
-    - brand_code: A (Aquapurite)
+    - brand_code: A (ILMS.AI)
     - model_name: IELITZ -> generates IEL as model code
     """
     service = SerializationService(db)
@@ -1014,7 +1014,7 @@ async def seed_serialization_codes(
         # FG Suppliers (Finished Goods manufacturers)
         {"code": "FS", "name": "FastTrack Manufacturing", "description": "Primary FG manufacturer"},
         {"code": "ST", "name": "STOS Industries", "description": "Premium product manufacturer"},
-        {"code": "AP", "name": "Aquapurite In-house", "description": "In-house manufacturing"},
+        {"code": "AP", "name": "ILMS.AI In-house", "description": "In-house manufacturing"},
 
         # Spare Parts Suppliers
         {"code": "EC", "name": "Economical Spares", "description": "Budget spare parts supplier"},

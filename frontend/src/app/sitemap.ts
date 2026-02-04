@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 const STOREFRONT_PATH = '/api/v1/storefront'
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.aquapurite.com'
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://www.ilms.ai'
 
 interface Product {
   slug: string

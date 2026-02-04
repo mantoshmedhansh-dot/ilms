@@ -19,7 +19,7 @@ class EmailService:
         smtp_user: str = "",
         smtp_password: str = "",
         from_email: str = "",
-        from_name: str = "Aquapurite ERP"
+        from_name: str = "ILMS.AI ERP"
     ):
         self.smtp_host = smtp_host
         self.smtp_port = smtp_port
@@ -111,7 +111,7 @@ class EmailService:
         Returns:
             True if email sent successfully, False otherwise
         """
-        subject = "Reset Your Password - Aquapurite ERP"
+        subject = "Reset Your Password - ILMS.AI ERP"
 
         html_content = f"""
         <!DOCTYPE html>
@@ -130,7 +130,7 @@ class EmailService:
         <body>
             <div class="container">
                 <div class="header">
-                    <h1>Aquapurite ERP</h1>
+                    <h1>ILMS.AI ERP</h1>
                 </div>
                 <div class="content">
                     <h2>Password Reset Request</h2>
@@ -151,10 +151,10 @@ class EmailService:
 
                     <p>If you didn't request this password reset, please ignore this email or contact support if you have concerns.</p>
 
-                    <p>Best regards,<br>Aquapurite ERP Team</p>
+                    <p>Best regards,<br>ILMS.AI ERP Team</p>
                 </div>
                 <div class="footer">
-                    <p>This is an automated message from Aquapurite Private Limited's ERP System.</p>
+                    <p>This is an automated message from ILMS.AI's ERP System.</p>
                     <p>Please do not reply to this email.</p>
                 </div>
             </div>
@@ -179,7 +179,7 @@ class EmailService:
         If you didn't request this password reset, please ignore this email.
 
         Best regards,
-        Aquapurite ERP Team
+        ILMS.AI ERP Team
         """
 
         return self.send_email(to_email, subject, html_content, text_content)
@@ -197,7 +197,7 @@ class EmailService:
         shipping_address: Dict,
         payment_method: str,
         expected_delivery: Optional[str] = None,
-        d2c_url: str = "https://www.aquapurite.com"
+        d2c_url: str = "https://www.ilms.ai"
     ) -> bool:
         """
         Send order confirmation email for D2C storefront.
@@ -216,7 +216,7 @@ class EmailService:
         Returns:
             True if sent successfully
         """
-        subject = f"Order Confirmed - {order_number} | Aquapurite"
+        subject = f"Order Confirmed - {order_number} | ILMS.AI"
 
         # Build items HTML
         items_html = ""
@@ -324,14 +324,14 @@ class EmailService:
 
                 <p style="margin: 20px 0 0 0; font-size: 14px; color: #666;">
                     If you have any questions, feel free to contact us at
-                    <a href="mailto:support@aquapurite.com" style="color: #0066cc;">support@aquapurite.com</a>
+                    <a href="mailto:support@ilms.ai" style="color: #0066cc;">support@ilms.ai</a>
                     or call us at <strong>1800-XXX-XXXX</strong> (Toll Free).
                 </p>
             </div>
 
             <div style="background: #333; color: #fff; padding: 20px; text-align: center; border-radius: 0 0 10px 10px;">
                 <p style="margin: 0 0 10px 0;">
-                    <strong>Aquapurite</strong> - Pure Water, Pure Life
+                    <strong>ILMS.AI</strong> - Pure Water, Pure Life
                 </p>
                 <p style="margin: 0; font-size: 12px; color: #999;">
                     This is an automated email. Please do not reply directly to this message.
@@ -357,9 +357,9 @@ Delivery Address:
 
 Track your order: {d2c_url}/track?order={order_number}
 
-Thank you for shopping with Aquapurite!
+Thank you for shopping with ILMS.AI!
 
-Questions? Contact us at support@aquapurite.com
+Questions? Contact us at support@ilms.ai
         """
 
         return self.send_email(to_email, subject, html_content, text_content)
@@ -373,10 +373,10 @@ Questions? Contact us at support@aquapurite.com
         courier_name: str,
         tracking_url: Optional[str] = None,
         expected_delivery: Optional[str] = None,
-        d2c_url: str = "https://www.aquapurite.com"
+        d2c_url: str = "https://www.ilms.ai"
     ) -> bool:
         """Send order shipped notification email."""
-        subject = f"Your Order is Shipped - {order_number} | Aquapurite"
+        subject = f"Your Order is Shipped - {order_number} | ILMS.AI"
 
         html_content = f"""
         <!DOCTYPE html>
@@ -410,7 +410,7 @@ Questions? Contact us at support@aquapurite.com
             </div>
 
             <div style="background: #333; color: #fff; padding: 20px; text-align: center; border-radius: 0 0 10px 10px;">
-                <p style="margin: 0;"><strong>Aquapurite</strong> - Pure Water, Pure Life</p>
+                <p style="margin: 0;"><strong>ILMS.AI</strong> - Pure Water, Pure Life</p>
             </div>
         </body>
         </html>
@@ -429,7 +429,7 @@ Tracking Number: {tracking_number}
 
 Track your shipment: {tracking_url or f'{d2c_url}/track?order={order_number}'}
 
-Thank you for shopping with Aquapurite!
+Thank you for shopping with ILMS.AI!
         """
 
         return self.send_email(to_email, subject, html_content, text_content)
@@ -569,7 +569,7 @@ def get_email_service() -> EmailService:
         smtp_user=getattr(settings, 'SMTP_USER', ''),
         smtp_password=getattr(settings, 'SMTP_PASSWORD', ''),
         from_email=getattr(settings, 'SMTP_FROM_EMAIL', ''),
-        from_name=getattr(settings, 'SMTP_FROM_NAME', 'Aquapurite ERP')
+        from_name=getattr(settings, 'SMTP_FROM_NAME', 'ILMS.AI ERP')
     )
 
 
@@ -606,7 +606,7 @@ async def send_order_notifications(
     email_service = get_email_service()
     sms_service = get_sms_service()
 
-    d2c_url = getattr(settings, 'D2C_FRONTEND_URL', 'https://www.aquapurite.com')
+    d2c_url = getattr(settings, 'D2C_FRONTEND_URL', 'https://www.ilms.ai')
 
     # Send email if provided
     if customer_email:
@@ -651,7 +651,7 @@ async def send_shipment_notifications(
     email_service = get_email_service()
     sms_service = get_sms_service()
 
-    d2c_url = getattr(settings, 'D2C_FRONTEND_URL', 'https://www.aquapurite.com')
+    d2c_url = getattr(settings, 'D2C_FRONTEND_URL', 'https://www.ilms.ai')
 
     # Send email if provided
     if customer_email:

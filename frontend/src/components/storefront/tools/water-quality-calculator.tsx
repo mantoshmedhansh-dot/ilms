@@ -57,8 +57,8 @@ const productRecommendations: Record<string, {
 }[]> = {
   'low_municipal_home_small': [
     {
-      name: 'Aquapurite UV Basic',
-      slug: 'aquapurite-uv-basic',
+      name: 'ILMS.AI UV Basic',
+      slug: 'ilms-uv-basic',
       price: 8999,
       features: ['UV Purification', '7L Storage', 'Low Maintenance'],
       reason: 'Municipal water with low TDS needs UV purification for microbiological safety.',
@@ -67,8 +67,8 @@ const productRecommendations: Record<string, {
   ],
   'medium_borewell_home_medium': [
     {
-      name: 'Aquapurite Optima RO+UV+UF',
-      slug: 'aquapurite-optima-ro-uv-uf',
+      name: 'ILMS.AI Optima RO+UV+UF',
+      slug: 'ilms-optima-ro-uv-uf',
       price: 24999,
       features: ['7-Stage Purification', '10L Storage', 'Mineral Retention'],
       reason: 'Borewell water with moderate TDS benefits from RO+UV combination.',
@@ -77,8 +77,8 @@ const productRecommendations: Record<string, {
   ],
   'high_borewell_home_large': [
     {
-      name: 'Aquapurite Pro Max RO+UV+UF+TDS',
-      slug: 'aquapurite-pro-max',
+      name: 'ILMS.AI Pro Max RO+UV+UF+TDS',
+      slug: 'ilms-pro-max',
       price: 34999,
       features: ['9-Stage Purification', '12L Storage', 'TDS Controller', 'Copper+'],
       reason: 'High TDS borewell water requires advanced RO with TDS control.',
@@ -87,8 +87,8 @@ const productRecommendations: Record<string, {
   ],
   'default': [
     {
-      name: 'Aquapurite Optima RO+UV+UF',
-      slug: 'aquapurite-optima-ro-uv-uf',
+      name: 'ILMS.AI Optima RO+UV+UF',
+      slug: 'ilms-optima-ro-uv-uf',
       price: 24999,
       features: ['7-Stage Purification', '10L Storage', 'Best Seller'],
       reason: 'Our most popular model suitable for most Indian water conditions.',

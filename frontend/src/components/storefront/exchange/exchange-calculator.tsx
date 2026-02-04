@@ -54,7 +54,7 @@ const brandValues: Record<string, number> = {
   'eureka_forbes': 1800,
   'blue_star': 1600,
   'ao_smith': 1700,
-  'aquapurite': 2000,
+  'ilms': 2000,
   'other': 1000,
 };
 
@@ -205,7 +205,7 @@ export default function ExchangeCalculator({
                     <SelectItem value="eureka_forbes">Eureka Forbes</SelectItem>
                     <SelectItem value="blue_star">Blue Star</SelectItem>
                     <SelectItem value="ao_smith">A.O. Smith</SelectItem>
-                    <SelectItem value="aquapurite">Aquapurite</SelectItem>
+                    <SelectItem value="ilms">ILMS.AI</SelectItem>
                     <SelectItem value="other">Other Brand</SelectItem>
                   </SelectContent>
                 </Select>

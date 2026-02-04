@@ -3,10 +3,10 @@
 4-Channel E2E Order Flow Test with Balance Sheet Generation
 
 Creates orders from 4 channels with specific products:
-- GT (General Trade): Aquapurite Neura
-- MT (Modern Trade): Aquapurite Blitz
-- D2C (Direct to Consumer): Aquapurite i Elitz
-- Marketplace (Amazon): Aquapurite Premiuo UV
+- GT (General Trade): ILMS.AI Neura
+- MT (Modern Trade): ILMS.AI Blitz
+- D2C (Direct to Consumer): ILMS.AI i Elitz
+- Marketplace (Amazon): ILMS.AI Premiuo UV
 
 Processes through complete flow: ORDER → PAY → ALLOCATE → SHIP → MANIFEST → INVOICE → GL → Balance Sheet
 """
@@ -46,10 +46,10 @@ from sqlalchemy.orm import selectinload
 
 # Product SKUs for each channel
 CHANNEL_PRODUCTS = {
-    'GT': {'sku': 'WPRANEU001', 'name': 'Aquapurite Neura'},
-    'MT': {'sku': 'WPRABLT001', 'name': 'Aquapurite Blitz'},
-    'D2C': {'sku': 'WPRAIEL001', 'name': 'Aquapurite i Elitz'},
-    'MARKETPLACE': {'sku': 'WPRAPUV001', 'name': 'Aquapurite Premiuo UV'},
+    'GT': {'sku': 'WPRANEU001', 'name': 'ILMS.AI Neura'},
+    'MT': {'sku': 'WPRABLT001', 'name': 'ILMS.AI Blitz'},
+    'D2C': {'sku': 'WPRAIEL001', 'name': 'ILMS.AI i Elitz'},
+    'MARKETPLACE': {'sku': 'WPRAPUV001', 'name': 'ILMS.AI Premiuo UV'},
 }
 
 
@@ -591,7 +591,7 @@ async def generate_invoice(db, order_id, shipment, manifest):
         shipping_state_code=buyer_state_code,
         shipping_pincode=order.shipping_address.get('pincode', '110001'),
         seller_gstin='07AABCT1234H1Z5',  # Test GSTIN
-        seller_name='Aquapurite Pvt Ltd',
+        seller_name='ILMS.AI Pvt Ltd',
         seller_address='123 Industrial Area, Delhi',
         seller_state_code=seller_state_code,
         place_of_supply=order.shipping_address.get('state', 'Delhi'),

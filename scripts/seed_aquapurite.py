@@ -1,4 +1,4 @@
-"""Seed script for Aquapurite water purifier products."""
+"""Seed script for ILMS.AI water purifier products."""
 import asyncio
 import sys
 import os
@@ -14,31 +14,31 @@ from app.models.category import Category
 from app.models.product import Product, ProductStatus, ProductSpecification
 
 
-async def seed_aquapurite():
-    """Seed Aquapurite brand, categories, and products."""
+async def seed_ilms():
+    """Seed ILMS.AI brand, categories, and products."""
     async with async_session_factory() as db:
         try:
-            # 1. Create Aquapurite Brand
+            # 1. Create ILMS.AI Brand
             brand_result = await db.execute(
-                select(Brand).where(Brand.slug == "aquapurite")
+                select(Brand).where(Brand.slug == "ilms")
             )
             brand = brand_result.scalar_one_or_none()
 
             if not brand:
                 brand = Brand(
-                    name="Aquapurite",
-                    slug="aquapurite",
+                    name="ILMS.AI",
+                    slug="ilms",
                     description="Premium water purification solutions",
-                    logo_url="/images/brands/aquapurite-logo.png",
-                    website="https://aquapurite.com",
+                    logo_url="/images/brands/ilms-logo.png",
+                    website="https://ilms.ai",
                     is_active=True,
                     is_featured=True
                 )
                 db.add(brand)
                 await db.flush()
-                print(f"Created brand: Aquapurite (ID: {brand.id})")
+                print(f"Created brand: ILMS.AI (ID: {brand.id})")
             else:
-                print(f"Brand already exists: Aquapurite (ID: {brand.id})")
+                print(f"Brand already exists: ILMS.AI (ID: {brand.id})")
 
             # 2. Create Categories
             categories_data = [
@@ -100,14 +100,14 @@ async def seed_aquapurite():
             # 3. Create Products
             products_data = [
                 {
-                    "name": "Aquapurite Blitz",
-                    "slug": "aquapurite-blitz",
+                    "name": "ILMS.AI Blitz",
+                    "slug": "ilms-blitz",
                     "sku": "AP-BLITZ-001",
                     "model_number": "BLITZ-RO-UV",
                     "category_slug": "ro-uv-water-purifiers",
                     "short_description": "RO+UV water purifier with Zinc Copper enrichment and pH Balance technology",
-                    "description": """<h2>Aquapurite Blitz - Advanced RO+UV Water Purifier</h2>
-<p>Experience the purest water with Aquapurite Blitz featuring advanced RO+UV purification technology.</p>
+                    "description": """<h2>ILMS.AI Blitz - Advanced RO+UV Water Purifier</h2>
+<p>Experience the purest water with ILMS.AI Blitz featuring advanced RO+UV purification technology.</p>
 <h3>Key Features:</h3>
 <ul>
 <li>9-Stage Purification Process</li>
@@ -147,15 +147,15 @@ async def seed_aquapurite():
                     "height_cm": Decimal("54"),
                 },
                 {
-                    "name": "Aquapurite i Elitz",
-                    "slug": "aquapurite-i-elitz",
+                    "name": "ILMS.AI i Elitz",
+                    "slug": "ilms-i-elitz",
                     "sku": "AP-IELITZ-001",
                     "model_number": "IELITZ-HOT-COLD",
                     "fg_code": "WPRAIEL001",
                     "model_code": "IEL",
                     "category_slug": "hot-cold-water-purifiers",
                     "short_description": "Premium Hot/Cold/Ambient RO water purifier with instant heating technology",
-                    "description": """<h2>Aquapurite i Elitz - Hot, Cold & Ambient Water Purifier</h2>
+                    "description": """<h2>ILMS.AI i Elitz - Hot, Cold & Ambient Water Purifier</h2>
 <p>The ultimate convenience with 3-temperature water dispensing and advanced RO purification.</p>
 <h3>Key Features:</h3>
 <ul>
@@ -198,15 +198,15 @@ async def seed_aquapurite():
                     "height_cm": Decimal("58"),
                 },
                 {
-                    "name": "Aquapurite i Premiuo",
-                    "slug": "aquapurite-i-premiuo",
+                    "name": "ILMS.AI i Premiuo",
+                    "slug": "ilms-i-premiuo",
                     "sku": "AP-IPREMIUO-001",
                     "model_number": "IPREMIUO-HOT-AMB",
                     "fg_code": "WPRAIPREM001",
                     "model_code": "IPM",
                     "category_slug": "hot-cold-water-purifiers",
                     "short_description": "Hot & Ambient RO water purifier with premium design and instant heating",
-                    "description": """<h2>Aquapurite i Premiuo - Hot & Ambient Water Purifier</h2>
+                    "description": """<h2>ILMS.AI i Premiuo - Hot & Ambient Water Purifier</h2>
 <p>Premium design meets functionality with hot and ambient water dispensing.</p>
 <h3>Key Features:</h3>
 <ul>
@@ -247,15 +247,15 @@ async def seed_aquapurite():
                     "height_cm": Decimal("55"),
                 },
                 {
-                    "name": "Aquapurite Neura",
-                    "slug": "aquapurite-neura",
+                    "name": "ILMS.AI Neura",
+                    "slug": "ilms-neura",
                     "sku": "AP-NEURA-001",
                     "model_number": "NEURA-RO-UV",
                     "fg_code": "WPRANEU001",
                     "model_code": "NEU",
                     "category_slug": "ro-uv-water-purifiers",
                     "short_description": "Smart RO+UV water purifier with Zinc Copper enrichment and IOT connectivity",
-                    "description": """<h2>Aquapurite Neura - Smart RO+UV Water Purifier</h2>
+                    "description": """<h2>ILMS.AI Neura - Smart RO+UV Water Purifier</h2>
 <p>Intelligent water purification with advanced mineral enrichment technology.</p>
 <h3>Key Features:</h3>
 <ul>
@@ -296,15 +296,15 @@ async def seed_aquapurite():
                     "height_cm": Decimal("52"),
                 },
                 {
-                    "name": "Aquapurite Premiuo UV",
-                    "slug": "aquapurite-premiuo-uv",
+                    "name": "ILMS.AI Premiuo UV",
+                    "slug": "ilms-premiuo-uv",
                     "sku": "AP-PREMIUOUV-001",
                     "model_number": "PREMIUO-UV",
                     "fg_code": "WPRAPUV001",
                     "model_code": "PUV",
                     "category_slug": "uv-water-purifiers",
                     "short_description": "Compact UV water purifier for low TDS water with advanced UV sterilization",
-                    "description": """<h2>Aquapurite Premiuo UV - Compact UV Water Purifier</h2>
+                    "description": """<h2>ILMS.AI Premiuo UV - Compact UV Water Purifier</h2>
 <p>Perfect for municipal/low TDS water with powerful UV sterilization.</p>
 <h3>Key Features:</h3>
 <ul>
@@ -414,7 +414,7 @@ async def seed_aquapurite():
             print("\n" + "=" * 60)
             print("SUMMARY")
             print("=" * 60)
-            print(f"Brand: Aquapurite")
+            print(f"Brand: ILMS.AI")
             print(f"Categories: {len(category_map)}")
             print(f"Products created: {len(created_products)}")
             print("=" * 60)
@@ -430,4 +430,4 @@ async def seed_aquapurite():
 
 
 if __name__ == "__main__":
-    asyncio.run(seed_aquapurite())
+    asyncio.run(seed_ilms())

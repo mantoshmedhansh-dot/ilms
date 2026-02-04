@@ -78,7 +78,7 @@ Format: APAAAIIEL00000001
  │  │  │  └─────── Model Code (3 chars: IEL=i Elitz, PRG=Puro Guard)
  │  │  └────────── Month Code (A=Jan...L=Dec)
  │  └───────────── Year Code (2 chars: A-Z then AA, AB...)
- └──────────────── Brand Prefix (AP = Aquapurite)
+ └──────────────── Brand Prefix (AP = ILMS.AI)
     """)
 
     # Generate sample FG barcodes
@@ -115,7 +115,7 @@ Format: APFSAAEC00000001
  │  │  │ └───────── Month Code (A=Jan...L=Dec)
  │  │  └──────────── Year Code (1 char only, wraps after Z)
  │  └─────────────── Supplier Code (FS=FastTrack, ST=STOS)
- └────────────────── Brand Prefix (AP = Aquapurite)
+ └────────────────── Brand Prefix (AP = ILMS.AI)
 
 Supplier-Channel Mapping:
   FS (FastTrack) → EC (Economical)

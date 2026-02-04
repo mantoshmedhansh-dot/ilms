@@ -69,7 +69,7 @@ from app.schemas.serialization import (
 class SerializationService:
     """Service for generating and managing product serial numbers/barcodes"""
 
-    BRAND_PREFIX = "AP"  # Aquapurite
+    BRAND_PREFIX = "AP"  # ILMS.AI
 
     # Year code mapping: A=2000, B=2001, ... Z=2025
     # After Z, we use AA=2026, AB=2027, etc.
@@ -927,7 +927,7 @@ class SerializationService:
         Example: WPRAIEL001
         - WP: Water Purifier
         - R: RO
-        - A: Aquapurite
+        - A: ILMS.AI
         - IEL: Model code (first 3 letters of model name)
         - 001: Sequential number
         """

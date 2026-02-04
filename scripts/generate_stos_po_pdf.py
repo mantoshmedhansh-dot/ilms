@@ -332,10 +332,10 @@ async def generate_po_pdf():
 
     <div class="container">
         <div class="header">
-            <div class="company-name">AQUAPURITE INDIA PVT LTD</div>
+            <div class="company-name">ILMS.AI INDIA PVT LTD</div>
             <div style="font-size: 10px; color: #666; margin-top: 5px;">
                 123 Industrial Area, Sector 5, Noida, UP - 201301<br>
-                Phone: +91-120-4567890 | Email: accounts@aquapurite.com<br>
+                Phone: +91-120-4567890 | Email: accounts@ilms.ai<br>
                 GSTIN: 09AABCU9603R1ZM | PAN: AABCU9603R
             </div>
         </div>
@@ -439,7 +439,7 @@ async def generate_po_pdf():
             <h4>Terms & Conditions</h4>
             <ol>
                 <li><strong>DELIVERY:</strong> As per schedule above (Batch 1: Jan, Batch 2: Feb 2026)</li>
-                <li><strong>QUALITY:</strong> All items must meet Aquapurite quality standards</li>
+                <li><strong>QUALITY:</strong> All items must meet ILMS.AI quality standards</li>
                 <li><strong>PACKAGING:</strong> Individual packaging with barcode labels required</li>
                 <li><strong>WARRANTY:</strong> 6 months from date of delivery</li>
                 <li><strong>RENDER IMAGES:</strong> Vendor to provide render photos of all spares for marketing material</li>

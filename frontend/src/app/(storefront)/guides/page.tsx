@@ -52,7 +52,7 @@ const fallbackGuides: VideoGuide[] = [
     id: '1',
     title: 'RO Water Purifier Installation Guide',
     slug: 'ro-installation-guide',
-    description: 'Step-by-step guide to install your AQUAPURITE RO water purifier.',
+    description: 'Step-by-step guide to install your ILMS.AI RO water purifier.',
     category: 'INSTALLATION',
     duration_seconds: 720,
     thumbnail_url: 'https://images.unsplash.com/photo-1585351650024-3a6d61c1e3f5?w=800&q=80',
@@ -292,7 +292,7 @@ export default function GuidesPage() {
           Water Purifier Guides & Tutorials
         </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
-          Learn how to install, maintain, and troubleshoot your AQUAPURITE water purifier with our comprehensive video guides. From basic setup to advanced maintenance - we&apos;ve got you covered!
+          Learn how to install, maintain, and troubleshoot your ILMS.AI water purifier with our comprehensive video guides. From basic setup to advanced maintenance - we&apos;ve got you covered!
         </p>
 
         {/* Quick Stats */}
@@ -506,7 +506,7 @@ export default function GuidesPage() {
             </div>
             <Button className="bg-red-600 hover:bg-red-700" asChild>
               <a
-                href="https://www.youtube.com/@aquapurite"
+                href="https://www.youtube.com/@ilms"
                 target="_blank"
                 rel="noopener noreferrer"
               >

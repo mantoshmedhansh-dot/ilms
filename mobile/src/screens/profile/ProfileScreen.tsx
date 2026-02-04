@@ -97,8 +97,8 @@ export function ProfileScreen(): React.JSX.Element {
       label: 'About',
       onPress: () =>
         Alert.alert(
-          'Aquapurite ERP Mobile',
-          'Version 1.0.0\n\nAquapurite Industries Pvt. Ltd.',
+          'ILMS.AI ERP Mobile',
+          'Version 1.0.0\n\nILMS.AI Industries Pvt. Ltd.',
         ),
       showArrow: true,
     },
@@ -183,9 +183,9 @@ export function ProfileScreen(): React.JSX.Element {
 
       {/* App Info */}
       <View style={styles.appInfo}>
-        <Text style={styles.appVersion}>Aquapurite ERP Mobile v1.0.0</Text>
+        <Text style={styles.appVersion}>ILMS.AI ERP Mobile v1.0.0</Text>
         <Text style={styles.copyright}>
-          © 2026 Aquapurite Industries Pvt. Ltd.
+          © 2026 ILMS.AI Industries Pvt. Ltd.
         </Text>
       </View>
 

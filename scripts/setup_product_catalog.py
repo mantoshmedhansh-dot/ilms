@@ -3,7 +3,7 @@ Product Catalog Setup Script
 
 This script:
 1. Uploads product images to Supabase Storage
-2. Creates the 6 main Aquapurite water purifier products
+2. Creates the 6 main ILMS.AI water purifier products
 3. Adds specifications and images to each product
 
 Run: python -m scripts.setup_product_catalog
@@ -38,7 +38,7 @@ except ImportError:
     print("Warning: Supabase not installed. Images will not be uploaded.")
 
 # Configuration
-PRODUCT_IMAGE_BASE_PATH = "/Users/mantosh/Desktop/Aquapurite/Product Image"
+PRODUCT_IMAGE_BASE_PATH = "/Users/mantosh/Desktop/ILMS.AI/Product Image"
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
 STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "uploads")
@@ -46,21 +46,21 @@ STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "uploads")
 # Product definitions with all data
 PRODUCTS = [
     {
-        "name": "Aquapurite i Elitz",
-        "slug": "aquapurite-i-elitz",
+        "name": "ILMS.AI i Elitz",
+        "slug": "ilms-i-elitz",
         "sku": "WPRAIEL001",
         "fg_code": "WPRAIEL001",
         "model_code": "IEL",
         "model_number": "i Elitz",
         "item_type": "FG",
         "short_description": "Hot / Cold / Ambient | 12 Stage RO+UV+UF | Alkaline + Copper & Zinc | 8L Storage",
-        "description": """Aquapurite i Elitz is our premium water purifier designed to deliver safe, healthy, and great-tasting drinking water for modern Indian households.
+        "description": """ILMS.AI i Elitz is our premium water purifier designed to deliver safe, healthy, and great-tasting drinking water for modern Indian households.
 
 Featuring advanced 12-stage intelligent purification technology with RO+UV+UF, this purifier ensures complete removal of harmful contaminants while retaining essential minerals. The unique Alkaline technology maintains optimal pH balance (8.5-9.5) for better hydration and health benefits.
 
 With Hot, Cold, and Ambient water dispensing options, i Elitz is perfect for families who want instant access to purified water at their preferred temperature. The built-in fruit and vegetable detoxifier adds extra value for health-conscious users.
 
-Backed by Aquapurite's trusted Pan-India service network, i Elitz ensures long-term reliability and peace of mind with no filter replacement costs for 2 years.""",
+Backed by ILMS.AI's trusted Pan-India service network, i Elitz ensures long-term reliability and peace of mind with no filter replacement costs for 2 years.""",
         "features": """• 12-Stage Intelligent Purification Technology
 • Hot / Cold / Ambient Water Dispenser
 • Balanced Alkaline Water (pH 8.5-9.5)
@@ -124,21 +124,21 @@ Backed by Aquapurite's trusted Pan-India service network, i Elitz ensures long-t
         ]
     },
     {
-        "name": "Aquapurite i Premiuo",
-        "slug": "aquapurite-i-premiuo",
+        "name": "ILMS.AI i Premiuo",
+        "slug": "ilms-i-premiuo",
         "sku": "WPRAPRE001",
         "fg_code": "WPRAPRE001",
         "model_code": "PRE",
         "model_number": "i Premiuo",
         "item_type": "FG",
         "short_description": "Hot / Ambient | 9 Stage RO+UV+UF | Alkaline + Copper & Zinc | 7L Storage",
-        "description": """Aquapurite i Premiuo combines intelligent 9-stage purification with hot and ambient water dispensing for the modern Indian kitchen.
+        "description": """ILMS.AI i Premiuo combines intelligent 9-stage purification with hot and ambient water dispensing for the modern Indian kitchen.
 
 With advanced RO+UV+UF technology and balanced alkaline output, i Premiuo delivers mineral-rich, healthy water at the perfect temperature. The DIY filter technology makes maintenance easy and cost-effective.
 
 Designed for families who value both health and convenience, i Premiuo offers copper and zinc enriched water with 40% water saving compared to conventional RO systems.
 
-Backed by Aquapurite's Pan-India service network with no filter replacement costs for 2 years.""",
+Backed by ILMS.AI's Pan-India service network with no filter replacement costs for 2 years.""",
         "features": """• 9-Stage Intelligent Purification Technology
 • Hot / Ambient Water Dispenser
 • Balanced Alkaline Water (pH 8.5-9.5)
@@ -193,21 +193,21 @@ Backed by Aquapurite's Pan-India service network with no filter replacement cost
         ]
     },
     {
-        "name": "Aquapurite Blitz",
-        "slug": "aquapurite-blitz",
+        "name": "ILMS.AI Blitz",
+        "slug": "ilms-blitz",
         "sku": "WPRABLT001",
         "fg_code": "WPRABLT001",
         "model_code": "BLT",
         "model_number": "Blitz",
         "item_type": "FG",
         "short_description": "RO+UV+UF | 8 Stage | Copper & Zinc | 12L Storage | Triple Protection",
-        "description": """Aquapurite Blitz brings powerful 8-stage purification with triple protection technology for families who need large capacity purified water.
+        "description": """ILMS.AI Blitz brings powerful 8-stage purification with triple protection technology for families who need large capacity purified water.
 
 Featuring RO+UV+UF technology with in-tank UV LED disinfection, Blitz ensures every drop of water is safe and healthy. The bacteriostatic copper and zinc infusion provides additional health benefits and natural preservation.
 
 With a generous 12L storage capacity and 40% water saving, Blitz is perfect for larger families. Free TDS meter included for easy monitoring.
 
-Backed by Aquapurite's Pan-India service network with no filter replacement costs for 2 years.""",
+Backed by ILMS.AI's Pan-India service network with no filter replacement costs for 2 years.""",
         "features": """• 8-Stage Water Purifier with Triple Protection
 • RO + UV + UF Technology
 • In-Tank UV LED Disinfection
@@ -262,21 +262,21 @@ Backed by Aquapurite's Pan-India service network with no filter replacement cost
         ]
     },
     {
-        "name": "Aquapurite Neura",
-        "slug": "aquapurite-neura",
+        "name": "ILMS.AI Neura",
+        "slug": "ilms-neura",
         "sku": "WPRANEU001",
         "fg_code": "WPRANEU001",
         "model_code": "NEU",
         "model_number": "Neura",
         "item_type": "FG",
         "short_description": "RO+UV | 7 Stage | Copper & Zinc | 7L Storage | In-Tank UV LED",
-        "description": """Aquapurite Neura delivers essential 7-stage RO+UV purification with intelligent features at an accessible price point.
+        "description": """ILMS.AI Neura delivers essential 7-stage RO+UV purification with intelligent features at an accessible price point.
 
 With triple protection technology and in-tank UV LED disinfection, Neura ensures consistent water safety. Bacteriostatic copper and zinc infusion provides natural antibacterial properties and essential minerals.
 
 Perfect for small to medium families, Neura offers 7L storage with 40% water saving. Free TDS meter included for quality monitoring.
 
-Backed by Aquapurite's Pan-India service network with no filter replacement costs for 2 years.""",
+Backed by ILMS.AI's Pan-India service network with no filter replacement costs for 2 years.""",
         "features": """• 7-Stage Water Purifier with Triple Protection
 • RO + UV Technology
 • In-Tank UV LED Disinfection
@@ -330,21 +330,21 @@ Backed by Aquapurite's Pan-India service network with no filter replacement cost
         ]
     },
     {
-        "name": "Aquapurite Premiuo UV",
-        "slug": "aquapurite-premiuo-uv",
+        "name": "ILMS.AI Premiuo UV",
+        "slug": "ilms-premiuo-uv",
         "sku": "WPRAPUV001",
         "fg_code": "WPRAPUV001",
         "model_code": "PUV",
         "model_number": "Premiuo UV",
         "item_type": "FG",
         "short_description": "UV + Copper + Magnesium + Zinc | 4 Stage | For Low TDS Water",
-        "description": """Aquapurite Premiuo UV is designed for areas with already low TDS municipal water that needs disinfection without RO.
+        "description": """ILMS.AI Premiuo UV is designed for areas with already low TDS municipal water that needs disinfection without RO.
 
 With 4-stage UV purification enhanced with copper, magnesium, and zinc infusion, Premiuo UV delivers safe, mineral-rich water while preserving natural minerals. Ideal for metro cities with reliable municipal water supply.
 
 No water wastage as there's no RO membrane - 100% water recovery. Perfect for environmentally conscious users who want purified water without the waste.
 
-Backed by Aquapurite's Pan-India service network with no filter replacement costs for 2 years.""",
+Backed by ILMS.AI's Pan-India service network with no filter replacement costs for 2 years.""",
         "features": """• 4-Stage UV Purification Technology
 • Copper + Magnesium + Zinc Enriched Water
 • Zero Water Wastage (No RO)
@@ -397,21 +397,21 @@ Backed by Aquapurite's Pan-India service network with no filter replacement cost
         ]
     },
     {
-        "name": "Aquapurite Optima",
-        "slug": "aquapurite-optima",
+        "name": "ILMS.AI Optima",
+        "slug": "ilms-optima",
         "sku": "WPRAOPT001",
         "fg_code": "WPRAOPT001",
         "model_code": "OPT",
         "model_number": "Optima",
         "item_type": "FG",
         "short_description": "RO+UV+UF | 10 Stage | Alkaline + Copper & Zinc | 6.5L Storage",
-        "description": """Aquapurite Optima is our balanced mid-range purifier offering 10-stage RO+UV+UF purification with alkaline technology.
+        "description": """ILMS.AI Optima is our balanced mid-range purifier offering 10-stage RO+UV+UF purification with alkaline technology.
 
 With advanced purification and alkaline pH balancing, Optima delivers healthy, mineral-rich water. Copper and zinc enrichment provides additional health benefits and natural antibacterial properties.
 
 Compact 6.5L storage makes it ideal for small families and apartments. 40% water saving compared to conventional RO systems.
 
-Backed by Aquapurite's Pan-India service network with affordable spares and transparent pricing.""",
+Backed by ILMS.AI's Pan-India service network with affordable spares and transparent pricing.""",
         "features": """• 10-Stage RO+UV+UF Purification
 • Balanced Alkaline Water (pH 8.5-9.5)
 • Copper & Zinc Enriched Water
@@ -533,8 +533,8 @@ async def get_or_create_category(db: AsyncSession, name: str = "Water Purifiers"
     return category.id
 
 
-async def get_or_create_brand(db: AsyncSession, name: str = "Aquapurite") -> uuid.UUID:
-    """Get or create the Aquapurite brand."""
+async def get_or_create_brand(db: AsyncSession, name: str = "ILMS.AI") -> uuid.UUID:
+    """Get or create the ILMS.AI brand."""
     result = await db.execute(
         select(Brand).where(Brand.name == name)
     )
@@ -543,7 +543,7 @@ async def get_or_create_brand(db: AsyncSession, name: str = "Aquapurite") -> uui
     if not brand:
         brand = Brand(
             name=name,
-            slug="aquapurite",
+            slug="ilms",
             description="India's trusted water purification brand",
             is_active=True
         )
@@ -557,7 +557,7 @@ async def get_or_create_brand(db: AsyncSession, name: str = "Aquapurite") -> uui
 async def setup_products():
     """Main function to setup all products."""
     print("\n" + "="*60)
-    print("AQUAPURITE PRODUCT CATALOG SETUP")
+    print("ILMS.AI PRODUCT CATALOG SETUP")
     print("="*60 + "\n")
 
     # Initialize Supabase client

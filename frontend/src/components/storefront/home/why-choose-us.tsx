@@ -162,7 +162,7 @@ export default function WhyChooseUs() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
           <h2 className="text-2xl md:text-3xl font-bold mb-2">
-            Why Choose AQUAPURITE?
+            Why Choose ILMS.AI?
           </h2>
           <p className="text-primary-foreground/80">
             India's most trusted water purification brand

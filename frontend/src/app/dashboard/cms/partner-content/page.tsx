@@ -37,7 +37,7 @@ interface PartnerPageContent {
 }
 
 const defaultContent: PartnerPageContent = {
-  hero_title: 'Become an AQUAPURITE Partner',
+  hero_title: 'Become an ILMS.AI Partner',
   hero_subtitle: 'Join our community of partners and earn by sharing our products. Zero investment, unlimited earning potential!',
   benefit_1_title: 'Earn Commission',
   benefit_1_description: '10-15% commission on every successful sale',
@@ -154,7 +154,7 @@ export default function PartnerContentPage() {
         actions={
           <div className="flex gap-2">
             <Button variant="outline" asChild>
-              <a href="https://www.aquapurite.com/become-partner" target="_blank" rel="noopener noreferrer">
+              <a href="https://www.ilms.ai/become-partner" target="_blank" rel="noopener noreferrer">
                 <Eye className="h-4 w-4 mr-2" />
                 Preview
               </a>
@@ -188,7 +188,7 @@ export default function PartnerContentPage() {
               id="hero_title"
               value={content.hero_title}
               onChange={(e) => handleChange('hero_title', e.target.value)}
-              placeholder="Become an AQUAPURITE Partner"
+              placeholder="Become an ILMS.AI Partner"
             />
           </div>
           <div className="space-y-2">

@@ -2,7 +2,7 @@
 Serialization Schemas for Barcode Generation in Procurement
 
 Barcode Structure: APFSZAIEL000001 (15 characters)
-- AP: Brand Prefix (Aquapurite)
+- AP: Brand Prefix (ILMS.AI)
 - FS: Supplier Code (2 letters)
 - Z: Year Code
 - A: Month Code
@@ -327,7 +327,7 @@ class FGCodeGenerateRequest(BaseModel):
     """Generate a new FG Code for a product"""
     category_code: str = Field(..., min_length=2, max_length=2, description="WP=Water Purifier")
     subcategory_code: str = Field(..., min_length=1, max_length=1, description="R=RO")
-    brand_code: str = Field(..., min_length=1, max_length=1, description="A=Aquapurite")
+    brand_code: str = Field(..., min_length=1, max_length=1, description="A=ILMS.AI")
     model_name: str = Field(..., min_length=2, max_length=10, description="Model name like IELITZ")
 
     @field_validator('category_code', 'subcategory_code', 'brand_code')
@@ -357,7 +357,7 @@ class CreateProductWithCodeRequest(BaseModel):
     # Code Components for FG Code generation
     category_code: str = Field(..., min_length=2, max_length=2, description="Category code (e.g., WP=Water Purifier, SP=Spare Parts)")
     subcategory_code: str = Field(..., min_length=1, max_length=2, description="Subcategory code (e.g., R=RO, SD=Sediment)")
-    brand_code: str = Field(..., min_length=1, max_length=1, description="Brand code (e.g., A=Aquapurite)")
+    brand_code: str = Field(..., min_length=1, max_length=1, description="Brand code (e.g., A=ILMS.AI)")
     model_code: str = Field(..., min_length=3, max_length=3, description="3-char model code for barcode (e.g., IEL)")
 
     # Product Details

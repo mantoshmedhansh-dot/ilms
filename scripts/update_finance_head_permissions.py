@@ -10,7 +10,7 @@ This script expands the Finance Head role to have full access to:
 - CRM (for customer financial data)
 - Reports (all financial reports)
 
-Also assigns Finance Head role to accounts@aquapurite user.
+Also assigns Finance Head role to accounts@ilms user.
 
 Usage:
     python -m scripts.update_finance_head_permissions
@@ -218,7 +218,7 @@ async def main():
             finance_head = await update_finance_head_role(session, permission_map)
 
             # Assign to accounts user
-            await assign_finance_head_to_user(session, finance_head, "accounts@aquapurite.com")
+            await assign_finance_head_to_user(session, finance_head, "accounts@ilms.ai")
 
             # Commit changes
             await session.commit()

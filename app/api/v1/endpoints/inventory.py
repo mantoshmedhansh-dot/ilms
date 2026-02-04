@@ -1000,7 +1000,7 @@ async def send_stock_alerts(
     db: DB,
     current_user: CurrentUser,
     warehouse_id: Optional[uuid.UUID] = Query(None, description="Filter by warehouse"),
-    manager_email: str = Query("inventory@aquapurite.com", description="Email for alerts"),
+    manager_email: str = Query("inventory@ilms.ai", description="Email for alerts"),
     manager_phone: Optional[str] = Query(None, description="Phone for SMS alerts"),
 ):
     """

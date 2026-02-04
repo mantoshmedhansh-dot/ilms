@@ -64,8 +64,8 @@ interface ContactSettings {
 const DEFAULT_SETTINGS: ContactSettings = {
   contact_phone: '+91 93119 39076',
   contact_whatsapp: '919311939076',
-  contact_email: 'support@aquapurite.com',
-  contact_address: 'AQUAPURITE Water Solutions',
+  contact_email: 'support@ilms.ai',
+  contact_address: 'ILMS.AI Water Solutions',
   contact_city: 'Delhi',
   contact_state: 'Delhi',
   contact_pincode: '110001',
@@ -181,7 +181,7 @@ export default function ContactPage() {
           </div>
           <h1 className="text-2xl font-bold mb-4">Message Sent Successfully!</h1>
           <p className="text-muted-foreground mb-4">
-            Thank you for reaching out to AQUAPURITE. Our customer care team has received your message.
+            Thank you for reaching out to ILMS.AI. Our customer care team has received your message.
           </p>
           <div className="bg-muted/50 rounded-lg p-4 mb-6">
             <p className="text-sm font-medium mb-2">What happens next?</p>
@@ -210,7 +210,7 @@ export default function ContactPage() {
           <MessageSquare className="h-3 w-3 mr-1" />
           We&apos;re Here to Help
         </Badge>
-        <h1 className="text-3xl md:text-4xl font-bold mb-4">Contact AQUAPURITE</h1>
+        <h1 className="text-3xl md:text-4xl font-bold mb-4">Contact ILMS.AI</h1>
         <p className="text-lg text-muted-foreground">
           Have questions about water purifiers, need help with your order, or want to schedule a service? Our dedicated team is ready to assist you.
         </p>
@@ -239,7 +239,7 @@ export default function ContactPage() {
                 </Badge>
                 <Button className="bg-green-600 hover:bg-green-700" asChild>
                   <a
-                    href={`https://wa.me/${contactInfo.whatsapp}?text=Hi, I need help with AQUAPURITE water purifiers`}
+                    href={`https://wa.me/${contactInfo.whatsapp}?text=Hi, I need help with ILMS.AI water purifiers`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

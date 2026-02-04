@@ -1,11 +1,11 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Return & Refund Policy | Aquapurite',
-  description: 'Learn about Aquapurite return and refund policy. Easy 7-day returns on eligible products with hassle-free refund process.',
+  title: 'Return & Refund Policy | ILMS.AI',
+  description: 'Learn about ILMS.AI return and refund policy. Easy 7-day returns on eligible products with hassle-free refund process.',
   openGraph: {
-    title: 'Return & Refund Policy | Aquapurite',
-    description: 'Learn about Aquapurite return and refund policy. Easy 7-day returns on eligible products with hassle-free refund process.',
+    title: 'Return & Refund Policy | ILMS.AI',
+    description: 'Learn about ILMS.AI return and refund policy. Easy 7-day returns on eligible products with hassle-free refund process.',
     type: 'website',
   },
 };
@@ -21,7 +21,7 @@ export default function ReturnPolicyPage() {
 
         <div className="prose prose-lg max-w-none prose-headings:font-bold prose-a:text-primary">
           <p>
-            At Aquapurite, we strive to ensure complete customer satisfaction with every purchase.
+            At ILMS.AI, we strive to ensure complete customer satisfaction with every purchase.
             If you are not entirely satisfied with your purchase, we&apos;re here to help.
           </p>
 
@@ -46,7 +46,7 @@ export default function ReturnPolicyPage() {
 
           <h2>How to Initiate a Return</h2>
           <ol>
-            <li>Log in to your Aquapurite account and go to &quot;My Orders&quot;</li>
+            <li>Log in to your ILMS.AI account and go to &quot;My Orders&quot;</li>
             <li>Select the order containing the item you wish to return</li>
             <li>Click on &quot;Request Return&quot; and provide the reason for return</li>
             <li>Our team will review your request within 24-48 hours</li>
@@ -76,7 +76,7 @@ export default function ReturnPolicyPage() {
           <h2>Contact Us</h2>
           <p>If you have any questions about our return and refund policy, please contact us:</p>
           <ul>
-            <li>Email: <a href="mailto:support@aquapurite.com">support@aquapurite.com</a></li>
+            <li>Email: <a href="mailto:support@ilms.ai">support@ilms.ai</a></li>
             <li>Phone: 1800-123-4567 (Toll Free)</li>
             <li>Visit: <a href="/support">Support Page</a></li>
           </ul>

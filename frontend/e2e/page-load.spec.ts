@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Page Load Tests', () => {
   test('Login page loads', async ({ page }) => {
     await page.goto('/login');
-    await expect(page).toHaveTitle(/.*Login.*|.*Consumer.*|.*Aquapurite.*/i);
+    await expect(page).toHaveTitle(/.*Login.*|.*Consumer.*|.*ILMS.AI.*/i);
     // Should have email and password fields
     await expect(page.locator('input[type="email"], input[name="email"]')).toBeVisible();
     await expect(page.locator('input[type="password"]')).toBeVisible();

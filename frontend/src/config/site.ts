@@ -1,9 +1,9 @@
 export const siteConfig = {
-  name: "Aquapurite Private Limited's ERP",
-  description: 'Aquapurite Private Limited ERP Management System',
+  name: "ILMS.AI - Enterprise Resource Planning",
+  description: 'ILMS.AI Multi-Tenant ERP Management System',
   url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-  company: 'Aquapurite Private Limited',
-  supportEmail: 'support@aquapurite.com',
+  company: 'ILMS.AI',
+  supportEmail: 'support@ilms.ai',
 };
 
 export const statusColors: Record<string, string> = {

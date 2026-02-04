@@ -230,7 +230,7 @@ export const partnerKYCApi = {
 
 // Helper function to generate share URLs
 export const generateShareUrl = (productSlug: string, partnerCode: string): string => {
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://www.aquapurite.com';
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://www.ilms.ai';
   return `${baseUrl}/products/${productSlug}?ref=${partnerCode}`;
 };
 

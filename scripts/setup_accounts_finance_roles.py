@@ -4,7 +4,7 @@ Setup Accounts Head and Finance Head roles with appropriate permissions.
 This script:
 1. Creates "Accounts Head" role (if not exists) - Day-to-day accounting operations
 2. Updates "Finance Head" role - Strategic finance oversight
-3. Assigns BOTH roles to accounts@aquapurite user
+3. Assigns BOTH roles to accounts@ilms user
 
 Role Definitions:
 - Finance Head: Strategic - Budgets, Financial Planning, Treasury, High-value Approvals
@@ -282,7 +282,7 @@ async def main():
             # Assign both roles to accounts user
             await assign_roles_to_user(
                 session,
-                "accounts@aquapurite.com",
+                "accounts@ilms.ai",
                 [accounts_head, finance_head]
             )
 
@@ -307,7 +307,7 @@ async def main():
             print("    - Full reports access (view, export, schedule)")
             print("    - System settings view")
             print(f"    - Permissions: {len(FINANCE_HEAD_PERMISSIONS)}")
-            print("\n  Both roles assigned to: accounts@aquapurite.com")
+            print("\n  Both roles assigned to: accounts@ilms.ai")
 
         except Exception as e:
             await session.rollback()

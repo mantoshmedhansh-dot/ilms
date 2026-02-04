@@ -140,7 +140,7 @@ async def create_stos_proforma():
             payment_terms="ADVANCE PAYMENT AGAINST PERFORMA INVOICE",
             delivery_terms="FREIGHT EXTRA AS PER ACTUAL",
             bill_to={
-                "name": "Aquapurite Private Limited",
+                "name": "ILMS.AI",
                 "address_line1": "PLOT 36-A KH NO 181, DINDAPUR EXT",
                 "address_line2": "PH-1, SHYAM VIHAR, Najafgarh",
                 "city": "New Delhi",
@@ -151,7 +151,7 @@ async def create_stos_proforma():
                 "state_code": "07"
             },
             ship_to={
-                "name": "Aquapurite Private Limited",
+                "name": "ILMS.AI",
                 "address_line1": "PLOT 36-A KH NO 181, DINDAPUR EXT",
                 "address_line2": "PH-1, SHYAM VIHAR, Najafgarh",
                 "city": "New Delhi",
@@ -263,7 +263,7 @@ async def generate_proforma_pdf(reference: str = None):
 
         # Bill To (buyer)
         bill_to = pi.bill_to or {
-            "name": "Aquapurite Private Limited",
+            "name": "ILMS.AI",
             "address_line1": "PLOT 36-A KH NO 181, DINDAPUR EXT",
             "address_line2": "PH-1, SHYAM VIHAR, Najafgarh",
             "city": "New Delhi",
@@ -373,7 +373,7 @@ async def generate_proforma_pdf(reference: str = None):
         </div>
         <div class="party-row">
             <div class="party-col">
-                <strong>{bill_to.get('name', 'Aquapurite Private Limited')}</strong><br>
+                <strong>{bill_to.get('name', 'ILMS.AI')}</strong><br>
                 {bill_to.get('address_line1', '')}<br>
                 {bill_to.get('address_line2', '')}<br>
                 {bill_to.get('city', '')}, {bill_to.get('district', bill_to.get('city', ''))}, {bill_to.get('state', '')}, {bill_to.get('pincode', '')}<br>
@@ -384,7 +384,7 @@ async def generate_proforma_pdf(reference: str = None):
                 {f"<br>Email : {bill_to.get('email')}" if bill_to.get('email') else ""}
             </div>
             <div class="party-col right">
-                <strong>{ship_to.get('name', 'Aquapurite Private Limited')}</strong><br>
+                <strong>{ship_to.get('name', 'ILMS.AI')}</strong><br>
                 {ship_to.get('address_line1', '')}<br>
                 {ship_to.get('address_line2', '')}<br>
                 {ship_to.get('city', '')}, {ship_to.get('district', ship_to.get('city', ''))}, {ship_to.get('state', '')}, {ship_to.get('pincode', '')}<br>

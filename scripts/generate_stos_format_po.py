@@ -133,7 +133,7 @@ async def generate_po_pdf(po_number: str):
 
         # Bill To (use from PO or default)
         bill_to = po.bill_to or {
-            "name": "Aquapurite Private Limited",
+            "name": "ILMS.AI",
             "address_line1": "PLOT 36-A KH NO 181, DINDAPUR EXT",
             "address_line2": "PH-1, SHYAM VIHAR, Najafgarh",
             "city": "New Delhi",
@@ -219,7 +219,7 @@ async def generate_po_pdf(po_number: str):
 
     <!-- Company Name -->
     <div class="title">
-        <h1>{bill_to.get('name', 'AQUAPURITE PRIVATE LIMITED').upper()}</h1>
+        <h1>{bill_to.get('name', 'ILMS.AI').upper()}</h1>
         <div class="subtitle">{bill_to.get('address_line1', '')}, {bill_to.get('address_line2', '')}, {bill_to.get('city', '')}, {bill_to.get('state', '')}, {bill_to.get('pincode', '')}</div>
     </div>
 
@@ -261,7 +261,7 @@ async def generate_po_pdf(po_number: str):
         </div>
         <div class="party-row">
             <div class="party-col">
-                <strong>{bill_to.get('name', 'Aquapurite Private Limited')}</strong><br>
+                <strong>{bill_to.get('name', 'ILMS.AI')}</strong><br>
                 {bill_to.get('address_line1', '')}<br>
                 {bill_to.get('address_line2', '')}<br>
                 {bill_to.get('city', '')}, {bill_to.get('district', bill_to.get('city', ''))}, {bill_to.get('state', '')}, {bill_to.get('pincode', '')}<br>
@@ -272,7 +272,7 @@ async def generate_po_pdf(po_number: str):
                 {f"<br>Email : {bill_to.get('email')}" if bill_to.get('email') else ""}
             </div>
             <div class="party-col right">
-                <strong>{ship_to.get('name', 'Aquapurite Private Limited')}</strong><br>
+                <strong>{ship_to.get('name', 'ILMS.AI')}</strong><br>
                 {ship_to.get('address_line1', '')}<br>
                 {ship_to.get('address_line2', '')}<br>
                 {ship_to.get('city', '')}, {ship_to.get('district', ship_to.get('city', ''))}, {ship_to.get('state', '')}, {ship_to.get('pincode', '')}<br>
@@ -405,7 +405,7 @@ async def generate_po_pdf(po_number: str):
 
     <!-- Bank Details -->
     <div class="bank-details">
-        <div><strong>{bill_to.get('name', 'AQUAPURITE PRIVATE LIMITED').upper()}</strong></div>
+        <div><strong>{bill_to.get('name', 'ILMS.AI').upper()}</strong></div>
         <table style="border: none; margin-top: 5px;">
             <tr style="border: none;">
                 <td style="border: none; width: 100px;">Bank Name</td>
@@ -437,7 +437,7 @@ async def generate_po_pdf(po_number: str):
 
     <!-- Signature -->
     <div class="signature">
-        <div>for <strong>{bill_to.get('name', 'AQUAPURITE PRIVATE LIMITED').upper()}</strong></div>
+        <div>for <strong>{bill_to.get('name', 'ILMS.AI').upper()}</strong></div>
         <div style="margin-top: 40px;">Authorised Signatory</div>
     </div>
 

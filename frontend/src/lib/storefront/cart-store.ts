@@ -447,7 +447,7 @@ export const useCartStore = create<CartStore>()(
       },
     }),
     {
-      name: 'aquapurite-cart',
+      name: 'ilms-cart',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         items: state.items,

@@ -204,7 +204,7 @@ async def main():
             # Assign to accounts user
             await assign_roles_to_user(
                 session,
-                "accounts@aquapurite.com",
+                "accounts@ilms.ai",
                 [accounts_head_id, finance_head_id]
             )
 

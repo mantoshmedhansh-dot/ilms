@@ -288,10 +288,10 @@ async def generate_po_pdf():
 
     <div class="container">
         <div class="header">
-            <div class="company-name">AQUAPURITE INDIA PVT LTD</div>
+            <div class="company-name">ILMS.AI INDIA PVT LTD</div>
             <div style="font-size: 11px; color: #666; margin-top: 5px;">
                 123 Industrial Area, Sector 5, Noida, UP - 201301<br>
-                Phone: +91-120-4567890 | Email: accounts@aquapurite.com<br>
+                Phone: +91-120-4567890 | Email: accounts@ilms.ai<br>
                 GSTIN: 09AABCU9603R1ZM | PAN: AABCU9603R
             </div>
         </div>

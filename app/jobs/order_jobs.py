@@ -353,7 +353,7 @@ async def queue_cart_reminder_email(
                         "first_name": first_name,
                         "item_count": item_count,
                         "cart_total": float(cart_total),
-                        "cart_url": "https://aquapurite.com/cart"
+                        "cart_url": "https://ilms.ai/cart"
                     }),
                     "scheduled_for": datetime.now(timezone.utc),
                     "created_at": datetime.now(timezone.utc)

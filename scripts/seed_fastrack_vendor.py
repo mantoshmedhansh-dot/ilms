@@ -84,10 +84,10 @@ async def seed_fastrack_vendor():
 
                 # Products they supply
                 primary_products="""Water Purifier Manufacturing:
-- AQUAPURITE BLITZ (RO+UV) @ ₹2,304/unit
-- AQUAPURITE NEURA (RO+UV) @ ₹2,509/unit
-- AQUAPURITE PREMIO (Hot/Ambient) @ ₹12,185/unit
-- AQUAPURITE ELITZ (Hot/Cold/Ambient) @ ₹8,321/unit
+- ILMS.AI BLITZ (RO+UV) @ ₹2,304/unit
+- ILMS.AI NEURA (RO+UV) @ ₹2,509/unit
+- ILMS.AI PREMIO (Hot/Ambient) @ ₹12,185/unit
+- ILMS.AI ELITZ (Hot/Cold/Ambient) @ ₹8,321/unit
 
 Notes:
 - Neura: Alkaline 4", RO Membrane & Housing provided by buyer

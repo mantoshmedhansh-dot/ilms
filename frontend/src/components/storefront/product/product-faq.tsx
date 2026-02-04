@@ -254,7 +254,7 @@ export default function ProductFAQ({ productName, showAll = false, maxItems = 8 
         </p>
         <div className="flex flex-col sm:flex-row gap-2 justify-center">
           <a
-            href="https://wa.me/919311939076?text=Hi! I have a question about Aquapurite water purifiers."
+            href="https://wa.me/919311939076?text=Hi! I have a question about ILMS.AI water purifiers."
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#25D366] text-white rounded-lg hover:bg-[#20BD5A] transition-colors text-sm font-medium"

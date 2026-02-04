@@ -63,7 +63,7 @@ export function LoginScreen(): React.JSX.Element {
           <View style={styles.logoPlaceholder}>
             <Text style={styles.logoText}>AP</Text>
           </View>
-          <Text style={styles.title}>Aquapurite ERP</Text>
+          <Text style={styles.title}>ILMS.AI ERP</Text>
           <Text style={styles.subtitle}>Mobile Portal</Text>
         </View>
 
@@ -134,7 +134,7 @@ export function LoginScreen(): React.JSX.Element {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            Version 1.0.0 | Aquapurite Industries
+            Version 1.0.0 | ILMS.AI Industries
           </Text>
         </View>
       </View>

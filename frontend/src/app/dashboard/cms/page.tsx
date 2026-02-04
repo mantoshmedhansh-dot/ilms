@@ -200,7 +200,7 @@ export default function CMSOverviewPage() {
         description="Manage your storefront content, navigation, and settings"
         actions={
           <Button variant="outline" asChild>
-            <a href="https://www.aquapurite.com" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.ilms.ai" target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-4 w-4 mr-2" />
               View Live Site
             </a>

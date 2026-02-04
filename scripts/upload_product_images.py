@@ -5,7 +5,7 @@ This script uploads product images to Supabase Storage via the production API.
 It requires a valid auth token.
 
 Usage:
-1. Login to the ERP (www.aquapurite.org/login)
+1. Login to the ERP (www.ilms.ai/login)
 2. Get the auth token from browser's localStorage (key: 'token')
 3. Run: python scripts/upload_product_images.py <token>
 
@@ -18,28 +18,28 @@ import requests
 from pathlib import Path
 
 # API Configuration
-API_BASE_URL = "https://aquapurite-erp-api.onrender.com"
-PRODUCT_IMAGE_BASE_PATH = "/Users/mantosh/Desktop/Aquapurite/Product Image"
+API_BASE_URL = "https://ilms-erp-api.onrender.com"
+PRODUCT_IMAGE_BASE_PATH = "/Users/mantosh/Desktop/ILMS.AI/Product Image"
 
 # Product image mapping
 PRODUCT_IMAGES = {
-    "aquapurite-i-elitz": {
+    "ilms-i-elitz": {
         "folder": "Elitz",
         "files": ["I Elitz-1.jpg", "I Elitz-2.jpg", "I Elitz-3.jpg"]
     },
-    "aquapurite-i-premiuo": {
+    "ilms-i-premiuo": {
         "folder": "I premiuo",
         "files": ["I premiuo-1.jpg", "I premiuo-2.jpg", "I premiuo-3.jpg"]
     },
-    "aquapurite-blitz": {
+    "ilms-blitz": {
         "folder": "Blitz",
         "files": ["Blitz-1.jpg", "Blitz-2.jpg", "Blitz-3.jpg"]
     },
-    "aquapurite-neura": {
+    "ilms-neura": {
         "folder": "Neura",
         "files": ["Neura-1.jpg", "Neura-2.jpg", "Neura-3.jpg"]
     },
-    "aquapurite-premiuo-uv": {
+    "ilms-premiuo-uv": {
         "folder": "Premiumem UV",
         "files": ["Prewmiuo UV-1.jpg", "Prewmiuo UV-2.jpg", "Prewmiuo UV-3.jpg"]
     },
@@ -74,9 +74,9 @@ def main():
         print("  OR")
         print("  AUTH_TOKEN=<token> python scripts/upload_product_images.py")
         print("\nTo get your auth token:")
-        print("1. Login to www.aquapurite.org/login")
+        print("1. Login to www.ilms.ai/login")
         print("2. Open browser DevTools (F12)")
-        print("3. Go to Application > Local Storage > https://aquapurite.org")
+        print("3. Go to Application > Local Storage > https://ilms.ai")
         print("4. Copy the value of 'token'")
         sys.exit(1)
 

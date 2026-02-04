@@ -1,5 +1,5 @@
 /**
- * API Client for Aquapurite ERP Backend
+ * API Client for ILMS.AI ERP Backend
  */
 
 import axios, {AxiosInstance, AxiosError, InternalAxiosRequestConfig} from 'axios';
@@ -8,7 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // API Base URL - Update for production
 const API_BASE_URL = __DEV__
   ? 'http://localhost:8000/api/v1'
-  : 'https://aquapurite-erp-api.onrender.com/api/v1';
+  : 'https://ilms-erp-api.onrender.com/api/v1';
 
 // Storage keys
 export const STORAGE_KEYS = {

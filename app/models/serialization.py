@@ -2,7 +2,7 @@
 Serialization Models for Product and Spare Parts Barcodes
 
 Barcode Structure: APFSZAIEL000001 (15 characters)
-- AP: Brand Prefix (Aquapurite)
+- AP: Brand Prefix (ILMS.AI)
 - FS: Supplier Code (2 letters)
 - Z: Year Code (A=2000, Z=2025, AA=2026...)
 - A: Month Code (A=Jan, L=Dec)

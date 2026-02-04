@@ -22,7 +22,7 @@ from sqlalchemy import text
 
 # Database URLs
 PRODUCTION_URL = os.environ.get("PRODUCTION_DB_URL", "")
-LOCAL_URL = "postgresql+psycopg://aquapurite:aquapurite_dev_2026@localhost:5432/aquapurite_erp"
+LOCAL_URL = "postgresql+psycopg://ilms:ilms_dev_2026@localhost:5432/ilms_erp"
 
 
 async def get_schema_info(engine, db_name: str) -> dict:

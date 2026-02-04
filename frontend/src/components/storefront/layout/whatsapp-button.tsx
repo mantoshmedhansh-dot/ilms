@@ -11,8 +11,8 @@ interface WhatsAppButtonProps {
 }
 
 export default function WhatsAppButton({
-  phoneNumber = '919311939076', // Default Aquapurite number (without +)
-  message = 'Hi! I have a question about Aquapurite water purifiers.',
+  phoneNumber = '919311939076', // Default ILMS.AI number (without +)
+  message = 'Hi! I have a question about ILMS.AI water purifiers.',
   className,
 }: WhatsAppButtonProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -34,7 +34,7 @@ export default function WhatsAppButton({
                 <MessageCircle className="h-5 w-5 text-white" />
               </div>
               <div>
-                <p className="text-white font-semibold text-sm">Aquapurite Support</p>
+                <p className="text-white font-semibold text-sm">ILMS.AI Support</p>
                 <p className="text-white/80 text-xs">Typically replies instantly</p>
               </div>
             </div>

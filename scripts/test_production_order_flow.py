@@ -31,7 +31,7 @@ PROD_DB = {
     'port': 6543,
     'database': 'postgres',
     'user': 'postgres',
-    'password': 'Aquapurite2026',
+    'password': 'ILMS.AI2026',
     'statement_cache_size': 0,  # For pgbouncer
 }
 
@@ -327,7 +327,7 @@ async def run_production_test():
             invoice_id, invoice_number, 'B2C', 'GENERATED', date.today(),
             order_id, customer['id'], f"{customer['first_name']} {customer['last_name']}",
             'Test Address', 'Delhi', 'Delhi', '07', '110001', 'India',
-            '07AABCU9603R1ZM', 'Aquapurite Water Solutions Pvt Ltd', 'Delhi, India', '07',
+            '07AABCU9603R1ZM', 'ILMS.AI Water Solutions Pvt Ltd', 'Delhi, India', '07',
             'Delhi', '07', False, False,
             subtotal, Decimal('0'), subtotal,
             cgst, sgst, Decimal('0'), Decimal('0'), total_tax,

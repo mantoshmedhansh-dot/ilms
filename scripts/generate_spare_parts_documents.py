@@ -1,14 +1,14 @@
 """
 Generate Sample Documents for Spare Parts Category:
-1. Supply Order (Purchase Order) - Aquapurite ordering from vendor
-2. Sales Order - Aquapurite selling to customer
-3. Tax Invoice - Aquapurite's invoice to customer
+1. Supply Order (Purchase Order) - ILMS.AI ordering from vendor
+2. Sales Order - ILMS.AI selling to customer
+3. Tax Invoice - ILMS.AI's invoice to customer
 4. E-Way Bill - For transportation
 
 Uses SP CODES from Product Master (e.g., SPSDF001, SPMBF001)
 Barcode Format: AP + SS + Y + M + CC + SSSSSSSS (16 chars)
 
-Aquapurite ERP - Spare Parts Documents
+ILMS.AI ERP - Spare Parts Documents
 """
 import asyncio
 import sys
@@ -23,8 +23,8 @@ from app.database import async_session_factory
 from app.models.product import Product, ProductItemType
 
 # Company Details (from master)
-AQUAPURITE = {
-    "name": "AQUAPURITE PRIVATE LIMITED",
+ILMS.AI = {
+    "name": "ILMS.AI",
     "address": "PLOT 36-A KH NO 181, PH-1, SHYAM VIHAR, DINDAPUR EXT",
     "city": "Najafgarh",
     "state": "Delhi",
@@ -33,7 +33,7 @@ AQUAPURITE = {
     "pan": "ABDCA6170C",
     "cin": "U32909DL2025PTC454115",
     "phone": "+91-9311939076",
-    "email": "accounts@aquapurite.com",
+    "email": "accounts@ilms.ai",
     "state_code": "07"
 }
 
@@ -209,9 +209,9 @@ def generate_supply_order(spare_parts):
     {get_print_button()}
     <div class="document">
         <div class="header">
-            <h1>{AQUAPURITE['name']}</h1>
-            <p>{AQUAPURITE['address']}, {AQUAPURITE['city']}, {AQUAPURITE['state']} - {AQUAPURITE['pincode']}</p>
-            <p>GSTIN: {AQUAPURITE['gstin']} | PAN: {AQUAPURITE['pan']} | Phone: {AQUAPURITE['phone']}</p>
+            <h1>{ILMS.AI['name']}</h1>
+            <p>{ILMS.AI['address']}, {ILMS.AI['city']}, {ILMS.AI['state']} - {ILMS.AI['pincode']}</p>
+            <p>GSTIN: {ILMS.AI['gstin']} | PAN: {ILMS.AI['pan']} | Phone: {ILMS.AI['phone']}</p>
         </div>
 
         <div class="doc-title">
@@ -248,10 +248,10 @@ def generate_supply_order(spare_parts):
             </div>
             <div class="party-box">
                 <h4>SHIP TO / DELIVERY ADDRESS</h4>
-                <strong>{AQUAPURITE['name']}</strong><br>
-                {AQUAPURITE['address']}<br>
-                {AQUAPURITE['city']}, {AQUAPURITE['state']} - {AQUAPURITE['pincode']}<br>
-                <strong>GSTIN:</strong> {AQUAPURITE['gstin']}
+                <strong>{ILMS.AI['name']}</strong><br>
+                {ILMS.AI['address']}<br>
+                {ILMS.AI['city']}, {ILMS.AI['state']} - {ILMS.AI['pincode']}<br>
+                <strong>GSTIN:</strong> {ILMS.AI['gstin']}
             </div>
         </div>
 
@@ -323,7 +323,7 @@ def generate_supply_order(spare_parts):
 
         <div class="terms">
             <strong>Terms & Conditions:</strong><br>
-            1. All items must be packed with proper barcodes as per Aquapurite serialization format<br>
+            1. All items must be packed with proper barcodes as per ILMS.AI serialization format<br>
             2. Barcode Format: AP + {VENDOR_FASTTRACK['code']} (Supplier) + YY (Year) + M (Month) + {VENDOR_FASTTRACK['channel']} (Channel) + Serial (8 digits)<br>
             3. Payment terms: 30 days from invoice date<br>
             4. Quality certification required for each batch<br>
@@ -339,7 +339,7 @@ def generate_supply_order(spare_parts):
                     <div class="signature-line">Approved By</div>
                 </div>
                 <div class="signature-box">
-                    <div class="signature-line">For {AQUAPURITE['name']}</div>
+                    <div class="signature-line">For {ILMS.AI['name']}</div>
                 </div>
             </div>
         </div>
@@ -374,9 +374,9 @@ def generate_sales_order(spare_parts):
     {get_print_button()}
     <div class="document">
         <div class="header">
-            <h1>{AQUAPURITE['name']}</h1>
-            <p>{AQUAPURITE['address']}, {AQUAPURITE['city']}, {AQUAPURITE['state']} - {AQUAPURITE['pincode']}</p>
-            <p>GSTIN: {AQUAPURITE['gstin']} | PAN: {AQUAPURITE['pan']} | Phone: {AQUAPURITE['phone']}</p>
+            <h1>{ILMS.AI['name']}</h1>
+            <p>{ILMS.AI['address']}, {ILMS.AI['city']}, {ILMS.AI['state']} - {ILMS.AI['pincode']}</p>
+            <p>GSTIN: {ILMS.AI['gstin']} | PAN: {ILMS.AI['pan']} | Phone: {ILMS.AI['phone']}</p>
         </div>
 
         <div class="doc-title">
@@ -497,7 +497,7 @@ def generate_sales_order(spare_parts):
                     <div class="signature-line">Customer Signature</div>
                 </div>
                 <div class="signature-box">
-                    <div class="signature-line">For {AQUAPURITE['name']}</div>
+                    <div class="signature-line">For {ILMS.AI['name']}</div>
                 </div>
             </div>
         </div>
@@ -535,9 +535,9 @@ def generate_tax_invoice(spare_parts):
     {get_print_button()}
     <div class="document">
         <div class="header">
-            <h1>{AQUAPURITE['name']}</h1>
-            <p>{AQUAPURITE['address']}, {AQUAPURITE['city']}, {AQUAPURITE['state']} - {AQUAPURITE['pincode']}</p>
-            <p>GSTIN: {AQUAPURITE['gstin']} | PAN: {AQUAPURITE['pan']} | Phone: {AQUAPURITE['phone']}</p>
+            <h1>{ILMS.AI['name']}</h1>
+            <p>{ILMS.AI['address']}, {ILMS.AI['city']}, {ILMS.AI['state']} - {ILMS.AI['pincode']}</p>
+            <p>GSTIN: {ILMS.AI['gstin']} | PAN: {ILMS.AI['pan']} | Phone: {ILMS.AI['phone']}</p>
         </div>
 
         <div class="doc-title">
@@ -691,7 +691,7 @@ def generate_tax_invoice(spare_parts):
                     <div class="signature-line">Receiver's Signature</div>
                 </div>
                 <div class="signature-box">
-                    <div class="signature-line">For {AQUAPURITE['name']}<br>(Authorized Signatory)</div>
+                    <div class="signature-line">For {ILMS.AI['name']}<br>(Authorized Signatory)</div>
                 </div>
             </div>
         </div>
@@ -739,9 +739,9 @@ def generate_eway_bill(spare_parts):
         </div>
 
         <div class="header">
-            <h1>{AQUAPURITE['name']}</h1>
-            <p>{AQUAPURITE['address']}, {AQUAPURITE['city']}, {AQUAPURITE['state']} - {AQUAPURITE['pincode']}</p>
-            <p>GSTIN: {AQUAPURITE['gstin']}</p>
+            <h1>{ILMS.AI['name']}</h1>
+            <p>{ILMS.AI['address']}, {ILMS.AI['city']}, {ILMS.AI['state']} - {ILMS.AI['pincode']}</p>
+            <p>GSTIN: {ILMS.AI['gstin']}</p>
         </div>
 
         <div class="doc-title">
@@ -789,11 +789,11 @@ def generate_eway_bill(spare_parts):
         <div class="party-section">
             <div class="party-box">
                 <h4>FROM (CONSIGNOR)</h4>
-                <strong>{AQUAPURITE['name']}</strong><br>
-                {AQUAPURITE['address']}<br>
-                {AQUAPURITE['city']}, {AQUAPURITE['state']} - {AQUAPURITE['pincode']}<br>
-                <strong>GSTIN:</strong> {AQUAPURITE['gstin']}<br>
-                <strong>State:</strong> {AQUAPURITE['state']} ({AQUAPURITE['state_code']})
+                <strong>{ILMS.AI['name']}</strong><br>
+                {ILMS.AI['address']}<br>
+                {ILMS.AI['city']}, {ILMS.AI['state']} - {ILMS.AI['pincode']}<br>
+                <strong>GSTIN:</strong> {ILMS.AI['gstin']}<br>
+                <strong>State:</strong> {ILMS.AI['state']} ({ILMS.AI['state_code']})
             </div>
             <div class="party-box">
                 <h4>TO (CONSIGNEE)</h4>
@@ -898,7 +898,7 @@ def generate_eway_bill(spare_parts):
                     <div class="signature-line">Verified By</div>
                 </div>
                 <div class="signature-box">
-                    <div class="signature-line">For {AQUAPURITE['name']}</div>
+                    <div class="signature-line">For {ILMS.AI['name']}</div>
                 </div>
             </div>
         </div>

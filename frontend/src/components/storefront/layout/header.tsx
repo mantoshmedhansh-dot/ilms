@@ -161,7 +161,7 @@ export default function StorefrontHeader() {
                     <Droplets className="h-6 w-6 text-primary-foreground" />
                   </div>
                   <span className="font-bold text-xl hidden sm:block">
-                    {company?.trade_name || company?.name || 'AQUAPURITE'}
+                    {company?.trade_name || company?.name || 'ILMS.AI'}
                   </span>
                 </>
               )}
@@ -326,7 +326,7 @@ export default function StorefrontHeader() {
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <Droplets className="h-5 w-5 text-primary" />
-              {company?.trade_name || company?.name || 'AQUAPURITE'}
+              {company?.trade_name || company?.name || 'ILMS.AI'}
             </SheetTitle>
           </SheetHeader>
           <nav className="mt-8 flex flex-col gap-4">

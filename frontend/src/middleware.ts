@@ -5,12 +5,12 @@ import type { NextRequest } from 'next/server';
  * Domain-based routing middleware
  *
  * Domains:
- * - aquapurite.com (D2C Storefront) → Customer-facing store
- * - aquapurite.org (ERP Dashboard) → Admin panel
+ * - ilms.ai (D2C Storefront) → Customer-facing store
+ * - ilms.org (ERP Dashboard) → Admin panel
  *
  * Routing Rules:
- * - aquapurite.com: Serve storefront, block /dashboard access
- * - aquapurite.org: Redirect / to /dashboard, block storefront routes
+ * - ilms.ai: Serve storefront, block /dashboard access
+ * - ilms.org: Redirect / to /dashboard, block storefront routes
  *
  * Referral Tracking:
  * - Detects ?ref=PARTNER_CODE in URL
@@ -22,7 +22,7 @@ import type { NextRequest } from 'next/server';
 const REFERRAL_COOKIE_NAME = 'partner_ref';
 const REFERRAL_COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days in seconds
 
-// Storefront routes (served on aquapurite.com)
+// Storefront routes (served on ilms.ai)
 const STOREFRONT_ROUTES = [
   '/',
   '/products',
@@ -35,7 +35,7 @@ const STOREFRONT_ROUTES = [
   '/contact',
 ];
 
-// Dashboard routes (served on aquapurite.org)
+// Dashboard routes (served on ilms.org)
 const DASHBOARD_ROUTES = [
   '/dashboard',
   '/login',
@@ -83,11 +83,11 @@ export function middleware(request: NextRequest) {
 
   // Determine which domain we're on
   const isStorefrontDomain =
-    hostname.includes('aquapurite.com') ||
+    hostname.includes('ilms.ai') ||
     hostname.includes('localhost:3000'); // For local development of storefront
 
   const isDashboardDomain =
-    hostname.includes('aquapurite.org') ||
+    hostname.includes('ilms.org') ||
     hostname.includes('localhost:3001'); // For local development of dashboard
 
   // Check if path is a storefront route
@@ -102,12 +102,12 @@ export function middleware(request: NextRequest) {
       pathname === route || pathname.startsWith(`${route}/`)
     );
 
-  // STOREFRONT DOMAIN (aquapurite.com)
+  // STOREFRONT DOMAIN (ilms.ai)
   if (isStorefrontDomain) {
     // Block dashboard access on storefront domain
     if (isDashboardRoute) {
-      // Redirect to aquapurite.org for dashboard
-      const dashboardUrl = new URL(pathname, 'https://www.aquapurite.org');
+      // Redirect to ilms.org for dashboard
+      const dashboardUrl = new URL(pathname, 'https://www.ilms.org');
       return NextResponse.redirect(dashboardUrl);
     }
     // Allow storefront routes (with referral tracking)
@@ -115,7 +115,7 @@ export function middleware(request: NextRequest) {
     return setReferralCookie(response);
   }
 
-  // DASHBOARD DOMAIN (aquapurite.org)
+  // DASHBOARD DOMAIN (ilms.org)
   if (isDashboardDomain) {
     // Redirect root to dashboard
     if (pathname === '/') {
@@ -124,8 +124,8 @@ export function middleware(request: NextRequest) {
 
     // Block storefront routes on dashboard domain
     if (isStorefrontRoute && !isDashboardRoute) {
-      // Redirect to aquapurite.com for storefront
-      const storefrontUrl = new URL(pathname, 'https://www.aquapurite.com');
+      // Redirect to ilms.ai for storefront
+      const storefrontUrl = new URL(pathname, 'https://www.ilms.ai');
       return NextResponse.redirect(storefrontUrl);
     }
 

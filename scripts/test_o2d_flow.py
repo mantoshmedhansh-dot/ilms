@@ -11,7 +11,7 @@ This script tests the complete sales flow:
 6. Test delivery and POD
 7. Test service request generation
 
-Author: Aquapurite ERP System
+Author: ILMS.AI ERP System
 """
 
 import asyncio

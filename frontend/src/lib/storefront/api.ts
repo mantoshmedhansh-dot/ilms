@@ -432,11 +432,11 @@ export const companyApi = {
     } catch {
       // Return default company info if API fails
       return {
-        name: 'AQUAPURITE',
-        trade_name: 'AQUAPURITE',
-        email: 'support@aquapurite.com',
+        name: 'ILMS.AI',
+        trade_name: 'ILMS.AI',
+        email: 'support@ilms.ai',
         phone: '1800-123-4567',
-        website: 'https://aquapurite.com',
+        website: 'https://ilms.ai',
         address: '123 Industrial Area, Sector 62',
         city: 'Noida',
         state: 'Uttar Pradesh',
@@ -2206,7 +2206,7 @@ export const exchangeApi = {
       // Client-side calculation fallback
       const brandValues: Record<string, number> = {
         'aquaguard': 2000, 'kent': 1800, 'pureit': 1500, 'livpure': 1400,
-        'eureka_forbes': 1800, 'blue_star': 1600, 'ao_smith': 1700, 'aquapurite': 2000,
+        'eureka_forbes': 1800, 'blue_star': 1600, 'ao_smith': 1700, 'ilms': 2000,
         'other': 1000,
       };
       const conditionMultipliers: Record<string, number> = {

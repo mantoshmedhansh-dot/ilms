@@ -94,7 +94,7 @@ export interface NavItem {
 }
 
 /**
- * AQUAPURITE ERP - NAVIGATION STRUCTURE
+ * ILMS.AI ERP - NAVIGATION STRUCTURE
  *
  * Based on Industry Best Practices (SAP, Oracle NetSuite, Zoho, Microsoft Dynamics)
  *

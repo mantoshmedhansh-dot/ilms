@@ -324,7 +324,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               </Button>
               <ShareButton
                 title={product.name}
-                text={`Check out ${product.name} on AQUAPURITE - ${formatCurrency(currentPrice)}`}
+                text={`Check out ${product.name} on ILMS.AI - ${formatCurrency(currentPrice)}`}
               />
             </div>
 

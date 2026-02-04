@@ -31,7 +31,7 @@ interface PinCodeCheckerProps {
   className?: string;
 }
 
-const PINCODE_STORAGE_KEY = 'aquapurite_delivery_pincode';
+const PINCODE_STORAGE_KEY = 'ilms_delivery_pincode';
 const FREE_DELIVERY_THRESHOLD = 999; // Free delivery above this amount
 
 export function PinCodeChecker({ productPrice = 0, className }: PinCodeCheckerProps) {

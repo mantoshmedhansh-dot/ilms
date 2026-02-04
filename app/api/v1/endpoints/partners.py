@@ -655,7 +655,7 @@ async def get_referral_link(
     """
     Generate referral link for a product.
     """
-    base_url = "https://www.aquapurite.com"
+    base_url = "https://www.ilms.ai"
     referral_link = f"{base_url}/products/{product_slug}?ref={partner.referral_code}"
 
     return {
@@ -739,7 +739,7 @@ async def get_products_for_sharing(
     result = await db.execute(query)
     products = result.scalars().all()
 
-    base_url = "https://www.aquapurite.com"
+    base_url = "https://www.ilms.ai"
 
     return {
         "items": [

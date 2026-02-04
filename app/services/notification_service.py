@@ -67,7 +67,7 @@ class NotificationType(str, Enum):
 SMS_TEMPLATES = {
     NotificationType.ORDER_CONFIRMED: (
         "Dear {customer_name}, your order #{order_number} has been confirmed. "
-        "Total: Rs.{amount}. Thank you for shopping with Aquapurite!"
+        "Total: Rs.{amount}. Thank you for shopping with ILMS.AI!"
     ),
     NotificationType.ORDER_SHIPPED: (
         "Your order #{order_number} has been shipped via {transporter}. "
@@ -301,7 +301,7 @@ class NotificationService:
         customer_email: Optional[str],
         product_name: str,
         warranty_end_date: str,
-        feedback_link: str = "https://aquapurite.com/feedback",
+        feedback_link: str = "https://ilms.ai/feedback",
     ) -> List[Dict[str, Any]]:
         """
         Send notifications when installation is completed.
@@ -536,7 +536,7 @@ async def send_out_of_stock_alert(
 async def check_and_send_stock_alerts(
     db: AsyncSession,
     warehouse_id: Optional[str] = None,
-    manager_email: str = "inventory@aquapurite.com",
+    manager_email: str = "inventory@ilms.ai",
     manager_phone: Optional[str] = None,
 ) -> Dict[str, Any]:
     """

@@ -1,11 +1,11 @@
 """
-Generate Sales Documents (Sales Order, Tax Invoice, E-Way Bill) for Aquapurite.
+Generate Sales Documents (Sales Order, Tax Invoice, E-Way Bill) for ILMS.AI.
 Uses Product Master data with FG Codes (not Part Codes).
 
-FG Code = Aquapurite's Finished Goods Code (e.g., WPRAIEL001)
+FG Code = ILMS.AI's Finished Goods Code (e.g., WPRAIEL001)
 Part Code = Vendor's code (used only in Purchase Orders)
 
-Aquapurite ERP System
+ILMS.AI ERP System
 """
 import asyncio
 import sys
@@ -74,9 +74,9 @@ def amount_to_words(amount):
     return words
 
 
-# Aquapurite Company Details (Seller)
+# ILMS.AI Company Details (Seller)
 COMPANY = {
-    "name": "AQUAPURITE PRIVATE LIMITED",
+    "name": "ILMS.AI",
     "address_line1": "PLOT 36-A KH NO 181, DINDAPUR EXT",
     "address_line2": "PH-1, SHYAM VIHAR, Najafgarh",
     "city": "New Delhi",
@@ -88,8 +88,8 @@ COMPANY = {
     "pan": "ABDCA6170C",
     "cin": "U74999DL2020PTC000000",
     "phone": "+91-11-12345678",
-    "email": "sales@aquapurite.com",
-    "website": "www.aquapurite.com",
+    "email": "sales@ilms.ai",
+    "website": "www.ilms.ai",
     "bank_name": "ICICI BANK",
     "bank_branch": "NAJAFGARH",
     "account_no": "123456789012",
@@ -1023,7 +1023,7 @@ def generate_eway_bill_html(items, doc_date):
 async def main():
     """Generate all sales documents using Product Master data."""
     print("=" * 60)
-    print("AQUAPURITE ERP - Sales Document Generator")
+    print("ILMS.AI ERP - Sales Document Generator")
     print("Using FG Codes from Product Master")
     print("=" * 60)
 

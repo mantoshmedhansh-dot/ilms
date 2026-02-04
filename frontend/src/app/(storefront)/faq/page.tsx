@@ -63,7 +63,7 @@ const fallbackCategories: StorefrontFaqCategory[] = [
     items: [
       {
         id: '1',
-        question: 'How do I place an order on Aquapurite?',
+        question: 'How do I place an order on ILMS.AI?',
         answer: 'Placing an order is simple: Browse our water purifiers and spare parts, add items to your cart, and proceed to checkout. You can pay using UPI, Credit/Debit cards, Net Banking, EMI options, or Cash on Delivery (COD) in select areas.',
         keywords: ['order', 'buy', 'purchase'],
       },
@@ -185,7 +185,7 @@ export default function FAQPage() {
           Frequently Asked Questions
         </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
-          Find instant answers to common questions about Aquapurite water purifiers, orders, installation, warranty, and more.
+          Find instant answers to common questions about ILMS.AI water purifiers, orders, installation, warranty, and more.
           Can&apos;t find what you&apos;re looking for?{' '}
           <Link href="/contact" className="text-primary hover:underline font-medium">
             Contact our support team

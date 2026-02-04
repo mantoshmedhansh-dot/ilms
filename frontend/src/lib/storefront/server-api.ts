@@ -380,9 +380,9 @@ export async function getCompanyInfo(): Promise<ServerCompanyInfo> {
   );
 
   return data || {
-    name: 'AQUAPURITE',
-    trade_name: 'AQUAPURITE',
-    email: 'support@aquapurite.com',
+    name: 'ILMS.AI',
+    trade_name: 'ILMS.AI',
+    email: 'support@ilms.ai',
     phone: '1800-123-4567',
   };
 }

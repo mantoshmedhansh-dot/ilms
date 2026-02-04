@@ -154,7 +154,7 @@ class CacheService:
     - TTL management
     """
 
-    def __init__(self, backend: CacheBackend, namespace: str = "aquapurite"):
+    def __init__(self, backend: CacheBackend, namespace: str = "ilms"):
         self._backend = backend
         self._namespace = namespace
 

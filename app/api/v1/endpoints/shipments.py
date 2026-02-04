@@ -936,7 +936,7 @@ async def download_shipping_label(
     <body>
         <div class="label">
             <div class="header">
-                <div class="logo">{shipment.transporter.name if shipment.transporter else 'AQUAPURITE'}</div>
+                <div class="logo">{shipment.transporter.name if shipment.transporter else 'ILMS.AI'}</div>
                 <div class="awb">AWB: {shipment.awb_number or shipment.shipment_number}</div>
                 <div class="barcode">*{shipment.awb_number or shipment.shipment_number}*</div>
             </div>
@@ -956,7 +956,7 @@ async def download_shipping_label(
             <div class="section">
                 <div class="label-title">FROM:</div>
                 <div class="label-value">
-                    AQUAPURITE PVT LTD<br>
+                    ILMS.AI<br>
                     {shipment.warehouse.address if shipment.warehouse and hasattr(shipment.warehouse, 'address') else 'Central Warehouse, Delhi'}<br>
                     Ph: +91-9311939076
                 </div>
@@ -1116,7 +1116,7 @@ async def download_shipment_invoice(
         <div class="invoice">
             <div class="header">
                 <div class="company">
-                    <div class="company-name">AQUAPURITE PRIVATE LIMITED</div>
+                    <div class="company-name">ILMS.AI</div>
                     <div>Plot 36-A KH No 181, Najafgarh</div>
                     <div>Delhi - 110043, India</div>
                     <div>GSTIN: 07ABDCA6170C1Z5</div>
@@ -1208,7 +1208,7 @@ async def download_shipment_invoice(
             </div>
 
             <div class="signature">
-                <div>For AQUAPURITE PRIVATE LIMITED</div>
+                <div>For ILMS.AI</div>
                 <br><br><br>
                 <div>Authorized Signatory</div>
             </div>

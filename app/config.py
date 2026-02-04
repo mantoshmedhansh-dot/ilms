@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     SMTP_USER: str = ""  # Your Gmail address
     SMTP_PASSWORD: str = ""  # Gmail App Password
     SMTP_FROM_EMAIL: str = ""  # Sender email (defaults to SMTP_USER)
-    SMTP_FROM_NAME: str = "Aquapurite ERP"
+    SMTP_FROM_NAME: str = "ILMS.AI ERP"
 
     # Frontend URL for email links
     FRONTEND_URL: str = "https://erp-woad-eight.vercel.app"
@@ -73,7 +73,7 @@ class Settings(BaseSettings):
     MSG91_TEMPLATE_ID_OTP: str = ""  # DLT Template ID for OTP
 
     # D2C Storefront URLs
-    D2C_FRONTEND_URL: str = "https://www.aquapurite.com"
+    D2C_FRONTEND_URL: str = "https://frontend-ilms.vercel.app"
 
     # Shiprocket Integration
     SHIPROCKET_EMAIL: str = ""  # Shiprocket account email
@@ -91,7 +91,7 @@ class Settings(BaseSettings):
     # Channel Inventory Settings
     CHANNEL_INVENTORY_ENABLED: bool = True  # Enable channel-specific inventory for D2C
     CHANNEL_INVENTORY_STRICT_MODE: bool = False  # If True, allocation fails if channel inventory consumption fails
-    D2C_CHANNEL_CODE: str = "D2C-002"  # Code for D2C channel (matches production: Aquapurite.com)
+    D2C_CHANNEL_CODE: str = "D2C-002"  # Code for D2C channel (matches production: ILMS.AI.com)
     D2C_FALLBACK_STRATEGY: str = "AUTO_REPLENISH"  # Options: NO_FALLBACK, SHARED_POOL, AUTO_REPLENISH
     MARKETPLACE_FALLBACK_STRATEGY: str = "NO_FALLBACK"  # Marketplaces should not fallback to prevent SLA violations
 

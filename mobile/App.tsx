@@ -1,5 +1,5 @@
 /**
- * Aquapurite ERP Mobile App
+ * ILMS.AI ERP Mobile App
  * React Native application for iOS and Android
  */
 

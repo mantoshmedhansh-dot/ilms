@@ -47,7 +47,7 @@ async def auto_seed_admin():
 
                 # Create admin user
                 admin = User(
-                    email="admin@aquapurite.com",
+                    email="admin@ilms.ai",
                     phone="+919999999999",
                     password_hash=get_password_hash("Admin@123"),
                     first_name="Super",
@@ -66,7 +66,7 @@ async def auto_seed_admin():
                 session.add(user_role)
 
                 await session.commit()
-                print(f"  Created admin user: admin@aquapurite.com / Admin@123")
+                print(f"  Created admin user: admin@ilms.ai / Admin@123")
             else:
                 print(f"Found {user_count} existing users. Skipping auto-seed.")
     except Exception as e:
@@ -209,7 +209,7 @@ OPENAPI_TAGS = [
 ]
 
 FULL_API_DESCRIPTION = """
-## Aquapurite ERP API v2.0
+## ILMS.AI ERP API v2.0
 
 A comprehensive **Consumer Durable ERP System** with full GST compliance for water purifier manufacturing and distribution.
 

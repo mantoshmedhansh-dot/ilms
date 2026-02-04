@@ -779,7 +779,7 @@ async def get_manifest_print_data(
 
     return ManifestPrintResponse(
         manifest=manifest_detail,
-        company_name="AQUAPURITE PRIVATE LIMITED",
+        company_name="ILMS.AI",
         company_address="Plot 36-A KH No 181, Najafgarh, Delhi - 110043",
         company_phone="+91-9311939076",
         company_gstin="07ABDCA6170C1Z5",

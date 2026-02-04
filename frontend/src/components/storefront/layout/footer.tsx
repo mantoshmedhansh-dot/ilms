@@ -159,7 +159,7 @@ export default function StorefrontFooter() {
                     <Droplets className="h-6 w-6 text-primary-foreground" />
                   </div>
                   <span className="font-bold text-xl text-white">
-                    {company?.trade_name || company?.name || 'AQUAPURITE'}
+                    {company?.trade_name || company?.name || 'ILMS.AI'}
                   </span>
                 </>
               )}
@@ -174,7 +174,7 @@ export default function StorefrontFooter() {
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="h-4 w-4 text-primary" />
-                <span>{settings['contact_email'] || company?.email || 'support@aquapurite.com'}</span>
+                <span>{settings['contact_email'] || company?.email || 'support@ilms.ai'}</span>
               </div>
               <div className="flex items-start gap-3">
                 <MapPin className="h-4 w-4 text-primary mt-1" />
@@ -326,7 +326,7 @@ export default function StorefrontFooter() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm">
-              {settings['footer_copyright'] || `© ${new Date().getFullYear()} ${company?.trade_name || company?.name || 'AQUAPURITE'}. All rights reserved.`}
+              {settings['footer_copyright'] || `© ${new Date().getFullYear()} ${company?.trade_name || company?.name || 'ILMS.AI'}. All rights reserved.`}
             </p>
             <div className="flex items-center gap-4">
               <img

@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'My Account | Aquapurite',
+  title: 'My Account | ILMS.AI',
   description: 'Manage your account, view orders, track deliveries, and update your profile.',
   robots: {
     index: false, // Don't index account pages

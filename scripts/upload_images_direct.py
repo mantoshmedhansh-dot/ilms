@@ -25,26 +25,26 @@ from datetime import datetime, timezone
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Product image mapping
-PRODUCT_IMAGE_BASE_PATH = "/Users/mantosh/Desktop/Aquapurite/Product Image"
+PRODUCT_IMAGE_BASE_PATH = "/Users/mantosh/Desktop/ILMS.AI/Product Image"
 
 PRODUCT_IMAGES = {
-    "aquapurite-i-elitz": {
+    "ilms-i-elitz": {
         "folder": "Elitz",
         "files": ["I Elitz-1.jpg", "I Elitz-2.jpg", "I Elitz-3.jpg"]
     },
-    "aquapurite-i-premiuo": {
+    "ilms-i-premiuo": {
         "folder": "I premiuo",
         "files": ["I premiuo-1.jpg", "I premiuo-2.jpg", "I premiuo-3.jpg"]
     },
-    "aquapurite-blitz": {
+    "ilms-blitz": {
         "folder": "Blitz",
         "files": ["Blitz-1.jpg", "Blitz-2.jpg", "Blitz-3.jpg"]
     },
-    "aquapurite-neura": {
+    "ilms-neura": {
         "folder": "Neura",
         "files": ["Neura-1.jpg", "Neura-2.jpg", "Neura-3.jpg"]
     },
-    "aquapurite-premiuo-uv": {
+    "ilms-premiuo-uv": {
         "folder": "Premiumem UV",
         "files": ["Prewmiuo UV-1.jpg", "Prewmiuo UV-2.jpg", "Prewmiuo UV-3.jpg"]
     },

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate Purchase Order PO/APL/FF/25-26/001 from Aquapurite to FastTrack
+Generate Purchase Order PO/APL/FF/25-26/001 from ILMS.AI to FastTrack
 Using master data from database
 
 Reference: Proforma Invoice PI NO./FF/25-26/005 dated 19.11.2025
@@ -30,7 +30,7 @@ EXPECTED_DELIVERY = "20.12.2025"  # 30 days from advance payment
 ORDER_ITEMS = [
     {
         "sr_no": 1,
-        "name": "AQUAPURITE BLITZ (RO+UV)",
+        "name": "ILMS.AI BLITZ (RO+UV)",
         "model_code": "BLITZ",
         "fg_code": "WPRABLZ001",
         "hsn_code": "84212110",
@@ -40,7 +40,7 @@ ORDER_ITEMS = [
     },
     {
         "sr_no": 2,
-        "name": "AQUAPURITE NEURA (RO+UV)",
+        "name": "ILMS.AI NEURA (RO+UV)",
         "model_code": "NEURA",
         "fg_code": "WPRANEU001",
         "hsn_code": "84212110",
@@ -50,7 +50,7 @@ ORDER_ITEMS = [
     },
     {
         "sr_no": 3,
-        "name": "AQUAPURITE i ELITZ (Hot/Normal/Ambient)",
+        "name": "ILMS.AI i ELITZ (Hot/Normal/Ambient)",
         "model_code": "i ELITZ",
         "fg_code": "WPRAIEL001",
         "hsn_code": "84212110",
@@ -505,8 +505,8 @@ def generate_po_html(company: dict, vendor: dict) -> str:
                     </ul>
                 </li>
                 <li><strong>Packing Material:</strong> UV LED to be provided by buyer.</li>
-                <li><strong>Quality:</strong> All products must meet Aquapurite quality standards and pass inspection before acceptance.</li>
-                <li><strong>Serialization:</strong> Each unit must have individual barcode label as per Aquapurite serialization format.</li>
+                <li><strong>Quality:</strong> All products must meet ILMS.AI quality standards and pass inspection before acceptance.</li>
+                <li><strong>Serialization:</strong> Each unit must have individual barcode label as per ILMS.AI serialization format.</li>
                 <li><strong>Documentation:</strong> Packing list with barcode details (CSV/Excel) must accompany each shipment.</li>
                 <li>This PO is subject to the terms agreed in the Proforma Invoice {PI_REFERENCE}.</li>
                 <li>All disputes subject to Delhi jurisdiction.</li>
@@ -531,7 +531,7 @@ def generate_po_html(company: dict, vendor: dict) -> str:
 
         <!-- Footer -->
         <div class="footer">
-            This is a system generated Purchase Order from Aquapurite ERP | Document ID: {PO_NUMBER} | Generated on: {datetime.now().strftime("%d-%m-%Y %H:%M:%S")}
+            This is a system generated Purchase Order from ILMS.AI ERP | Document ID: {PO_NUMBER} | Generated on: {datetime.now().strftime("%d-%m-%Y %H:%M:%S")}
         </div>
     </div>
 </body>
@@ -547,8 +547,8 @@ async def main():
     print("=" * 80)
 
     async with async_session_factory() as db:
-        # Fetch company (Aquapurite) details using explicit column names
-        print("\n1. Fetching Aquapurite company details from master...")
+        # Fetch company (ILMS.AI) details using explicit column names
+        print("\n1. Fetching ILMS.AI company details from master...")
         result = await db.execute(text("""
             SELECT legal_name, trade_name, gstin, state_code, cin,
                    address_line1, address_line2, city, state, pincode,

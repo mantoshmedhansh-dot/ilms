@@ -24,7 +24,7 @@ import { toast } from 'sonner';
 import { formatCurrency } from '@/lib/utils';
 
 // API client
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://aquapurite-erp-api.onrender.com';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ilms-erp-api.onrender.com';
 
 interface TrackingEvent {
   status: string;

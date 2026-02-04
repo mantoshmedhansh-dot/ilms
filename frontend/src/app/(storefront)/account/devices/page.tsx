@@ -231,7 +231,7 @@ export default function DevicesPage() {
             <Cpu className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Devices Registered</h3>
             <p className="text-muted-foreground mb-4">
-              Register your Aquapurite water purifier to track warranty and book services.
+              Register your ILMS.AI water purifier to track warranty and book services.
             </p>
             <Button onClick={() => setShowAddDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />

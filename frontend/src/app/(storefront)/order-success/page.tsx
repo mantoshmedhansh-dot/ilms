@@ -152,7 +152,7 @@ function OrderSuccessContent() {
                 </div>
               </a>
               <a
-                href={`mailto:${company?.email || 'support@aquapurite.com'}`}
+                href={`mailto:${company?.email || 'support@ilms.ai'}`}
                 className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
               >
                 <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -161,7 +161,7 @@ function OrderSuccessContent() {
                 <div>
                   <p className="font-medium">Email Us</p>
                   <p className="text-sm text-muted-foreground">
-                    {company?.email || 'support@aquapurite.com'}
+                    {company?.email || 'support@ilms.ai'}
                   </p>
                 </div>
               </a>

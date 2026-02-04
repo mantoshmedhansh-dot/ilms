@@ -137,7 +137,7 @@ class ProductOrchestrationService:
             Unique 3-letter model code or None if cannot generate
         """
         # Remove common words that don't add meaning
-        skip_words = {'AQUAPURITE', 'WATER', 'PURIFIER', 'RO', 'UV', 'UF', 'FILTER',
+        skip_words = {'ILMS.AI', 'WATER', 'PURIFIER', 'RO', 'UV', 'UF', 'FILTER',
                       'THE', 'A', 'AN', 'WITH', 'AND', 'FOR', 'PLUS', 'PRO', 'LITE'}
 
         words = product.name.upper().split()

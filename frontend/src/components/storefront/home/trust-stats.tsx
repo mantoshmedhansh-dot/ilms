@@ -87,7 +87,7 @@ export default function TrustStats({ className, variant = 'default' }: TrustStat
             Trusted by Thousands of Indian Families
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Join the growing community of health-conscious families who trust Aquapurite
+            Join the growing community of health-conscious families who trust ILMS.AI
             for pure, safe drinking water every day.
           </p>
         </div>

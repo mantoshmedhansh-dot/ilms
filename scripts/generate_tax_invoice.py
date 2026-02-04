@@ -1,8 +1,8 @@
 """
-Generate Tax Invoice PDF for Aquapurite.
-This is the billing document Aquapurite (as seller) issues to customers after delivery.
+Generate Tax Invoice PDF for ILMS.AI.
+This is the billing document ILMS.AI (as seller) issues to customers after delivery.
 
-Aquapurite ERP System - Sales Document
+ILMS.AI ERP System - Sales Document
 """
 import asyncio
 import sys
@@ -68,11 +68,11 @@ def amount_to_words(amount):
 
 
 async def generate_tax_invoice():
-    """Generate Tax Invoice from Aquapurite."""
+    """Generate Tax Invoice from ILMS.AI."""
 
-    # Aquapurite Company Details (Seller)
+    # ILMS.AI Company Details (Seller)
     company = {
-        "name": "AQUAPURITE PRIVATE LIMITED",
+        "name": "ILMS.AI",
         "address_line1": "PLOT 36-A KH NO 181, DINDAPUR EXT",
         "address_line2": "PH-1, SHYAM VIHAR, Najafgarh",
         "city": "New Delhi",
@@ -84,8 +84,8 @@ async def generate_tax_invoice():
         "pan": "ABDCA6170C",
         "cin": "U74999DL2020PTC000000",
         "phone": "+91-11-12345678",
-        "email": "sales@aquapurite.com",
-        "website": "www.aquapurite.com",
+        "email": "sales@ilms.ai",
+        "website": "www.ilms.ai",
         "bank_name": "ICICI BANK",
         "bank_branch": "NAJAFGARH",
         "account_no": "123456789012",

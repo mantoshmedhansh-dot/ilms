@@ -41,10 +41,10 @@ export async function generateMetadata({
 
   return {
     title: `${category.name} - Water Purifiers`,
-    description: category.description || `Browse ${category.name} products at AQUAPURITE`,
+    description: category.description || `Browse ${category.name} products at ILMS.AI`,
     openGraph: {
       title: `${category.name} - Water Purifiers`,
-      description: category.description || `Browse ${category.name} products at AQUAPURITE`,
+      description: category.description || `Browse ${category.name} products at ILMS.AI`,
       images: category.image_url ? [category.image_url] : undefined,
       type: 'website',
     },

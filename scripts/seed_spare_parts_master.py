@@ -5,7 +5,7 @@ SP Code Format: SP + 3-letter Category Code + Sequence
 Example: SPSDF001 (Spare Part - Sediment Filter - 001)
 
 Barcode Format (16 chars): AP + SS + Y + M + CC + SSSSSSSS
-- AP = Aquapurite prefix
+- AP = ILMS.AI prefix
 - SS = Supplier code (FS=FastTrack, ST=STOS)
 - Y = Year (A=2026, B=2027, etc.)
 - M = Month (A=Jan, B=Feb, etc.)
@@ -16,7 +16,7 @@ Dual Series: Same item can have TWO barcode series based on supplier:
 - Economical (FastTrack): APFSAAEC00000001
 - Premium (STOS): APSTAAPR00000001
 
-Aquapurite ERP - Spare Parts Master
+ILMS.AI ERP - Spare Parts Master
 """
 import asyncio
 import sys
@@ -241,17 +241,17 @@ async def create_spare_parts_master():
             await db.flush()
             print(f"✓ Created category: {category.name}")
 
-        # Get Aquapurite brand
+        # Get ILMS.AI brand
         result = await db.execute(
-            select(Brand).where(Brand.name.ilike("%aquapurite%"))
+            select(Brand).where(Brand.name.ilike("%ilms%"))
         )
         brand = result.scalars().first()
 
         if not brand:
             brand = Brand(
-                name="Aquapurite",
-                slug="aquapurite",
-                description="Aquapurite Water Purification Systems",
+                name="ILMS.AI",
+                slug="ilms",
+                description="ILMS.AI Water Purification Systems",
                 is_active=True
             )
             db.add(brand)
@@ -366,7 +366,7 @@ async def create_spare_parts_master():
 ├─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
 │  Format: AP + SS + Y + M + CC + SSSSSSSS                                                                             │
 │                                                                                                                      │
-│  AP = Aquapurite prefix (2 chars)                                                                                    │
+│  AP = ILMS.AI prefix (2 chars)                                                                                    │
 │  SS = Supplier code (2 chars): FS=FastTrack, ST=STOS                                                                 │
 │  Y  = Year code (1 char): A=2026, B=2027, C=2028...                                                                  │
 │  M  = Month code (1 char): A=Jan, B=Feb, C=Mar...                                                                    │

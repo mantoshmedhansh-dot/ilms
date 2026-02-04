@@ -1,5 +1,5 @@
 /**
- * Aquapurite Theme Configuration
+ * ILMS.AI Theme Configuration
  *
  * Dark mode theme with Golden and Blue accents
  * Inspired by: Eureka Forbes, Atomberg, Havells

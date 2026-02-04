@@ -11,7 +11,7 @@ def run_setup():
         host='db.ywiurorfxrjvftcnenyk.supabase.co',
         port=6543,
         user='postgres',
-        password='Aquapurite2026',
+        password='ILMS.AI2026',
         dbname='postgres'
     )
 

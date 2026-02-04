@@ -63,7 +63,7 @@ class EncryptionService:
             self._secret = Fernet.generate_key().decode()
 
         # Default salt (should be unique per installation)
-        self._salt = os.getenv("ENCRYPTION_SALT", "aquapurite_erp_salt_2024").encode()
+        self._salt = os.getenv("ENCRYPTION_SALT", "ilms_erp_salt_2024").encode()
 
         # Initialize cipher
         self._fernet = self._create_cipher()
