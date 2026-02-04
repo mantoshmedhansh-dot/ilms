@@ -308,6 +308,25 @@ async def fix_tenant_schema(
         else:
             tables_skipped.append("regions")
 
+        # Check and add missing department column to roles table
+        try:
+            dept_check = await db.execute(text(f"""
+                SELECT 1 FROM information_schema.columns
+                WHERE table_schema = '{schema_name}'
+                AND table_name = 'roles'
+                AND column_name = 'department'
+            """))
+            dept_exists = dept_check.scalar() is not None
+
+            if not dept_exists:
+                await db.execute(text(f"""
+                    ALTER TABLE "{schema_name}".roles
+                    ADD COLUMN department VARCHAR(50)
+                """))
+                tables_created.append("roles.department column")
+        except Exception as dept_err:
+            logger.warning(f"Department column check/add skipped: {dept_err}")
+
         # Add foreign key to users.region_id if not exists
         # PostgreSQL doesn't support ADD CONSTRAINT IF NOT EXISTS, so check first
         try:
