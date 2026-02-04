@@ -4,6 +4,7 @@ from datetime import datetime, date
 from typing import AsyncGenerator
 from uuid import UUID
 
+from fastapi import Request
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import DateTime, event
@@ -172,7 +173,7 @@ async def get_tenant_session(schema: str) -> AsyncGenerator[AsyncSession, None]:
             await async_session.close()
 
 
-async def get_db_with_tenant(request) -> AsyncGenerator[AsyncSession, None]:
+async def get_db_with_tenant(request: Request) -> AsyncGenerator[AsyncSession, None]:
     """
     Dependency to get database session for current tenant
 
