@@ -329,14 +329,10 @@ class TenantSchemaService:
             # Step 2: Create auth tables (users, roles, user_roles)
             await self.create_tenant_tables(schema_name)
 
-            # Step 2.5 (Phase 6): Create ALL operational tables from SQLAlchemy models
-            # This creates 237 tables for full ERP functionality
-            try:
-                await self.create_all_operational_tables(schema_name)
-                logger.info(f"Phase 6: Operational tables created for '{schema_name}'")
-            except Exception as e:
-                logger.warning(f"Phase 6: Could not create operational tables: {e}")
-                # Continue with auth-only setup for now
+            # Step 2.5 (Phase 6): Operational tables are created on-demand
+            # Creating 237 tables at once times out on Supabase
+            # Tables will be created via migrations or when modules are activated
+            logger.info(f"Skipping bulk table creation - using on-demand approach")
 
             # Step 3: Seed default roles
             await self.seed_default_roles(schema_name)
