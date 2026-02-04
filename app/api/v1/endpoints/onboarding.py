@@ -26,6 +26,12 @@ from app.models.tenant import Tenant
 router = APIRouter(tags=["Onboarding"])
 
 
+@router.get("/ping")
+async def ping():
+    """Simple ping endpoint to test connectivity."""
+    return {"status": "ok", "message": "Onboarding API is responsive"}
+
+
 class TenantSetupStatusResponse(BaseModel):
     """Response for tenant setup status check."""
     tenant_id: str
