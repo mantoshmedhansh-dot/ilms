@@ -7,7 +7,7 @@ from uuid import UUID
 from fastapi import Request
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import DateTime, event
+from sqlalchemy import DateTime, event, text
 from sqlalchemy.dialects.postgresql import JSONB
 import psycopg
 from psycopg.types.json import set_json_dumps, set_json_loads
@@ -158,7 +158,7 @@ async def get_tenant_session(schema: str) -> AsyncGenerator[AsyncSession, None]:
     # Create connection with tenant schema
     async with engine.connect() as conn:
         # Set search_path to tenant schema
-        await conn.execute(f"SET search_path TO {schema}")
+        await conn.execute(text(f'SET search_path TO "{schema}"'))
 
         # Create session from connection
         async_session = AsyncSession(bind=conn, expire_on_commit=False)
