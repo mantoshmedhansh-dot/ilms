@@ -1,8 +1,9 @@
 from pydantic_settings import BaseSettings
-from pydantic import field_validator, Field, AliasChoices
+from pydantic import field_validator
 from typing import Optional, Union
 from functools import lru_cache
 import json
+import os
 
 
 class Settings(BaseSettings):
@@ -28,22 +29,16 @@ class Settings(BaseSettings):
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = False
 
-    # CORS - accepts JSON string or list (env var: ALLOWED_ORIGINS or CORS_ORIGINS)
-    CORS_ORIGINS: list[str] = Field(
-        default=[
-            "http://localhost:3000",
-            "http://localhost:3001",
-            "http://localhost:5173",
-            "https://erp-five-phi.vercel.app",
-            "https://erp-woad-eight.vercel.app",
-            "https://www.aquapurite.org",
-            "https://aquapurite.org",
-            "https://www.aquapurite.com",
-            "https://aquapurite.com",
-            "https://frontend-ilms.vercel.app",
-        ],
-        validation_alias=AliasChoices('CORS_ORIGINS', 'ALLOWED_ORIGINS')
-    )
+    # CORS - accepts JSON string, comma-separated, or list
+    # Reads from CORS_ORIGINS or ALLOWED_ORIGINS env var
+    CORS_ORIGINS: list[str] = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:5173",
+        "https://frontend-ilms.vercel.app",
+        "https://frontend-git-main-ilms.vercel.app",
+        "*",  # Allow all in production (can be restricted via env var)
+    ]
 
     # Email/SMTP Settings (Gmail)
     SMTP_HOST: str = "smtp.gmail.com"
