@@ -29,6 +29,9 @@ async def check_pending_payments():
     - captured -> Mark order as paid
     - failed -> Mark order as failed
     - expired -> Cancel order
+
+    Note: This job operates on tenant-specific tables. In a multi-tenant
+    system, it should be run per-tenant or disabled in public schema.
     """
     logger.info("Starting pending payments check...")
     start_time = datetime.now(timezone.utc)
@@ -38,6 +41,7 @@ async def check_pending_payments():
     try:
         from app.database import get_db_session
         from sqlalchemy import text
+        from sqlalchemy.exc import ProgrammingError
         import razorpay
         from app.config import settings
 
@@ -50,25 +54,31 @@ async def check_pending_payments():
             # Find orders with pending payment (older than 5 minutes)
             cutoff_time = datetime.now(timezone.utc) - timedelta(minutes=5)
 
-            result = await session.execute(
-                text("""
-                    SELECT
-                        id,
-                        order_number,
-                        razorpay_order_id,
-                        razorpay_payment_id,
-                        payment_status,
-                        created_at
-                    FROM orders
-                    WHERE payment_status = 'PENDING'
-                    AND razorpay_order_id IS NOT NULL
-                    AND created_at < :cutoff_time
-                    ORDER BY created_at ASC
-                    LIMIT 100
-                """),
-                {"cutoff_time": cutoff_time}
-            )
-            pending_orders = result.fetchall()
+            try:
+                result = await session.execute(
+                    text("""
+                        SELECT
+                            id,
+                            order_number,
+                            razorpay_order_id,
+                            razorpay_payment_id,
+                            payment_status,
+                            created_at
+                        FROM orders
+                        WHERE payment_status = 'PENDING'
+                        AND razorpay_order_id IS NOT NULL
+                        AND created_at < :cutoff_time
+                        ORDER BY created_at ASC
+                        LIMIT 100
+                    """),
+                    {"cutoff_time": cutoff_time}
+                )
+                pending_orders = result.fetchall()
+            except ProgrammingError as e:
+                if "does not exist" in str(e):
+                    logger.info("Pending payments check skipped: orders table not found (multi-tenant setup)")
+                    return
+                raise
 
             for order in pending_orders:
                 processed_count += 1
@@ -179,6 +189,9 @@ async def process_abandoned_carts():
     - Active (< 1 hour): No action
     - Abandoned (1-24 hours): Send reminder
     - Expired (> 24 hours): Release inventory, delete cart
+
+    Note: This job operates on tenant-specific tables. In a multi-tenant
+    system, it should be run per-tenant or disabled in public schema.
     """
     logger.info("Starting abandoned carts processing...")
     start_time = datetime.now(timezone.utc)
@@ -188,6 +201,7 @@ async def process_abandoned_carts():
     try:
         from app.database import get_db_session
         from sqlalchemy import text
+        from sqlalchemy.exc import ProgrammingError
 
         async with get_db_session() as session:
             # Find abandoned carts (1-24 hours old)
@@ -195,35 +209,41 @@ async def process_abandoned_carts():
             expired_cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
 
             # Get carts for reminder (1-24 hours old, reminder not sent)
-            result = await session.execute(
-                text("""
-                    SELECT
-                        c.id,
-                        c.user_id,
-                        c.session_id,
-                        c.updated_at,
-                        u.email,
-                        u.first_name,
-                        COUNT(ci.id) as item_count,
-                        SUM(ci.quantity * ci.unit_price) as cart_total
-                    FROM carts c
-                    LEFT JOIN users u ON c.user_id = u.id
-                    LEFT JOIN cart_items ci ON c.id = ci.cart_id
-                    WHERE c.updated_at < :abandoned_cutoff
-                    AND c.updated_at >= :expired_cutoff
-                    AND c.reminder_sent = false
-                    AND c.is_active = true
-                    GROUP BY c.id, c.user_id, c.session_id, c.updated_at,
-                             u.email, u.first_name
-                    HAVING COUNT(ci.id) > 0
-                    LIMIT 100
-                """),
-                {
-                    "abandoned_cutoff": abandoned_cutoff,
-                    "expired_cutoff": expired_cutoff
-                }
-            )
-            abandoned_carts = result.fetchall()
+            try:
+                result = await session.execute(
+                    text("""
+                        SELECT
+                            c.id,
+                            c.user_id,
+                            c.session_id,
+                            c.updated_at,
+                            u.email,
+                            u.first_name,
+                            COUNT(ci.id) as item_count,
+                            SUM(ci.quantity * ci.unit_price) as cart_total
+                        FROM carts c
+                        LEFT JOIN users u ON c.user_id = u.id
+                        LEFT JOIN cart_items ci ON c.id = ci.cart_id
+                        WHERE c.updated_at < :abandoned_cutoff
+                        AND c.updated_at >= :expired_cutoff
+                        AND c.reminder_sent = false
+                        AND c.is_active = true
+                        GROUP BY c.id, c.user_id, c.session_id, c.updated_at,
+                                 u.email, u.first_name
+                        HAVING COUNT(ci.id) > 0
+                        LIMIT 100
+                    """),
+                    {
+                        "abandoned_cutoff": abandoned_cutoff,
+                        "expired_cutoff": expired_cutoff
+                    }
+                )
+                abandoned_carts = result.fetchall()
+            except ProgrammingError as e:
+                if "does not exist" in str(e):
+                    logger.info("Abandoned carts processing skipped: carts table not found (multi-tenant setup)")
+                    return
+                raise
 
             for cart in abandoned_carts:
                 try:
@@ -328,40 +348,46 @@ async def queue_cart_reminder_email(
     try:
         from app.database import get_db_session
         from sqlalchemy import text
+        from sqlalchemy.exc import ProgrammingError
         import json
 
         async with get_db_session() as session:
-            await session.execute(
-                text("""
-                    INSERT INTO email_queue (
-                        recipient_email,
-                        template_type,
-                        template_data,
-                        scheduled_for,
-                        created_at
-                    ) VALUES (
-                        :email,
-                        'cart_reminder',
-                        :template_data,
-                        :scheduled_for,
-                        :created_at
-                    )
-                """),
-                {
-                    "email": email,
-                    "template_data": json.dumps({
-                        "first_name": first_name,
-                        "item_count": item_count,
-                        "cart_total": float(cart_total),
-                        "cart_url": "https://ilms.ai/cart"
-                    }),
-                    "scheduled_for": datetime.now(timezone.utc),
-                    "created_at": datetime.now(timezone.utc)
-                }
-            )
-            await session.commit()
-
-        logger.info(f"Cart reminder email queued for {email}")
+            try:
+                await session.execute(
+                    text("""
+                        INSERT INTO email_queue (
+                            recipient_email,
+                            template_type,
+                            template_data,
+                            scheduled_for,
+                            created_at
+                        ) VALUES (
+                            :email,
+                            'cart_reminder',
+                            :template_data,
+                            :scheduled_for,
+                            :created_at
+                        )
+                    """),
+                    {
+                        "email": email,
+                        "template_data": json.dumps({
+                            "first_name": first_name,
+                            "item_count": item_count,
+                            "cart_total": float(cart_total),
+                            "cart_url": "https://ilms.ai/cart"
+                        }),
+                        "scheduled_for": datetime.now(timezone.utc),
+                        "created_at": datetime.now(timezone.utc)
+                    }
+                )
+                await session.commit()
+                logger.info(f"Cart reminder email queued for {email}")
+            except ProgrammingError as e:
+                if "does not exist" in str(e):
+                    logger.info(f"Email queue skipped: email_queue table not found (multi-tenant setup)")
+                    return
+                raise
 
     except Exception as e:
         logger.error(f"Failed to queue cart reminder email: {e}")
@@ -372,29 +398,39 @@ async def update_order_tracking():
     Update order tracking information from logistics partners.
 
     This is called by the scheduler to fetch latest tracking updates.
+
+    Note: This job operates on tenant-specific tables. In a multi-tenant
+    system, it should be run per-tenant or disabled in public schema.
     """
     logger.info("Starting order tracking update...")
 
     try:
         from app.database import get_db_session
         from sqlalchemy import text
+        from sqlalchemy.exc import ProgrammingError
 
         async with get_db_session() as session:
             # Find orders in transit
-            result = await session.execute(
-                text("""
-                    SELECT
-                        id,
-                        order_number,
-                        awb_code,
-                        courier_name
-                    FROM orders
-                    WHERE status IN ('SHIPPED', 'IN_TRANSIT')
-                    AND awb_code IS NOT NULL
-                    LIMIT 50
-                """)
-            )
-            orders = result.fetchall()
+            try:
+                result = await session.execute(
+                    text("""
+                        SELECT
+                            id,
+                            order_number,
+                            awb_code,
+                            courier_name
+                        FROM orders
+                        WHERE status IN ('SHIPPED', 'IN_TRANSIT')
+                        AND awb_code IS NOT NULL
+                        LIMIT 50
+                    """)
+                )
+                orders = result.fetchall()
+            except ProgrammingError as e:
+                if "does not exist" in str(e):
+                    logger.info("Order tracking update skipped: orders table not found (multi-tenant setup)")
+                    return
+                raise
 
             for order in orders:
                 try:

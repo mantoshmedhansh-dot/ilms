@@ -65,6 +65,9 @@ async def refresh_serviceability_cache():
     This job runs every 15 minutes to keep the cache fresh.
     Fetches all serviceable pincodes and their delivery estimates
     from the database and updates Redis/in-memory cache.
+
+    Note: This job operates on tenant-specific tables. In a multi-tenant
+    system, it should be run per-tenant or disabled in public schema.
     """
     global _serviceability_cache, _cache_last_updated
 
@@ -75,24 +78,32 @@ async def refresh_serviceability_cache():
         # Import here to avoid circular imports
         from app.database import get_db_session
         from sqlalchemy import text
+        from sqlalchemy.exc import ProgrammingError
 
         async with get_db_session() as session:
-            # Fetch all serviceable areas from warehouse_serviceability table
-            result = await session.execute(
-                text("""
-                    SELECT
-                        pincode,
-                        city,
-                        state,
-                        is_serviceable,
-                        estimated_days,
-                        cod_available,
-                        shipping_cost
-                    FROM warehouse_serviceability
-                    WHERE is_active = true
-                """)
-            )
-            rows = result.fetchall()
+            # First check if the table exists (may not exist in public schema)
+            try:
+                # Fetch all serviceable areas from warehouse_serviceability table
+                result = await session.execute(
+                    text("""
+                        SELECT
+                            pincode,
+                            city,
+                            state,
+                            is_serviceable,
+                            estimated_days,
+                            cod_available,
+                            shipping_cost
+                        FROM warehouse_serviceability
+                        WHERE is_active = true
+                    """)
+                )
+                rows = result.fetchall()
+            except ProgrammingError as e:
+                if "does not exist" in str(e):
+                    logger.info("Serviceability cache refresh skipped: warehouse_serviceability table not found (multi-tenant setup)")
+                    return
+                raise
 
             # Build cache data
             cache_data = {}
@@ -148,6 +159,9 @@ async def warm_popular_pincodes():
 
     This job runs every 30 minutes to ensure popular areas
     always have fresh data available instantly.
+
+    Note: This job operates on tenant-specific tables. In a multi-tenant
+    system, it should be run per-tenant or disabled in public schema.
     """
     logger.info("Starting popular pincodes cache warming...")
     start_time = datetime.now(timezone.utc)
@@ -156,29 +170,36 @@ async def warm_popular_pincodes():
     try:
         from app.database import get_db_session
         from sqlalchemy import text
+        from sqlalchemy.exc import ProgrammingError
 
         async with get_db_session() as session:
             # Fetch data for popular pincodes
             placeholders = ", ".join([f":pin{i}" for i in range(len(POPULAR_PINCODES))])
             params = {f"pin{i}": pin for i, pin in enumerate(POPULAR_PINCODES)}
 
-            result = await session.execute(
-                text(f"""
-                    SELECT
-                        pincode,
-                        city,
-                        state,
-                        is_serviceable,
-                        estimated_days,
-                        cod_available,
-                        shipping_cost
-                    FROM warehouse_serviceability
-                    WHERE pincode IN ({placeholders})
-                    AND is_active = true
-                """),
-                params
-            )
-            rows = result.fetchall()
+            try:
+                result = await session.execute(
+                    text(f"""
+                        SELECT
+                            pincode,
+                            city,
+                            state,
+                            is_serviceable,
+                            estimated_days,
+                            cod_available,
+                            shipping_cost
+                        FROM warehouse_serviceability
+                        WHERE pincode IN ({placeholders})
+                        AND is_active = true
+                    """),
+                    params
+                )
+                rows = result.fetchall()
+            except ProgrammingError as e:
+                if "does not exist" in str(e):
+                    logger.info("Popular pincodes cache warming skipped: warehouse_serviceability table not found (multi-tenant setup)")
+                    return
+                raise
 
             # Update cache with high priority
             redis_client = await get_redis_client()
@@ -230,6 +251,9 @@ async def sync_inventory_cache():
 
     This job runs every 5 minutes to keep inventory data fresh
     for quick stock availability checks.
+
+    Note: This job operates on tenant-specific tables. In a multi-tenant
+    system, it should be run per-tenant or disabled in public schema.
     """
     global _inventory_cache
 
@@ -239,22 +263,29 @@ async def sync_inventory_cache():
     try:
         from app.database import get_db_session
         from sqlalchemy import text
+        from sqlalchemy.exc import ProgrammingError
 
         async with get_db_session() as session:
             # Fetch current inventory levels
-            result = await session.execute(
-                text("""
-                    SELECT
-                        product_id,
-                        sku,
-                        quantity_available,
-                        reserved_quantity,
-                        warehouse_id
-                    FROM inventory
-                    WHERE is_active = true
-                """)
-            )
-            rows = result.fetchall()
+            try:
+                result = await session.execute(
+                    text("""
+                        SELECT
+                            product_id,
+                            sku,
+                            quantity_available,
+                            reserved_quantity,
+                            warehouse_id
+                        FROM inventory
+                        WHERE is_active = true
+                    """)
+                )
+                rows = result.fetchall()
+            except ProgrammingError as e:
+                if "does not exist" in str(e):
+                    logger.info("Inventory cache sync skipped: inventory table not found (multi-tenant setup)")
+                    return
+                raise
 
             # Build inventory cache
             inventory_data = {}
