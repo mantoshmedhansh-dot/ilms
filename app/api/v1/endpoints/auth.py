@@ -25,7 +25,6 @@ router = APIRouter(tags=["Authentication"])
 
 
 @router.post("/login", response_model=TokenResponse)
-@require_module("system_admin")
 async def login(
     request: Request,
     data: LoginRequest,
@@ -65,10 +64,10 @@ async def login(
 
 
 @router.post("/refresh", response_model=TokenResponse)
-@require_module("system_admin")
 async def refresh_token(
+    request: Request,
     data: RefreshTokenRequest,
-    db: DB,
+    db: TenantDB,
 ):
     """
     Refresh access token using a valid refresh token.
@@ -158,10 +157,10 @@ password_reset_tokens: dict = {}
 
 
 @router.post("/forgot-password")
-@require_module("system_admin")
 async def forgot_password(
+    request: Request,
     data: ForgotPasswordRequest,
-    db: DB,
+    db: TenantDB,
 ):
     """
     Request a password reset. Generates a reset token and sends email.
@@ -220,10 +219,10 @@ async def forgot_password(
 
 
 @router.post("/reset-password")
-@require_module("system_admin")
 async def reset_password(
+    request: Request,
     data: ResetPasswordRequest,
-    db: DB,
+    db: TenantDB,
 ):
     """
     Reset password using a valid reset token.

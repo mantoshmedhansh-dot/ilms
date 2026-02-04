@@ -120,6 +120,9 @@ async def tenant_middleware(request: Request, call_next):
         "/api/v1/storefront",  # D2C public storefront
     ]
 
+    # Auth paths need tenant context but skip module check
+    # They get tenant from X-Tenant-ID header (sent by frontend)
+
     if request.url.path in public_routes:
         return await call_next(request)
 
