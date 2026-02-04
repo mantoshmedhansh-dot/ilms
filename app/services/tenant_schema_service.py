@@ -136,6 +136,23 @@ class TenantSchemaService:
                 )
             """))
 
+            # Create audit_logs table (for tracking login, permission changes, etc.)
+            await self.db.execute(text(f"""
+                CREATE TABLE IF NOT EXISTS "{schema_name}".audit_logs (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    user_id UUID REFERENCES "{schema_name}".users(id) ON DELETE SET NULL,
+                    action VARCHAR(50) NOT NULL,
+                    entity_type VARCHAR(50) NOT NULL,
+                    entity_id UUID,
+                    old_values JSONB,
+                    new_values JSONB,
+                    description TEXT,
+                    ip_address VARCHAR(50),
+                    user_agent VARCHAR(500),
+                    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+                )
+            """))
+
             # Create indexes
             await self.db.execute(text(f"""
                 CREATE INDEX IF NOT EXISTS idx_regions_code ON "{schema_name}".regions(code);
@@ -146,6 +163,9 @@ class TenantSchemaService:
                 CREATE INDEX IF NOT EXISTS idx_roles_code ON "{schema_name}".roles(code);
                 CREATE INDEX IF NOT EXISTS idx_user_roles_user ON "{schema_name}".user_roles(user_id);
                 CREATE INDEX IF NOT EXISTS idx_user_roles_role ON "{schema_name}".user_roles(role_id);
+                CREATE INDEX IF NOT EXISTS idx_audit_action ON "{schema_name}".audit_logs(action);
+                CREATE INDEX IF NOT EXISTS idx_audit_entity ON "{schema_name}".audit_logs(entity_type);
+                CREATE INDEX IF NOT EXISTS idx_audit_created ON "{schema_name}".audit_logs(created_at);
             """))
 
             await self.db.commit()

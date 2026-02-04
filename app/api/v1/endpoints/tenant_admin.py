@@ -308,6 +308,41 @@ async def fix_tenant_schema(
         else:
             tables_skipped.append("regions")
 
+        # Check and create audit_logs table
+        check_audit = await db.execute(text(f"""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables
+                WHERE table_schema = '{schema_name}'
+                AND table_name = 'audit_logs'
+            )
+        """))
+        audit_exists = check_audit.scalar()
+
+        if not audit_exists:
+            await db.execute(text(f"""
+                CREATE TABLE IF NOT EXISTS "{schema_name}".audit_logs (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    user_id UUID REFERENCES "{schema_name}".users(id) ON DELETE SET NULL,
+                    action VARCHAR(50) NOT NULL,
+                    entity_type VARCHAR(50) NOT NULL,
+                    entity_id UUID,
+                    old_values JSONB,
+                    new_values JSONB,
+                    description TEXT,
+                    ip_address VARCHAR(50),
+                    user_agent VARCHAR(500),
+                    created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+                )
+            """))
+            await db.execute(text(f"""
+                CREATE INDEX IF NOT EXISTS idx_audit_action ON "{schema_name}".audit_logs(action);
+                CREATE INDEX IF NOT EXISTS idx_audit_entity ON "{schema_name}".audit_logs(entity_type);
+                CREATE INDEX IF NOT EXISTS idx_audit_created ON "{schema_name}".audit_logs(created_at);
+            """))
+            tables_created.append("audit_logs")
+        else:
+            tables_skipped.append("audit_logs")
+
         # Check and add missing department column to roles table
         try:
             dept_check = await db.execute(text(f"""
