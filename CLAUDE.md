@@ -84,3 +84,5 @@ NEXT_PUBLIC_API_URL=https://ilms-z6dz.onrender.com
 4. **Database** - Hosted on Supabase (project: dhosrcfdjyuxozcxfbyh)
 
 # Last verified: Wed Feb  4 17:26:18 IST 2026
+
+# Vercel connected to correct repo: Wed Feb  4 19:19:47 IST 2026
