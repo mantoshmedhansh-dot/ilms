@@ -1,6 +1,9 @@
 """API endpoints for tenant administration (super admin)."""
 
+import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
+
+logger = logging.getLogger(__name__)
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
 from typing import Optional
@@ -306,20 +309,32 @@ async def fix_tenant_schema(
             tables_skipped.append("regions")
 
         # Add foreign key to users.region_id if not exists
-        # (PostgreSQL doesn't error if column already has FK, but let's check)
+        # PostgreSQL doesn't support ADD CONSTRAINT IF NOT EXISTS, so check first
         try:
-            await db.execute(text(f"""
-                ALTER TABLE "{schema_name}".users
-                ADD CONSTRAINT IF NOT EXISTS fk_users_region
-                FOREIGN KEY (region_id) REFERENCES "{schema_name}".regions(id) ON DELETE SET NULL
+            fk_check = await db.execute(text(f"""
+                SELECT 1 FROM information_schema.table_constraints
+                WHERE constraint_schema = '{schema_name}'
+                AND table_name = 'users'
+                AND constraint_name = 'fk_users_region'
             """))
-        except Exception:
-            pass  # FK might already exist
+            fk_exists = fk_check.scalar() is not None
+
+            if not fk_exists:
+                await db.execute(text(f"""
+                    ALTER TABLE "{schema_name}".users
+                    ADD CONSTRAINT fk_users_region
+                    FOREIGN KEY (region_id) REFERENCES "{schema_name}".regions(id) ON DELETE SET NULL
+                """))
+        except Exception as fk_err:
+            logger.warning(f"FK creation skipped: {fk_err}")
 
         # Create index on users.region_id if not exists
-        await db.execute(text(f"""
-            CREATE INDEX IF NOT EXISTS idx_users_region ON "{schema_name}".users(region_id);
-        """))
+        try:
+            await db.execute(text(f"""
+                CREATE INDEX IF NOT EXISTS idx_users_region ON "{schema_name}".users(region_id);
+            """))
+        except Exception as idx_err:
+            logger.warning(f"Index creation skipped: {idx_err}")
 
         await db.commit()
 
