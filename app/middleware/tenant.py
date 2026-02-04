@@ -100,6 +100,10 @@ async def tenant_middleware(request: Request, call_next):
 
     Public routes (health check, docs, etc.) skip tenant check.
     """
+    # Skip tenant check for OPTIONS (CORS preflight) requests
+    if request.method == "OPTIONS":
+        return await call_next(request)
+
     # Skip tenant check for public routes
     public_routes = [
         "/health",
