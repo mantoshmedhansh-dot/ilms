@@ -1,7 +1,15 @@
 """
-APScheduler Configuration
+APScheduler Configuration for Multi-Tenant SaaS
 
-Background job scheduler for periodic tasks.
+Background job scheduler with tenant-aware job execution.
+All jobs run across all active tenants with proper schema isolation.
+
+Architecture:
+- Jobs are registered with @tenant_job decorator
+- Scheduler triggers jobs at configured intervals
+- TenantJobRunner iterates through all active tenants
+- Each job runs in the correct tenant schema context
+- Failures in one tenant don't affect others
 """
 
 import logging
@@ -37,74 +45,83 @@ scheduler = AsyncIOScheduler(
 )
 
 
+async def run_tenant_aware_job(job_name: str):
+    """
+    Wrapper to run a tenant-aware job from the scheduler.
+
+    This function is called by APScheduler and delegates to the
+    TenantJobRunner which handles iterating through all tenants.
+    """
+    from app.jobs.tenant_job_runner import run_tenant_job
+
+    try:
+        result = await run_tenant_job(job_name)
+        logger.info(
+            f"Job '{job_name}' completed: "
+            f"{result.get('successful', 0)}/{result.get('tenant_count', 0)} tenants successful"
+        )
+    except Exception as e:
+        logger.error(f"Job '{job_name}' failed: {e}")
+
+
 def start_scheduler():
-    """Start the background job scheduler."""
+    """Start the background job scheduler with tenant-aware jobs."""
     if not scheduler.running:
-        # Import jobs here to avoid circular imports
-        from app.jobs.cache_jobs import (
-            refresh_serviceability_cache,
-            warm_popular_pincodes,
-            sync_inventory_cache,
-        )
-        from app.jobs.order_jobs import (
-            check_pending_payments,
-            process_abandoned_carts,
-        )
+        # Import tenant job runner to register jobs
+        # This import triggers @tenant_job decorators
+        from app.jobs import tenant_job_runner  # noqa: F401
 
-        # Add scheduled jobs
+        # ============================================================
+        # TENANT-AWARE SCHEDULED JOBS
+        # These jobs run across ALL active tenants
+        # ============================================================
 
-        # Cache refresh every 15 minutes
+        # Sync inventory cache every 5 minutes (per tenant)
         scheduler.add_job(
-            refresh_serviceability_cache,
-            'interval',
-            minutes=15,
-            id='refresh_serviceability_cache',
-            name='Refresh Serviceability Cache',
-            replace_existing=True,
-        )
-
-        # Warm popular pincodes every 30 minutes
-        scheduler.add_job(
-            warm_popular_pincodes,
-            'interval',
-            minutes=30,
-            id='warm_popular_pincodes',
-            name='Warm Popular Pincodes Cache',
-            replace_existing=True,
-        )
-
-        # Sync inventory cache every 5 minutes
-        scheduler.add_job(
-            sync_inventory_cache,
+            run_tenant_aware_job,
             'interval',
             minutes=5,
+            args=['sync_inventory_cache'],
             id='sync_inventory_cache',
-            name='Sync Inventory Cache',
+            name='[Multi-Tenant] Sync Inventory Cache',
             replace_existing=True,
         )
 
-        # Check pending payments every 10 minutes
+        # Refresh serviceability cache every 15 minutes (per tenant)
         scheduler.add_job(
-            check_pending_payments,
+            run_tenant_aware_job,
+            'interval',
+            minutes=15,
+            args=['refresh_serviceability_cache'],
+            id='refresh_serviceability_cache',
+            name='[Multi-Tenant] Refresh Serviceability Cache',
+            replace_existing=True,
+        )
+
+        # Check pending payments every 10 minutes (per tenant)
+        scheduler.add_job(
+            run_tenant_aware_job,
             'interval',
             minutes=10,
+            args=['check_pending_payments'],
             id='check_pending_payments',
-            name='Check Pending Payments',
+            name='[Multi-Tenant] Check Pending Payments',
             replace_existing=True,
         )
 
-        # Process abandoned carts every hour
+        # Process abandoned carts every hour (per tenant)
         scheduler.add_job(
-            process_abandoned_carts,
+            run_tenant_aware_job,
             'interval',
             hours=1,
+            args=['process_abandoned_carts'],
             id='process_abandoned_carts',
-            name='Process Abandoned Carts',
+            name='[Multi-Tenant] Process Abandoned Carts',
             replace_existing=True,
         )
 
         scheduler.start()
-        logger.info("Background job scheduler started")
+        logger.info("Multi-tenant background job scheduler started")
 
         # Log all scheduled jobs
         jobs = scheduler.get_jobs()
