@@ -1,8 +1,16 @@
 """
-Cache Management Jobs
+Cache Management Jobs (DEPRECATED - Use tenant_job_runner.py instead)
 
-Background jobs for managing serviceability cache, inventory sync,
-and warming popular pincode caches.
+These jobs are kept for backwards compatibility but are superseded by
+the tenant-aware job implementations in tenant_job_runner.py.
+
+For multi-tenant deployments:
+- Use @tenant_job decorator from tenant_job_runner.py
+- Jobs automatically run for all active tenants
+- Each tenant gets proper schema isolation
+
+WARNING: The global caches below are NOT tenant-isolated and should
+not be used in multi-tenant environments.
 """
 
 import logging
@@ -11,10 +19,15 @@ from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
-# In-memory cache for serviceability (fallback when Redis is unavailable)
+# DEPRECATED: Global caches are NOT tenant-isolated
+# In multi-tenant mode, use CacheService with tenant_id parameter
+# These are kept only for backwards compatibility in single-tenant mode
 _serviceability_cache: Dict[str, Any] = {}
 _inventory_cache: Dict[str, int] = {}
 _cache_last_updated: datetime = None
+
+# WARNING: Using these global caches in multi-tenant mode
+# will cause cross-tenant data leakage!
 
 # Popular pincodes to pre-warm (high traffic areas)
 POPULAR_PINCODES = [

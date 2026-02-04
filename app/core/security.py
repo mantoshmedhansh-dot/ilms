@@ -93,10 +93,13 @@ def create_access_token(
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
+    jti = str(uuid.uuid4())  # Unique token ID for blacklisting
+
     to_encode = {
         "sub": str(subject),
         "exp": expire,
         "iat": datetime.now(timezone.utc),
+        "jti": jti,
         "type": "access"
     }
 
@@ -130,10 +133,13 @@ def create_refresh_token(
     else:
         expire = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
 
+    jti = str(uuid.uuid4())  # Unique token ID for blacklisting
+
     to_encode = {
         "sub": str(subject),
         "exp": expire,
         "iat": datetime.now(timezone.utc),
+        "jti": jti,
         "type": "refresh"
     }
 
@@ -204,3 +210,104 @@ def verify_refresh_token(token: str) -> Optional[str]:
         return None
 
     return payload.get("sub")
+
+
+async def blacklist_token(
+    db,
+    token: str,
+    user_id: uuid.UUID,
+    tenant_id: Optional[uuid.UUID] = None
+) -> bool:
+    """
+    Add a token to the blacklist.
+
+    Args:
+        db: Database session (public schema)
+        token: The JWT token to blacklist
+        user_id: User ID who owns the token
+        tenant_id: Tenant ID (optional)
+
+    Returns:
+        True if token was blacklisted successfully
+    """
+    from app.models.tenant import TokenBlacklist
+
+    payload = decode_token(token)
+    if payload is None:
+        return False
+
+    jti = payload.get("jti")
+    if not jti:
+        return False  # Token doesn't have JTI, can't blacklist
+
+    token_type = payload.get("type", "access")
+    exp = payload.get("exp")
+
+    if exp:
+        expires_at = datetime.fromtimestamp(exp, tz=timezone.utc)
+    else:
+        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+
+    blacklist_entry = TokenBlacklist(
+        jti=jti,
+        token_type=token_type,
+        user_id=user_id,
+        tenant_id=tenant_id,
+        expires_at=expires_at
+    )
+
+    db.add(blacklist_entry)
+    return True
+
+
+async def is_token_blacklisted(db, token: str) -> bool:
+    """
+    Check if a token is blacklisted.
+
+    Args:
+        db: Database session (public schema)
+        token: The JWT token to check
+
+    Returns:
+        True if token is blacklisted, False otherwise
+    """
+    from sqlalchemy import select
+    from app.models.tenant import TokenBlacklist
+
+    payload = decode_token(token)
+    if payload is None:
+        return True  # Invalid token, treat as blacklisted
+
+    jti = payload.get("jti")
+    if not jti:
+        return False  # Old tokens without JTI, allow them
+
+    stmt = select(TokenBlacklist).where(TokenBlacklist.jti == jti)
+    result = await db.execute(stmt)
+    blacklisted = result.scalar_one_or_none()
+
+    return blacklisted is not None
+
+
+async def cleanup_expired_blacklist_entries(db) -> int:
+    """
+    Remove expired tokens from the blacklist.
+
+    Call this periodically (e.g., daily via cron job).
+
+    Args:
+        db: Database session (public schema)
+
+    Returns:
+        Number of entries removed
+    """
+    from sqlalchemy import delete
+    from app.models.tenant import TokenBlacklist
+
+    stmt = delete(TokenBlacklist).where(
+        TokenBlacklist.expires_at < datetime.now(timezone.utc)
+    )
+    result = await db.execute(stmt)
+    await db.commit()
+
+    return result.rowcount

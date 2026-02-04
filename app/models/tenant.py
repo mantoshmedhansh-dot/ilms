@@ -341,3 +341,33 @@ class UsageMetric(Base):
         nullable=False
     )
     metric_metadata: Mapped[dict] = mapped_column(JSONB, default=dict, nullable=False)
+
+
+class TokenBlacklist(Base):
+    """
+    Token blacklist for invalidating JWT tokens on logout.
+
+    Stores JTI (JWT ID) of invalidated tokens until they expire naturally.
+    A background job should periodically clean up expired entries.
+    """
+    __tablename__ = "token_blacklist"
+    __table_args__ = {'schema': 'public'}
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4
+    )
+    jti: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
+    token_type: Mapped[str] = mapped_column(String(20), nullable=False)  # 'access' or 'refresh'
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    tenant_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=True)
+    blacklisted_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False
+    )
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False
+    )

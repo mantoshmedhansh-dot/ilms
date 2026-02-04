@@ -1,4 +1,5 @@
 import secrets
+import uuid
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, HTTPException, status, Request
@@ -16,7 +17,7 @@ from app.schemas.auth import (
 from app.services.auth_service import AuthService
 from app.services.audit_service import AuditService
 from app.models.user import User
-from app.core.security import get_password_hash
+from app.core.security import get_password_hash, blacklist_token
 from app.services.email_service import get_email_service
 from app.config import settings
 from app.core.module_decorators import require_module
@@ -101,11 +102,28 @@ async def logout(
     db: DB,
 ):
     """
-    Logout current user (log the action).
-    Note: JWT tokens are stateless, so actual invalidation
-    would require a token blacklist (not implemented here).
+    Logout current user and invalidate the current token.
+
+    Blacklists the current access token so it cannot be reused.
     """
     audit_service = AuditService(db)
+
+    # Get the current token from authorization header
+    auth_header = request.headers.get("authorization", "")
+    if auth_header.startswith("Bearer "):
+        token = auth_header[7:]
+        # Get tenant_id from request state if available
+        tenant_id = getattr(request.state, "tenant_id", None)
+        if tenant_id:
+            tenant_id = uuid.UUID(tenant_id) if isinstance(tenant_id, str) else tenant_id
+
+        # Blacklist the token
+        await blacklist_token(
+            db=db,
+            token=token,
+            user_id=current_user.id,
+            tenant_id=tenant_id
+        )
 
     await audit_service.log_user_logout(
         user_id=current_user.id,
@@ -113,7 +131,7 @@ async def logout(
     )
     await db.commit()
 
-    return {"message": "Successfully logged out"}
+    return {"message": "Successfully logged out. Token has been invalidated."}
 
 
 @router.get("/me")

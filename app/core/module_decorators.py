@@ -1,7 +1,8 @@
 """
-Module access control decorators
+Module access control decorators for Multi-Tenant SaaS
 
-Provides decorators to check if tenant has access to specific modules
+Provides decorators to check if tenant has access to specific modules.
+Includes automatic cache cleanup to prevent memory bloat.
 """
 from functools import wraps
 from fastapi import HTTPException, Request, status
@@ -14,7 +15,29 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Cache for module access checks (to reduce database queries)
+# Format: {cache_key: (has_access, cache_time)}
 _module_access_cache = {}
+
+# Maximum cache entries before cleanup (prevents unbounded growth)
+_MAX_CACHE_ENTRIES = 10000
+
+# Cache TTL in seconds
+_CACHE_TTL_SECONDS = 300  # 5 minutes
+
+
+def _cleanup_expired_cache_entries():
+    """Remove expired entries from the module access cache."""
+    global _module_access_cache
+    now = datetime.now(timezone.utc)
+    expired_keys = [
+        key for key, (_, cache_time) in _module_access_cache.items()
+        if (now - cache_time).total_seconds() >= _CACHE_TTL_SECONDS
+    ]
+    for key in expired_keys:
+        del _module_access_cache[key]
+
+    if expired_keys:
+        logger.debug(f"Cleaned up {len(expired_keys)} expired cache entries")
 
 
 def require_module(module_code: str):
@@ -68,8 +91,8 @@ def require_module(module_code: str):
             cache_key = f"{tenant_id}:{module_code}"
             if cache_key in _module_access_cache:
                 has_access, cache_time = _module_access_cache[cache_key]
-                # Cache valid for 5 minutes
-                if (datetime.now(timezone.utc) - cache_time).seconds < 300:
+                # Cache valid for configured TTL
+                if (datetime.now(timezone.utc) - cache_time).total_seconds() < _CACHE_TTL_SECONDS:
                     if not has_access:
                         raise HTTPException(
                             status_code=status.HTTP_403_FORBIDDEN,
@@ -77,6 +100,13 @@ def require_module(module_code: str):
                         )
                     # Access granted, proceed
                     return await func(*args, **kwargs)
+                else:
+                    # Entry expired, remove it
+                    del _module_access_cache[cache_key]
+
+            # Cleanup if cache is getting too large
+            if len(_module_access_cache) > _MAX_CACHE_ENTRIES:
+                _cleanup_expired_cache_entries()
 
             # Check if module is enabled for this tenant
             from app.database import async_session_maker

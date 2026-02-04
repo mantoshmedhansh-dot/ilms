@@ -285,3 +285,81 @@ class TenantAdminService:
 
         result = await self.db.execute(query)
         return list(result.scalars().all())
+
+    async def delete_tenant(
+        self,
+        tenant_id: uuid.UUID,
+        drop_schema: bool = True,
+        reason: Optional[str] = None
+    ) -> dict:
+        """
+        Delete a tenant and optionally drop their database schema.
+
+        WARNING: This is a destructive operation and cannot be undone.
+
+        Args:
+            tenant_id: Tenant UUID
+            drop_schema: Whether to drop the tenant's database schema
+            reason: Reason for deletion
+
+        Returns:
+            Dictionary with deletion status
+        """
+        # Get tenant
+        tenant_stmt = select(Tenant).where(Tenant.id == tenant_id)
+        tenant_result = await self.db.execute(tenant_stmt)
+        tenant = tenant_result.scalar_one_or_none()
+
+        if not tenant:
+            raise ValueError(f"Tenant {tenant_id} not found")
+
+        schema_name = tenant.database_schema
+        subdomain = tenant.subdomain
+
+        # Drop the schema if requested
+        schema_dropped = False
+        if drop_schema and schema_name:
+            from app.services.tenant_schema_service import TenantSchemaService
+            schema_service = TenantSchemaService(self.db)
+            try:
+                await schema_service.drop_tenant_schema(schema_name)
+                schema_dropped = True
+            except Exception as e:
+                # Log but continue with tenant deletion
+                import logging
+                logging.getLogger(__name__).error(f"Failed to drop schema {schema_name}: {e}")
+
+        # Delete subscriptions first (foreign key constraint)
+        from sqlalchemy import delete
+        await self.db.execute(
+            delete(TenantSubscription).where(TenantSubscription.tenant_id == tenant_id)
+        )
+
+        # Delete billing history
+        await self.db.execute(
+            delete(BillingHistory).where(BillingHistory.tenant_id == tenant_id)
+        )
+
+        # Delete usage metrics
+        await self.db.execute(
+            delete(UsageMetric).where(UsageMetric.tenant_id == tenant_id)
+        )
+
+        # Delete feature flags
+        from app.models.tenant import FeatureFlag
+        await self.db.execute(
+            delete(FeatureFlag).where(FeatureFlag.tenant_id == tenant_id)
+        )
+
+        # Delete the tenant
+        await self.db.delete(tenant)
+        await self.db.commit()
+
+        return {
+            "success": True,
+            "tenant_id": str(tenant_id),
+            "subdomain": subdomain,
+            "schema_dropped": schema_dropped,
+            "reason": reason,
+            "message": f"Tenant '{subdomain}' deleted successfully"
+        }

@@ -12,63 +12,96 @@ from app.jobs.scheduler import start_scheduler, shutdown_scheduler
 
 
 async def auto_seed_admin():
-    """Create admin user on startup if no users exist."""
-    from sqlalchemy import select, func
-    from app.models.user import User, UserRole
-    from app.models.role import Role, RoleLevel
-    from app.core.security import get_password_hash
+    """
+    DEPRECATED: This function is for single-tenant mode only.
+
+    In multi-tenant mode, admin users are created per-tenant during
+    the onboarding process (see TenantSchemaService.create_admin_user).
+
+    This function is kept for backwards compatibility but skips execution
+    in multi-tenant deployments (when tenants table exists).
+    """
+    from sqlalchemy import select, func, text
+    from sqlalchemy.exc import ProgrammingError
 
     try:
         async with async_session_factory() as session:
-            # Check if any users exist
-            result = await session.execute(select(func.count(User.id)))
-            user_count = result.scalar()
-
-            if user_count == 0:
-                print("No users found. Creating admin user...")
-
-                # First, ensure super_admin role exists
-                role_result = await session.execute(
-                    select(Role).where(Role.code == "super_admin")
+            # Check if this is a multi-tenant deployment
+            try:
+                result = await session.execute(
+                    text("SELECT COUNT(*) FROM public.tenants")
                 )
-                role = role_result.scalar_one_or_none()
+                tenant_count = result.scalar() or 0
 
-                if not role:
-                    role = Role(
-                        name="Super Admin",
-                        code="super_admin",
-                        description="Full system access",
-                        level=RoleLevel.SUPER_ADMIN,
-                        is_system=True,
+                if tenant_count > 0:
+                    print(f"Multi-tenant mode detected ({tenant_count} tenants). "
+                          f"Skipping auto-seed - admins created during onboarding.")
+                    return
+            except ProgrammingError:
+                # tenants table doesn't exist - this is single-tenant mode
+                pass
+
+            # Single-tenant mode: check if users table exists and seed admin
+            try:
+                from app.models.user import User, UserRole
+                from app.models.role import Role, RoleLevel
+                from app.core.security import get_password_hash
+
+                result = await session.execute(select(func.count(User.id)))
+                user_count = result.scalar()
+
+                if user_count == 0:
+                    print("No users found. Creating admin user...")
+
+                    # First, ensure super_admin role exists
+                    role_result = await session.execute(
+                        select(Role).where(Role.code == "super_admin")
                     )
-                    session.add(role)
+                    role = role_result.scalar_one_or_none()
+
+                    if not role:
+                        role = Role(
+                            name="Super Admin",
+                            code="super_admin",
+                            description="Full system access",
+                            level=RoleLevel.SUPER_ADMIN,
+                            is_system=True,
+                        )
+                        session.add(role)
+                        await session.flush()
+                        print("  Created super_admin role")
+
+                    # Create admin user
+                    admin = User(
+                        email="admin@ilms.ai",
+                        phone="+919999999999",
+                        password_hash=get_password_hash("Admin@123"),
+                        first_name="Super",
+                        last_name="Admin",
+                        employee_code="EMP001",
+                        department="Administration",
+                        designation="System Administrator",
+                        is_active=True,
+                        is_verified=True,
+                    )
+                    session.add(admin)
                     await session.flush()
-                    print("  Created super_admin role")
 
-                # Create admin user
-                admin = User(
-                    email="admin@ilms.ai",
-                    phone="+919999999999",
-                    password_hash=get_password_hash("Admin@123"),
-                    first_name="Super",
-                    last_name="Admin",
-                    employee_code="EMP001",
-                    department="Administration",
-                    designation="System Administrator",
-                    is_active=True,
-                    is_verified=True,
-                )
-                session.add(admin)
-                await session.flush()
+                    # Assign role
+                    user_role = UserRole(user_id=admin.id, role_id=role.id)
+                    session.add(user_role)
 
-                # Assign role
-                user_role = UserRole(user_id=admin.id, role_id=role.id)
-                session.add(user_role)
+                    await session.commit()
+                    print(f"  Created admin user: admin@ilms.ai / Admin@123")
+                else:
+                    print(f"Found {user_count} existing users. Skipping auto-seed.")
 
-                await session.commit()
-                print(f"  Created admin user: admin@ilms.ai / Admin@123")
-            else:
-                print(f"Found {user_count} existing users. Skipping auto-seed.")
+            except ProgrammingError as e:
+                if "does not exist" in str(e):
+                    print("Users table not found (multi-tenant setup). Skipping auto-seed.")
+                else:
+                    raise
+
     except Exception as e:
         import traceback
         print(f"Auto-seed error: {e}")
