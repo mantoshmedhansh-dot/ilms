@@ -88,3 +88,5 @@ NEXT_PUBLIC_API_URL=https://ilms-z6dz.onrender.com
 # Vercel connected to correct repo: Wed Feb  4 19:19:47 IST 2026
 
 # Root directory fix verified: Wed Feb  4 19:33:31 IST 2026
+
+# API URL env var added: Wed Feb  4 20:22:54 IST 2026
