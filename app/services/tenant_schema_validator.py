@@ -147,7 +147,7 @@ class TenantSchemaValidator:
         # First validate to find issues
         validation = await self.validate_schema(schema_name)
 
-        if validation.is_valid:
+        if validation.is_valid and len(validation.issues) == 0:
             return {
                 "success": True,
                 "message": "Schema is valid, no fixes needed",
