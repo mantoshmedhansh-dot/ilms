@@ -511,3 +511,264 @@ async def list_tenant_users(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to list users: {str(e)}")
+
+
+# =============================================================================
+# SCHEMA VALIDATION ENDPOINTS (Structural Solution)
+# =============================================================================
+
+@router.get("/tenants/{tenant_id}/validate-schema")
+async def validate_tenant_schema(
+    tenant_id: UUID,
+    db: AsyncSession = DB
+):
+    """
+    Validate a tenant's schema against expected structure.
+
+    Returns a detailed report of:
+    - Missing tables
+    - Missing columns
+    - Missing indexes
+    - Other schema issues
+
+    TODO: Requires SUPER_ADMIN role in production.
+    """
+    from sqlalchemy import select
+    from app.models.tenant import Tenant
+    from app.services.tenant_schema_validator import TenantSchemaValidator
+
+    try:
+        # Get tenant
+        tenant_stmt = select(Tenant).where(Tenant.id == tenant_id)
+        tenant_result = await db.execute(tenant_stmt)
+        tenant = tenant_result.scalar_one_or_none()
+
+        if not tenant:
+            raise HTTPException(status_code=404, detail=f"Tenant {tenant_id} not found")
+
+        # Validate schema
+        validator = TenantSchemaValidator(db)
+        validation = await validator.validate_schema(tenant.database_schema)
+
+        return {
+            "tenant_id": str(tenant_id),
+            "tenant_name": tenant.name,
+            **validation.to_dict()
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Schema validation failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Validation failed: {str(e)}")
+
+
+@router.post("/tenants/{tenant_id}/repair-schema")
+async def repair_tenant_schema(
+    tenant_id: UUID,
+    dry_run: bool = Query(False, description="If true, only report what would be fixed"),
+    db: AsyncSession = DB
+):
+    """
+    Repair a tenant's schema by fixing all identified issues.
+
+    This endpoint will:
+    1. Validate the schema
+    2. Create missing tables
+    3. Add missing columns
+    4. Create missing indexes
+
+    Use dry_run=true to preview changes without applying them.
+
+    TODO: Requires SUPER_ADMIN role in production.
+    """
+    from sqlalchemy import select
+    from app.models.tenant import Tenant
+    from app.services.tenant_schema_validator import TenantSchemaValidator
+
+    try:
+        # Get tenant
+        tenant_stmt = select(Tenant).where(Tenant.id == tenant_id)
+        tenant_result = await db.execute(tenant_stmt)
+        tenant = tenant_result.scalar_one_or_none()
+
+        if not tenant:
+            raise HTTPException(status_code=404, detail=f"Tenant {tenant_id} not found")
+
+        # Repair schema
+        validator = TenantSchemaValidator(db)
+        repair_result = await validator.fix_schema(
+            tenant.database_schema,
+            dry_run=dry_run
+        )
+
+        # Get post-repair validation if not dry run
+        post_validation = None
+        if not dry_run:
+            post_val = await validator.validate_schema(tenant.database_schema)
+            post_validation = post_val.to_dict()
+
+        return {
+            "tenant_id": str(tenant_id),
+            "tenant_name": tenant.name,
+            "schema": tenant.database_schema,
+            "dry_run": dry_run,
+            **repair_result,
+            "post_repair_validation": post_validation
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Schema repair failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Repair failed: {str(e)}")
+
+
+@router.post("/validate-all-schemas")
+async def validate_all_tenant_schemas(
+    db: AsyncSession = DB
+):
+    """
+    Validate schemas for ALL tenants.
+
+    Returns a summary of schema health across all tenants.
+    Use this for periodic health checks.
+
+    TODO: Requires SUPER_ADMIN role in production.
+    """
+    from sqlalchemy import select
+    from app.models.tenant import Tenant
+    from app.services.tenant_schema_validator import TenantSchemaValidator
+
+    try:
+        # Get all active tenants
+        tenants_stmt = select(Tenant).where(Tenant.status.in_(['active', 'pending']))
+        tenants_result = await db.execute(tenants_stmt)
+        tenants = tenants_result.scalars().all()
+
+        validator = TenantSchemaValidator(db)
+        results = []
+        summary = {
+            "total_tenants": len(tenants),
+            "healthy": 0,
+            "issues_found": 0,
+            "critical_issues": 0
+        }
+
+        for tenant in tenants:
+            try:
+                validation = await validator.validate_schema(tenant.database_schema)
+                tenant_result = {
+                    "tenant_id": str(tenant.id),
+                    "tenant_name": tenant.name,
+                    "schema": tenant.database_schema,
+                    "is_valid": validation.is_valid,
+                    "issues_count": len(validation.issues),
+                    "critical_count": len([i for i in validation.issues if i.severity == "CRITICAL"]),
+                    "tables_missing": validation.tables_missing
+                }
+                results.append(tenant_result)
+
+                if validation.is_valid:
+                    summary["healthy"] += 1
+                else:
+                    summary["issues_found"] += 1
+                    if tenant_result["critical_count"] > 0:
+                        summary["critical_issues"] += 1
+
+            except Exception as e:
+                results.append({
+                    "tenant_id": str(tenant.id),
+                    "tenant_name": tenant.name,
+                    "error": str(e)
+                })
+                summary["issues_found"] += 1
+
+        return {
+            "summary": summary,
+            "tenants": results
+        }
+
+    except Exception as e:
+        logger.error(f"Bulk validation failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Validation failed: {str(e)}")
+
+
+@router.post("/repair-all-schemas")
+async def repair_all_tenant_schemas(
+    dry_run: bool = Query(True, description="Default true for safety - set false to apply fixes"),
+    db: AsyncSession = DB
+):
+    """
+    Repair schemas for ALL tenants.
+
+    WARNING: This modifies database schemas. Use dry_run=true first!
+
+    TODO: Requires SUPER_ADMIN role in production.
+    """
+    from sqlalchemy import select
+    from app.models.tenant import Tenant
+    from app.services.tenant_schema_validator import TenantSchemaValidator
+
+    try:
+        # Get all active tenants
+        tenants_stmt = select(Tenant).where(Tenant.status.in_(['active', 'pending']))
+        tenants_result = await db.execute(tenants_stmt)
+        tenants = tenants_result.scalars().all()
+
+        validator = TenantSchemaValidator(db)
+        results = []
+        summary = {
+            "total_tenants": len(tenants),
+            "already_valid": 0,
+            "repaired": 0,
+            "repair_failed": 0,
+            "dry_run": dry_run
+        }
+
+        for tenant in tenants:
+            try:
+                # First validate
+                validation = await validator.validate_schema(tenant.database_schema)
+
+                if validation.is_valid:
+                    results.append({
+                        "tenant_id": str(tenant.id),
+                        "tenant_name": tenant.name,
+                        "status": "already_valid"
+                    })
+                    summary["already_valid"] += 1
+                else:
+                    # Repair needed
+                    repair_result = await validator.fix_schema(
+                        tenant.database_schema,
+                        dry_run=dry_run
+                    )
+                    results.append({
+                        "tenant_id": str(tenant.id),
+                        "tenant_name": tenant.name,
+                        "status": "repaired" if repair_result["success"] else "repair_failed",
+                        "fixes": repair_result
+                    })
+                    if repair_result["success"]:
+                        summary["repaired"] += 1
+                    else:
+                        summary["repair_failed"] += 1
+
+            except Exception as e:
+                results.append({
+                    "tenant_id": str(tenant.id),
+                    "tenant_name": tenant.name,
+                    "status": "error",
+                    "error": str(e)
+                })
+                summary["repair_failed"] += 1
+
+        return {
+            "summary": summary,
+            "tenants": results
+        }
+
+    except Exception as e:
+        logger.error(f"Bulk repair failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Repair failed: {str(e)}")
