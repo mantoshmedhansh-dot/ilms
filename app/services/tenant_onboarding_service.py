@@ -251,16 +251,13 @@ class TenantOnboardingService:
         country: Optional[str] = None,
     ) -> Tuple[Tenant, uuid.UUID, str, str, int]:
         """
-        Complete tenant registration flow (Phase 3A + 3B).
+        Register tenant (Phase 3A) and queue schema setup (Phase 3B).
 
         This creates:
-        1. Tenant record in public.tenants
+        1. Tenant record in public.tenants (status: pending)
         2. Module subscriptions
-        3. Tenant database schema
-        4. All ERP tables in tenant schema
-        5. Default roles
-        6. Admin user
-        7. JWT tokens for immediate login
+        3. Stores admin credentials for later setup
+        4. Returns immediately - schema created in background
 
         Args:
             company_name: Company name
@@ -288,7 +285,7 @@ class TenantOnboardingService:
         if not is_valid:
             raise ValueError(error_message)
 
-        # 3. Create tenant
+        # 3. Create tenant with pending_setup status
         tenant = await self.create_tenant(
             company_name=company_name,
             subdomain=subdomain,
@@ -304,33 +301,35 @@ class TenantOnboardingService:
             billing_cycle="monthly"
         )
 
-        # 5. Commit tenant and subscriptions
-        await self.db.commit()
-
-        # 6. Create tenant schema and admin user (Phase 3B)
-        schema_service = TenantSchemaService(self.db)
+        # 5. Store admin credentials for background setup
         admin_user_id = uuid.uuid4()
         admin_password_hash = get_password_hash(admin_password)
 
+        tenant.settings["pending_admin"] = {
+            "user_id": str(admin_user_id),
+            "email": admin_email,
+            "password_hash": admin_password_hash,
+            "first_name": admin_first_name,
+            "last_name": admin_last_name,
+            "phone": admin_phone,
+        }
+        tenant.status = "pending_setup"
+
+        # 6. Commit tenant and subscriptions
+        await self.db.commit()
+
+        # 7. Try to complete setup immediately (with timeout handling)
+        # If it fails, background job will retry
         try:
-            await schema_service.complete_tenant_setup(
-                tenant_id=tenant.id,
-                schema_name=tenant.database_schema,
-                admin_email=admin_email,
-                admin_password_hash=admin_password_hash,
-                admin_first_name=admin_first_name,
-                admin_last_name=admin_last_name,
-                admin_phone=admin_phone,
-                admin_user_id=admin_user_id
-            )
+            await self.complete_tenant_setup_internal(tenant, admin_user_id)
         except Exception as e:
-            # If schema creation fails, mark tenant as failed and re-raise
-            tenant.status = "failed"
+            # Setup failed - will be retried via background job or manual retry
+            tenant.status = "setup_pending"
             tenant.settings["setup_error"] = str(e)
             await self.db.commit()
-            raise ValueError(f"Tenant setup failed: {e}")
+            # Don't raise - return tenant in pending state
 
-        # 7. Generate tokens (using actual admin user ID)
+        # 8. Generate tokens (user can check status while waiting)
         access_token, refresh_token, expires_in = await self.generate_tokens(
             tenant_id=tenant.id,
             user_id=admin_user_id,
@@ -338,3 +337,79 @@ class TenantOnboardingService:
         )
 
         return tenant, admin_user_id, access_token, refresh_token, expires_in
+
+    async def complete_tenant_setup_internal(self, tenant: Tenant, admin_user_id: uuid.UUID) -> bool:
+        """
+        Complete tenant schema setup (internal helper).
+
+        Args:
+            tenant: Tenant object with pending_admin in settings
+            admin_user_id: Pre-generated admin user ID
+
+        Returns:
+            True if setup completed successfully
+        """
+        pending_admin = tenant.settings.get("pending_admin", {})
+        if not pending_admin:
+            raise ValueError("No pending admin credentials found")
+
+        schema_service = TenantSchemaService(self.db)
+
+        await schema_service.complete_tenant_setup(
+            tenant_id=tenant.id,
+            schema_name=tenant.database_schema,
+            admin_email=pending_admin["email"],
+            admin_password_hash=pending_admin["password_hash"],
+            admin_first_name=pending_admin["first_name"],
+            admin_last_name=pending_admin["last_name"],
+            admin_phone=pending_admin.get("phone"),
+            admin_user_id=admin_user_id
+        )
+
+        # Clear sensitive data and mark as active
+        del tenant.settings["pending_admin"]
+        if "setup_error" in tenant.settings:
+            del tenant.settings["setup_error"]
+        tenant.status = "active"
+        await self.db.commit()
+
+        return True
+
+    async def retry_tenant_setup(self, tenant_id: uuid.UUID) -> Tuple[bool, str]:
+        """
+        Retry setup for a failed/pending tenant.
+
+        Args:
+            tenant_id: UUID of the tenant to retry
+
+        Returns:
+            (success, message)
+        """
+        from sqlalchemy import select
+
+        # Get tenant
+        stmt = select(Tenant).where(Tenant.id == tenant_id)
+        result = await self.db.execute(stmt)
+        tenant = result.scalar_one_or_none()
+
+        if not tenant:
+            return False, "Tenant not found"
+
+        if tenant.status == "active":
+            return True, "Tenant is already active"
+
+        if tenant.status not in ("pending_setup", "setup_pending", "pending", "failed"):
+            return False, f"Cannot retry tenant with status: {tenant.status}"
+
+        pending_admin = tenant.settings.get("pending_admin")
+        if not pending_admin:
+            return False, "No pending admin credentials - cannot retry setup"
+
+        try:
+            admin_user_id = uuid.UUID(pending_admin["user_id"])
+            await self.complete_tenant_setup_internal(tenant, admin_user_id)
+            return True, "Tenant setup completed successfully"
+        except Exception as e:
+            tenant.settings["setup_error"] = str(e)
+            await self.db.commit()
+            return False, f"Setup failed: {str(e)}"
