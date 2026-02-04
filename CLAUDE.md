@@ -50,8 +50,9 @@
 - **Dashboard:** https://supabase.com/dashboard/project/dhosrcfdjyuxozcxfbyh
 - **Project ID:** dhosrcfdjyuxozcxfbyh
 - **Pooler Host:** aws-1-ap-southeast-2.pooler.supabase.com
-- **Port:** 6543
-- **DATABASE_URL Format:** `postgresql+psycopg://postgres.dhosrcfdjyuxozcxfbyh:[PASSWORD]@aws-1-ap-southeast-2.pooler.supabase.com:6543/postgres`
+- **Session Mode (recommended):** Port 5432 - for schema creation and long transactions
+- **Transaction Mode:** Port 6543 - for short queries only
+- **DATABASE_URL Format:** `postgresql+psycopg://postgres.dhosrcfdjyuxozcxfbyh:[PASSWORD]@aws-1-ap-southeast-2.pooler.supabase.com:5432/postgres`
 
 ---
 

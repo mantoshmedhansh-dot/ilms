@@ -318,16 +318,9 @@ class TenantOnboardingService:
         # 6. Commit tenant and subscriptions
         await self.db.commit()
 
-        # 7. Try to complete setup immediately (with timeout handling)
-        # If it fails, background job will retry
-        try:
-            await self.complete_tenant_setup_internal(tenant, admin_user_id)
-        except Exception as e:
-            # Setup failed - will be retried via background job or manual retry
-            tenant.status = "setup_pending"
-            tenant.settings["setup_error"] = str(e)
-            await self.db.commit()
-            # Don't raise - return tenant in pending state
+        # 7. Schema setup is deferred - user must call retry endpoint
+        # This ensures registration returns quickly without timeout
+        # The retry endpoint will complete the schema setup
 
         # 8. Generate tokens (user can check status while waiting)
         access_token, refresh_token, expires_in = await self.generate_tokens(
