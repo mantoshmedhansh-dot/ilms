@@ -373,6 +373,54 @@ async def fix_tenant_schema(
         raise HTTPException(status_code=500, detail=f"Failed to fix schema: {str(e)}")
 
 
+@router.post("/tenants/{tenant_id}/reset-admin-password")
+async def reset_admin_password(
+    tenant_id: UUID,
+    new_password: str = Query(..., description="New password for admin"),
+    db: AsyncSession = DB
+):
+    """
+    Reset admin user password for a tenant.
+
+    TODO: Requires SUPER_ADMIN role in production.
+    """
+    from sqlalchemy import text, select
+    from app.models.tenant import Tenant
+    from app.core.security import get_password_hash
+
+    try:
+        # Get tenant
+        tenant_stmt = select(Tenant).where(Tenant.id == tenant_id)
+        tenant_result = await db.execute(tenant_stmt)
+        tenant = tenant_result.scalar_one_or_none()
+
+        if not tenant:
+            raise HTTPException(status_code=404, detail=f"Tenant {tenant_id} not found")
+
+        schema_name = tenant.database_schema
+        password_hash = get_password_hash(new_password)
+
+        # Update first user's password (admin)
+        await db.execute(text(f"""
+            UPDATE "{schema_name}".users
+            SET password_hash = :password_hash, updated_at = NOW()
+            WHERE id = (SELECT id FROM "{schema_name}".users ORDER BY created_at LIMIT 1)
+        """), {"password_hash": password_hash})
+
+        await db.commit()
+
+        return {
+            "success": True,
+            "message": "Admin password reset successfully"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to reset password: {str(e)}")
+
+
 @router.get("/tenants/{tenant_id}/users")
 async def list_tenant_users(
     tenant_id: UUID,
