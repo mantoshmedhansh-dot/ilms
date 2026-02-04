@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload, joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
+from app.database import get_db, get_db_with_tenant
 from app.core.security import verify_access_token
 from app.core.permissions import PermissionChecker
 from app.models.user import User, UserRole
@@ -175,5 +175,6 @@ def require_role_level(level: RoleLevel):
 
 # Type aliases for cleaner endpoint signatures
 CurrentUser = Annotated[User, Depends(get_current_user)]
-DB = Annotated[AsyncSession, Depends(get_db)]
+DB = Annotated[AsyncSession, Depends(get_db)]  # Public schema (for tenant management)
+TenantDB = Annotated[AsyncSession, Depends(get_db_with_tenant)]  # Tenant schema (for user data)
 Permissions = Annotated[PermissionChecker, Depends(get_permission_checker)]

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, HTTPException, status, Request
 from sqlalchemy import select
 
-from app.api.deps import DB, CurrentUser
+from app.api.deps import DB, TenantDB, CurrentUser
 from app.schemas.auth import (
     LoginRequest,
     RefreshTokenRequest,
@@ -29,7 +29,7 @@ router = APIRouter(tags=["Authentication"])
 async def login(
     request: Request,
     data: LoginRequest,
-    db: DB,
+    db: TenantDB,
 ):
     """
     Authenticate user and return access/refresh tokens.
