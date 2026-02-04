@@ -371,3 +371,60 @@ async def fix_tenant_schema(
     except Exception as e:
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to fix schema: {str(e)}")
+
+
+@router.get("/tenants/{tenant_id}/users")
+async def list_tenant_users(
+    tenant_id: UUID,
+    db: AsyncSession = DB
+):
+    """
+    List users in a tenant schema (for debugging).
+
+    TODO: Requires SUPER_ADMIN role in production.
+    """
+    from sqlalchemy import text, select
+    from app.models.tenant import Tenant
+
+    try:
+        # Get tenant
+        tenant_stmt = select(Tenant).where(Tenant.id == tenant_id)
+        tenant_result = await db.execute(tenant_stmt)
+        tenant = tenant_result.scalar_one_or_none()
+
+        if not tenant:
+            raise HTTPException(status_code=404, detail=f"Tenant {tenant_id} not found")
+
+        schema_name = tenant.database_schema
+
+        # Get users from tenant schema
+        users_query = await db.execute(text(f"""
+            SELECT id, email, first_name, last_name, is_active, is_verified, created_at
+            FROM "{schema_name}".users
+            ORDER BY created_at DESC
+            LIMIT 50
+        """))
+        users = users_query.fetchall()
+
+        return {
+            "tenant_id": str(tenant_id),
+            "schema": schema_name,
+            "user_count": len(users),
+            "users": [
+                {
+                    "id": str(u[0]),
+                    "email": u[1],
+                    "first_name": u[2],
+                    "last_name": u[3],
+                    "is_active": u[4],
+                    "is_verified": u[5],
+                    "created_at": str(u[6])
+                }
+                for u in users
+            ]
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to list users: {str(e)}")
