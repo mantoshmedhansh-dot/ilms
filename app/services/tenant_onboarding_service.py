@@ -6,6 +6,8 @@ from typing import List, Optional, Tuple
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from sqlalchemy.orm.attributes import flag_modified
+
 from app.models.tenant import Tenant, ErpModule, Plan, TenantSubscription
 from app.core.security import get_password_hash, create_access_token
 from app.config import settings
@@ -314,6 +316,9 @@ class TenantOnboardingService:
             "phone": admin_phone,
         }
         tenant.status = "pending_setup"
+
+        # Mark JSONB column as modified (SQLAlchemy doesn't track dict mutations)
+        flag_modified(tenant, "settings")
 
         # 6. Commit tenant and subscriptions
         await self.db.commit()
