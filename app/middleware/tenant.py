@@ -117,6 +117,7 @@ async def tenant_middleware(request: Request, call_next):
         "/static",
         "/api/v1/onboarding",  # Tenant onboarding (Phase 3)
         "/api/v1/admin",  # Platform administration (Phase 3D)
+        "/api/v1/super-admin",  # Super admin routes (no tenant context needed)
         "/api/v1/storefront",  # D2C public storefront
     ]
 
