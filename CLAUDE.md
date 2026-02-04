@@ -8,10 +8,10 @@
 - **Account:** mantoshmedhansh-dot
 
 ### Vercel (Frontend)
-- **Dashboard:** https://vercel.com/ilms/ilmsfrontend
+- **Dashboard:** https://vercel.com/ilms/frontend
 - **Team:** ilms
-- **Project:** ilmsfrontend
-- **Production URL:** https://ilmsfrontend.vercel.app
+- **Project:** frontend
+- **Production URL:** https://frontend-ilms.vercel.app
 - **Account:** mantoshmedhansh-dot
 
 ### Render (Backend API)
