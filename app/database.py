@@ -66,7 +66,8 @@ else:
         pool_timeout=settings.DB_POOL_TIMEOUT,  # Seconds to wait for connection (default: 30)
         pool_recycle=settings.DB_POOL_RECYCLE,  # Recycle connections after N seconds (default: 1800)
         connect_args={
-            "prepare_threshold": None,  # Disable prepared statements to avoid DuplicatePreparedStatement errors
+            "prepare_threshold": None,  # Disable prepared statements for Supabase Pooler
+            "connect_timeout": 30,  # Connection timeout in seconds
         },
     )
 

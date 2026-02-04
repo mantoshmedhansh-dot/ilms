@@ -12,11 +12,11 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str
 
-    # Database Connection Pool Settings
-    DB_POOL_SIZE: int = 10  # Base number of connections in pool
-    DB_MAX_OVERFLOW: int = 20  # Extra connections allowed beyond pool_size
-    DB_POOL_TIMEOUT: int = 30  # Seconds to wait for connection from pool
-    DB_POOL_RECYCLE: int = 1800  # Recycle connections after 30 minutes
+    # Database Connection Pool Settings (optimized for Supabase Pooler)
+    DB_POOL_SIZE: int = 5  # Base number of connections in pool
+    DB_MAX_OVERFLOW: int = 10  # Extra connections allowed beyond pool_size
+    DB_POOL_TIMEOUT: int = 60  # Seconds to wait for connection from pool
+    DB_POOL_RECYCLE: int = 300  # Recycle connections every 5 minutes (Supabase Pooler)
 
     # JWT Settings
     SECRET_KEY: str
