@@ -242,3 +242,98 @@ async def get_billing_history(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get billing history: {str(e)}")
+
+
+@router.post("/tenants/{tenant_id}/fix-schema")
+async def fix_tenant_schema(
+    tenant_id: UUID,
+    db: AsyncSession = DB
+):
+    """
+    Fix tenant schema by adding missing tables (regions, etc.).
+
+    This endpoint repairs tenant schemas that were created before
+    all required tables were added to the schema creation process.
+
+    TODO: Requires SUPER_ADMIN role in production.
+    """
+    from sqlalchemy import text, select
+    from app.models.tenant import Tenant
+
+    try:
+        # Get tenant
+        tenant_stmt = select(Tenant).where(Tenant.id == tenant_id)
+        tenant_result = await db.execute(tenant_stmt)
+        tenant = tenant_result.scalar_one_or_none()
+
+        if not tenant:
+            raise HTTPException(status_code=404, detail=f"Tenant {tenant_id} not found")
+
+        schema_name = tenant.database_schema
+        tables_created = []
+        tables_skipped = []
+
+        # Check and create regions table
+        check_regions = await db.execute(text(f"""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables
+                WHERE table_schema = '{schema_name}'
+                AND table_name = 'regions'
+            )
+        """))
+        regions_exists = check_regions.scalar()
+
+        if not regions_exists:
+            await db.execute(text(f"""
+                CREATE TABLE IF NOT EXISTS "{schema_name}".regions (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    name VARCHAR(100) NOT NULL,
+                    code VARCHAR(50) UNIQUE NOT NULL,
+                    type VARCHAR(20) NOT NULL DEFAULT 'CITY',
+                    parent_id UUID REFERENCES "{schema_name}".regions(id) ON DELETE SET NULL,
+                    description TEXT,
+                    is_active BOOLEAN DEFAULT TRUE,
+                    created_at TIMESTAMPTZ DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ DEFAULT NOW()
+                )
+            """))
+            await db.execute(text(f"""
+                CREATE INDEX IF NOT EXISTS idx_regions_code ON "{schema_name}".regions(code);
+                CREATE INDEX IF NOT EXISTS idx_regions_parent ON "{schema_name}".regions(parent_id);
+            """))
+            tables_created.append("regions")
+        else:
+            tables_skipped.append("regions")
+
+        # Add foreign key to users.region_id if not exists
+        # (PostgreSQL doesn't error if column already has FK, but let's check)
+        try:
+            await db.execute(text(f"""
+                ALTER TABLE "{schema_name}".users
+                ADD CONSTRAINT IF NOT EXISTS fk_users_region
+                FOREIGN KEY (region_id) REFERENCES "{schema_name}".regions(id) ON DELETE SET NULL
+            """))
+        except Exception:
+            pass  # FK might already exist
+
+        # Create index on users.region_id if not exists
+        await db.execute(text(f"""
+            CREATE INDEX IF NOT EXISTS idx_users_region ON "{schema_name}".users(region_id);
+        """))
+
+        await db.commit()
+
+        return {
+            "success": True,
+            "tenant_id": str(tenant_id),
+            "schema": schema_name,
+            "tables_created": tables_created,
+            "tables_skipped": tables_skipped,
+            "message": f"Schema fix completed. Created: {tables_created}, Skipped (already exist): {tables_skipped}"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to fix schema: {str(e)}")

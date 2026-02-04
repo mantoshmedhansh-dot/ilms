@@ -58,7 +58,7 @@ class TenantSchemaService:
         """
         Create essential auth tables in the tenant schema.
 
-        Creates: users, roles, user_roles
+        Creates: regions, roles, users, user_roles
         These are minimum tables needed for role seeding and admin user creation.
 
         Args:
@@ -71,6 +71,21 @@ class TenantSchemaService:
             # Set search path to tenant schema
             await self.db.execute(text(f'SET search_path TO "{schema_name}"'))
 
+            # Create regions table FIRST (users references it)
+            await self.db.execute(text(f"""
+                CREATE TABLE IF NOT EXISTS "{schema_name}".regions (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    name VARCHAR(100) NOT NULL,
+                    code VARCHAR(50) UNIQUE NOT NULL,
+                    type VARCHAR(20) NOT NULL DEFAULT 'CITY',
+                    parent_id UUID REFERENCES "{schema_name}".regions(id) ON DELETE SET NULL,
+                    description TEXT,
+                    is_active BOOLEAN DEFAULT TRUE,
+                    created_at TIMESTAMPTZ DEFAULT NOW(),
+                    updated_at TIMESTAMPTZ DEFAULT NOW()
+                )
+            """))
+
             # Create roles table
             await self.db.execute(text(f"""
                 CREATE TABLE IF NOT EXISTS "{schema_name}".roles (
@@ -79,6 +94,7 @@ class TenantSchemaService:
                     code VARCHAR(50) UNIQUE NOT NULL,
                     description TEXT,
                     level VARCHAR(50) NOT NULL,
+                    department VARCHAR(50),
                     is_system BOOLEAN DEFAULT FALSE,
                     is_active BOOLEAN DEFAULT TRUE,
                     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -86,7 +102,7 @@ class TenantSchemaService:
                 )
             """))
 
-            # Create users table
+            # Create users table (references regions)
             await self.db.execute(text(f"""
                 CREATE TABLE IF NOT EXISTS "{schema_name}".users (
                     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -99,7 +115,7 @@ class TenantSchemaService:
                     employee_code VARCHAR(50) UNIQUE,
                     department VARCHAR(100),
                     designation VARCHAR(100),
-                    region_id UUID,
+                    region_id UUID REFERENCES "{schema_name}".regions(id) ON DELETE SET NULL,
                     is_active BOOLEAN DEFAULT TRUE,
                     is_verified BOOLEAN DEFAULT FALSE,
                     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -122,8 +138,11 @@ class TenantSchemaService:
 
             # Create indexes
             await self.db.execute(text(f"""
+                CREATE INDEX IF NOT EXISTS idx_regions_code ON "{schema_name}".regions(code);
+                CREATE INDEX IF NOT EXISTS idx_regions_parent ON "{schema_name}".regions(parent_id);
                 CREATE INDEX IF NOT EXISTS idx_users_email ON "{schema_name}".users(email);
                 CREATE INDEX IF NOT EXISTS idx_users_phone ON "{schema_name}".users(phone);
+                CREATE INDEX IF NOT EXISTS idx_users_region ON "{schema_name}".users(region_id);
                 CREATE INDEX IF NOT EXISTS idx_roles_code ON "{schema_name}".roles(code);
                 CREATE INDEX IF NOT EXISTS idx_user_roles_user ON "{schema_name}".user_roles(user_id);
                 CREATE INDEX IF NOT EXISTS idx_user_roles_role ON "{schema_name}".user_roles(role_id);
