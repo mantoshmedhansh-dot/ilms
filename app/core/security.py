@@ -9,16 +9,14 @@ from app.config import settings
 
 
 # Password hashing context with multi-algorithm support
-# - argon2 is the preferred algorithm (winner of Password Hashing Competition)
-# - bcrypt is deprecated but supported for migrating existing passwords
+# - bcrypt is now default (faster, widely supported, still secure)
+# - argon2 supported for new high-security requirements
 pwd_context = CryptContext(
-    schemes=["argon2", "bcrypt"],
-    default="argon2",
-    deprecated=["bcrypt"],
-    # Argon2 settings (secure defaults)
-    argon2__memory_cost=65536,  # 64 MB
-    argon2__time_cost=3,
-    argon2__parallelism=4,
+    schemes=["bcrypt", "argon2"],
+    default="bcrypt",
+    deprecated=[],
+    # Bcrypt settings (secure and fast)
+    bcrypt__rounds=12,  # Good balance of security and speed
 )
 
 
