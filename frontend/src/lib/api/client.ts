@@ -1,12 +1,14 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID || '';
 
 // Create axios instance - increased timeout for Render.com cold starts
 export const apiClient: AxiosInstance = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,
   headers: {
     'Content-Type': 'application/json',
+    ...(TENANT_ID && { 'X-Tenant-ID': TENANT_ID }),
   },
   timeout: 60000, // 60 seconds to handle Render.com cold starts
 });
