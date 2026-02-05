@@ -123,6 +123,7 @@ async def tenant_middleware(request: Request, call_next):
         "/api/v1/admin",  # Platform administration (Phase 3D)
         "/api/v1/super-admin",  # Super admin routes (no tenant context needed)
         "/api/v1/storefront",  # D2C public storefront
+        "/api/v1/dom/atp",  # DOM ATP check for checkout (public)
     ]
 
     # Auth paths need tenant context but skip module check

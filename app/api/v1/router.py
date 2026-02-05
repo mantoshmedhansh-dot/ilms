@@ -105,6 +105,8 @@ from app.api.v1.endpoints import (
     kitting,
     # Returns Management (Reverse Logistics & Return Processing)
     returns_management,
+    # Warehouse Billing (Storage & Operations Billing)
+    warehouse_billing,
     # Call Center CRM
     call_center,
     # Lead Management
@@ -466,6 +468,13 @@ api_router.include_router(
     returns_management.router,
     prefix="/returns",
     tags=["Returns Management"]
+)
+
+# ==================== Warehouse Billing (Storage & Operations Billing) ====================
+api_router.include_router(
+    warehouse_billing.router,
+    prefix="/warehouse-billing",
+    tags=["Warehouse Billing"]
 )
 
 # ==================== Call Center CRM ====================
