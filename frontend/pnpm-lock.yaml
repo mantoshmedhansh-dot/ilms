@@ -86,6 +86,9 @@ importers:
       '@tanstack/react-table':
         specifier: ^8.21.3
         version: 8.21.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      '@tiptap/core':
+        specifier: ^2.27.2
+        version: 2.27.2(@tiptap/pm@2.27.2)
       '@tiptap/extension-image':
         specifier: ^2.27.2
         version: 2.27.2(@tiptap/core@2.27.2(@tiptap/pm@2.27.2))

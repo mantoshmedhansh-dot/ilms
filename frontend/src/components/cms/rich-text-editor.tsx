@@ -70,7 +70,8 @@ function MenuBar({ editor }: MenuBarProps) {
 
   const addImage = useCallback(() => {
     if (imageUrl) {
-      editor.chain().focus().setImage({ src: imageUrl }).run();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (editor.chain().focus() as any).setImage({ src: imageUrl }).run();
     }
     setImageUrl('');
     setShowImagePopover(false);
@@ -272,28 +273,33 @@ export function RichTextEditor({
     setMounted(true);
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const extensions: any[] = [
+    StarterKit.configure({
+      heading: {
+        levels: [2, 3],
+      },
+    }),
+    Image.configure({
+      inline: false,
+      allowBase64: true,
+      HTMLAttributes: {
+        class: 'max-w-full h-auto rounded-lg',
+      },
+    }),
+    Link.configure({
+      openOnClick: false,
+      HTMLAttributes: {
+        class: 'text-primary underline',
+      },
+    }),
+    Placeholder.configure({
+      placeholder,
+    }),
+  ];
+
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        heading: {
-          levels: [2, 3],
-        },
-      }),
-      Image.configure({
-        HTMLAttributes: {
-          class: 'max-w-full h-auto rounded-lg',
-        },
-      }),
-      Link.configure({
-        openOnClick: false,
-        HTMLAttributes: {
-          class: 'text-primary underline',
-        },
-      }),
-      Placeholder.configure({
-        placeholder,
-      }),
-    ],
+    extensions,
     content,
     onUpdate: ({ editor }) => {
       onChange?.(editor.getHTML());
