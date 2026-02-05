@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useRef } from 'react';
 import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sidebar, Header } from '@/components/layout';
 import { useAuth } from '@/providers';
+import { getAccessToken } from '@/lib/api/client';
 
 export default function DashboardLayout({
   children,
@@ -13,31 +13,62 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const hasRedirected = useRef(false);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      // Redirect to tenant-specific login if tenant is known
+    // Prevent multiple redirects
+    if (hasRedirected.current) return;
+
+    // Wait until loading is complete
+    if (isLoading) return;
+
+    // If not authenticated, redirect to login
+    if (!isAuthenticated) {
+      hasRedirected.current = true;
+
+      // Check if we have tokens but auth still failed (API issue)
+      const token = getAccessToken();
+      const tenantId = localStorage.getItem('tenant_id');
+
+      console.log('[DashboardLayout] Auth failed', {
+        hasToken: !!token,
+        hasTenantId: !!tenantId,
+        isAuthenticated,
+        isLoading,
+      });
+
+      // Use full page reload to avoid React state issues
       const subdomain = localStorage.getItem('tenant_subdomain');
       if (subdomain) {
-        router.push(`/t/${subdomain}/login`);
+        window.location.href = `/t/${subdomain}/login`;
       } else {
-        router.push('/login');
+        window.location.href = '/login';
       }
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading]);
 
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground mt-2">Loading...</p>
+        </div>
       </div>
     );
   }
 
   if (!isAuthenticated) {
-    return null;
+    // Show loading while redirect happens
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground mt-2">Redirecting to login...</p>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { authApi } from '@/lib/api';
-import { setTokens } from '@/lib/api/client';
+import { setTokens, getAccessToken } from '@/lib/api/client';
 import { useAuth } from '@/providers';
 
 const loginSchema = z.object({
@@ -26,17 +26,43 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export default function TenantLoginPage() {
   const params = useParams();
-  const router = useRouter();
-  const { refreshUser } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const tenant = params.tenant as string;
   const [isLoading, setIsLoading] = useState(false);
   const [tenantName, setTenantName] = useState<string>('');
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const hasRedirected = useRef(false);
 
   useEffect(() => {
     // Get tenant name from localStorage (set by layout)
     const name = localStorage.getItem('tenant_name');
     if (name) setTenantName(name);
+
+    // Check if user is already logged in
+    const token = getAccessToken();
+    const tenantId = localStorage.getItem('tenant_id');
+
+    if (token && tenantId) {
+      // User has valid session, redirect to dashboard
+      console.log('[Login] User already has token, redirecting to dashboard');
+      if (!hasRedirected.current) {
+        hasRedirected.current = true;
+        window.location.href = '/dashboard';
+        return;
+      }
+    }
+
+    setIsCheckingAuth(false);
   }, []);
+
+  // Also check auth state from provider
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && !hasRedirected.current) {
+      console.log('[Login] User authenticated via provider, redirecting');
+      hasRedirected.current = true;
+      window.location.href = '/dashboard';
+    }
+  }, [authLoading, isAuthenticated]);
 
   const {
     register,
@@ -65,6 +91,15 @@ export default function TenantLoginPage() {
       setIsLoading(false);
     }
   };
+
+  // Show loading while checking auth
+  if (isCheckingAuth || (authLoading && !isLoading)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/50">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/50 p-4">

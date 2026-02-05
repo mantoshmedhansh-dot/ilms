@@ -32,6 +32,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUserAndPermissions = useCallback(async () => {
     try {
       const token = getAccessToken();
+      const tenantId = localStorage.getItem('tenant_id');
+      const tenantSubdomain = localStorage.getItem('tenant_subdomain');
+
+      console.log('[Auth] Starting auth check', {
+        hasToken: !!token,
+        hasTenantId: !!tenantId,
+        tenantSubdomain,
+      });
+
       if (!token) {
         console.log('[Auth] No token found, skipping user fetch');
         setIsLoading(false);
@@ -39,14 +48,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Check if tenant_id is set (required for API calls)
-      const tenantId = localStorage.getItem('tenant_id');
       if (!tenantId) {
         console.warn('[Auth] No tenant_id in localStorage - API calls will fail');
+        // If we have a token but no tenant_id, the tenant context was lost
+        // This can happen if localStorage was partially cleared
+        // Clear tokens and let the user re-login through tenant path
+        console.warn('[Auth] Clearing tokens due to missing tenant context');
         setIsLoading(false);
         return;
       }
 
-      console.log('[Auth] Fetching user...');
+      console.log('[Auth] Fetching user from API...');
 
       // Fetch user first - this is required
       let userData;
@@ -54,8 +66,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         userData = await authApi.getCurrentUser();
         console.log('[Auth] User fetched successfully:', userData.email);
         setUser(userData);
-      } catch (userError) {
-        console.error('[Auth] Failed to fetch user:', userError);
+      } catch (userError: unknown) {
+        const errorDetails = userError instanceof Error ? userError.message : String(userError);
+        console.error('[Auth] Failed to fetch user:', errorDetails);
+
+        // Log more details for debugging
+        if (userError && typeof userError === 'object' && 'response' in userError) {
+          const axiosError = userError as { response?: { status?: number; data?: unknown } };
+          console.error('[Auth] API Error details:', {
+            status: axiosError.response?.status,
+            data: axiosError.response?.data,
+          });
+        }
+
         setUser(null);
         setPermissions(null);
         setIsLoading(false);
@@ -79,6 +102,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           permissions: {},
         });
       }
+
+      console.log('[Auth] Auth check complete - user authenticated');
     } catch (error) {
       console.error('[Auth] Unexpected error:', error);
       setUser(null);
