@@ -93,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (permError) {
         console.warn('[Auth] Failed to fetch permissions, using defaults:', permError);
         // For SUPER_ADMIN, set default permissions flag
-        const isSuperAdmin = userData.roles?.some((r: { code: string }) => r.code === 'SUPER_ADMIN');
+        const isSuperAdmin = userData.roles?.some((r: { code: string }) => r.code === 'SUPER_ADMIN') ?? false;
         setPermissions({
           is_super_admin: isSuperAdmin,
           roles: userData.roles,
