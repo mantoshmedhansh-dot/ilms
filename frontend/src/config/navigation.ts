@@ -158,12 +158,15 @@ export const navigation: NavItem[] = [
       { title: 'Sales Channels', href: '/dashboard/channels', icon: Network, permissions: ['ORDERS_VIEW'] },
       { title: 'Marketplaces', href: '/dashboard/channels/marketplaces', icon: Store, permissions: ['ORDERS_VIEW'] },
       { title: 'Channel Pricing', href: '/dashboard/channels/pricing', icon: DollarSign, permissions: ['ORDERS_VIEW'] },
+      // Omnichannel
+      { title: 'Omnichannel (BOPIS)', href: '/dashboard/omnichannel', icon: Store, permissions: ['ORDERS_VIEW'] },
       // Distribution Network
       { title: 'Dealers', href: '/dashboard/distribution/dealers', icon: Handshake, permissions: ['ORDERS_VIEW'] },
       { title: 'Franchisees', href: '/dashboard/distribution/franchisees', icon: Building2, permissions: ['ORDERS_VIEW'] },
       { title: 'Pricing Tiers', href: '/dashboard/distribution/pricing-tiers', icon: Layers, permissions: ['ORDERS_VIEW'] },
       // Promotions
       { title: 'Promotions', href: '/dashboard/marketing/promotions', icon: BadgePercent, permissions: ['MARKETING_VIEW'] },
+      { title: 'Coupons', href: '/dashboard/marketing/coupons', icon: BadgePercent, permissions: ['MARKETING_VIEW'] },
       { title: 'Sales Commissions', href: '/dashboard/marketing/commissions', icon: Banknote, permissions: ['MARKETING_VIEW'] },
     ],
   },
@@ -179,6 +182,7 @@ export const navigation: NavItem[] = [
       { title: 'Customer 360', href: '/dashboard/crm/customer-360', icon: Target, permissions: ['CRM_VIEW'] },
       { title: 'Leads', href: '/dashboard/crm/leads', icon: UserPlus, permissions: ['CRM_VIEW'] },
       { title: 'Call Center', href: '/dashboard/crm/call-center', icon: Phone, permissions: ['CRM_VIEW'] },
+      { title: 'Abandoned Carts', href: '/dashboard/crm/abandoned-carts', icon: ShoppingCart, permissions: ['CRM_VIEW'] },
     ],
   },
 
@@ -196,6 +200,8 @@ export const navigation: NavItem[] = [
       { title: 'Partner Commissions', href: '/dashboard/partners/commissions', icon: Wallet, permissions: [] },
       { title: 'Payouts', href: '/dashboard/partners/payouts', icon: Banknote, permissions: [] },
       { title: 'Partner Orders', href: '/dashboard/partners/orders', icon: ShoppingCart, permissions: [] },
+      { title: 'Partner Training', href: '/dashboard/partners/training', icon: GraduationCap, permissions: [] },
+      { title: 'Referrals', href: '/dashboard/partners/referrals', icon: UserPlus, permissions: [] },
     ],
   },
 
@@ -266,9 +272,13 @@ export const navigation: NavItem[] = [
     moduleCode: 'oms_fulfillment',
     children: [
       { title: 'Shipments', href: '/dashboard/logistics/shipments', icon: Truck, permissions: ['LOGISTICS_VIEW'] },
+      { title: 'Order Tracking', href: '/dashboard/logistics/tracking', icon: MapPin, permissions: ['LOGISTICS_VIEW'] },
       { title: 'Manifests', href: '/dashboard/logistics/manifests', icon: FileText, permissions: ['LOGISTICS_VIEW'] },
       { title: 'Order Allocation', href: '/dashboard/orders/allocation', icon: GitBranch, permissions: ['ORDERS_VIEW'] },
       { title: 'Allocation Rules', href: '/dashboard/logistics/allocation-rules', permissions: ['LOGISTICS_VIEW'] },
+      { title: 'DOM (Order Routing)', href: '/dashboard/logistics/dom', icon: Network, permissions: ['LOGISTICS_VIEW'] },
+      { title: 'Backorders', href: '/dashboard/logistics/backorders', icon: Clock, permissions: ['LOGISTICS_VIEW'] },
+      { title: 'Preorders', href: '/dashboard/logistics/preorders', icon: Calendar, permissions: ['LOGISTICS_VIEW'] },
       { title: 'Transporters', href: '/dashboard/logistics/transporters', icon: Building2, permissions: ['LOGISTICS_VIEW'] },
       { title: 'Rate Cards', href: '/dashboard/logistics/rate-cards', icon: IndianRupee, permissions: ['LOGISTICS_VIEW'] },
       { title: 'Rate Cards - B2B', href: '/dashboard/logistics/rate-cards/b2b', permissions: ['LOGISTICS_VIEW'] },
