@@ -137,6 +137,7 @@ async def logout(
 @router.get("/me")
 @require_module("system_admin")
 async def get_current_user_info(
+    request: Request,
     current_user: CurrentUser,
 ):
     """

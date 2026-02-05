@@ -1,7 +1,7 @@
 from typing import Optional
 import uuid
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 
 from app.api.deps import DB, CurrentUser, Permissions
 from app.schemas.module import (
@@ -20,6 +20,7 @@ router = APIRouter(prefix="/access", tags=["Access Control"])
 @router.post("/check", response_model=PermissionCheckResponse)
 @require_module("system_admin")
 async def check_permission(
+    request: Request,
     data: PermissionCheckRequest,
     current_user: CurrentUser,
     permission_checker: Permissions,
@@ -41,6 +42,7 @@ async def check_permission(
 @router.post("/check-multiple", response_model=MultiplePermissionCheckResponse)
 @require_module("system_admin")
 async def check_multiple_permissions(
+    request: Request,
     permission_codes: list[str],
     current_user: CurrentUser,
     permission_checker: Permissions,
@@ -63,6 +65,7 @@ async def check_multiple_permissions(
 @router.get("/modules", response_model=ModuleListResponse)
 @require_module("system_admin")
 async def list_modules(
+    request: Request,
     db: DB,
     current_user: CurrentUser,
 ):
@@ -82,6 +85,7 @@ async def list_modules(
 @router.get("/user-access-summary")
 @require_module("system_admin")
 async def get_user_access_summary(
+    request: Request,
     db: DB,
     current_user: CurrentUser,
     permission_checker: Permissions,
