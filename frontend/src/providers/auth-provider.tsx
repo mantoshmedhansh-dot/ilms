@@ -42,20 +42,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const tenantId = localStorage.getItem('tenant_id');
       if (!tenantId) {
         console.warn('[Auth] No tenant_id in localStorage - API calls will fail');
+        setIsLoading(false);
+        return;
       }
 
-      console.log('[Auth] Fetching user and permissions...');
-      const [userData, permissionsData] = await Promise.all([
-        authApi.getCurrentUser(),
-        authApi.getUserPermissions(),
-      ]);
+      console.log('[Auth] Fetching user...');
 
-      console.log('[Auth] User fetched successfully:', userData.email);
-      setUser(userData);
-      setPermissions(permissionsData);
+      // Fetch user first - this is required
+      let userData;
+      try {
+        userData = await authApi.getCurrentUser();
+        console.log('[Auth] User fetched successfully:', userData.email);
+        setUser(userData);
+      } catch (userError) {
+        console.error('[Auth] Failed to fetch user:', userError);
+        setUser(null);
+        setPermissions(null);
+        setIsLoading(false);
+        return;
+      }
+
+      // Fetch permissions - optional, don't fail auth if this fails
+      try {
+        const permissionsData = await authApi.getUserPermissions();
+        console.log('[Auth] Permissions fetched successfully');
+        setPermissions(permissionsData);
+      } catch (permError) {
+        console.warn('[Auth] Failed to fetch permissions, using defaults:', permError);
+        // For SUPER_ADMIN, set default permissions flag
+        const isSuperAdmin = userData.roles?.some((r: { code: string }) => r.code === 'SUPER_ADMIN');
+        setPermissions({
+          is_super_admin: isSuperAdmin,
+          roles: userData.roles,
+          permissions_by_module: {},
+          total_permissions: 0,
+          permissions: {},
+        });
+      }
     } catch (error) {
-      // Log the actual error for debugging
-      console.error('[Auth] Failed to fetch user/permissions:', error);
+      console.error('[Auth] Unexpected error:', error);
       setUser(null);
       setPermissions(null);
     } finally {
