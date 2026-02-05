@@ -295,8 +295,9 @@ class WarehouseWorker(Base):
         foreign_keys="WorkShift.worker_id"
     )
     leave_requests: Mapped[List["WarehouseLeaveRequest"]] = relationship(
-        "LeaveRequest",
-        back_populates="worker"
+        "WarehouseLeaveRequest",
+        back_populates="worker",
+        foreign_keys="WarehouseLeaveRequest.worker_id"
     )
 
     @property
