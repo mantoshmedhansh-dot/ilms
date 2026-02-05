@@ -679,6 +679,25 @@ from app.models.warehouse_billing import (
     InvoiceStatus as BillingInvoiceStatus,
     BillingPeriod,
 )
+# Cycle Counting (Inventory Accuracy & Physical Inventory)
+from app.models.cycle_count import (
+    CycleCountPlan,
+    CountSchedule,
+    CountSession,
+    CountTask,
+    CountDetail,
+    InventoryVariance,
+    ABCClassification,
+    CountType,
+    CountFrequency,
+    CountMethod,
+    CountPlanStatus,
+    CountTaskStatus,
+    VarianceStatus,
+    VarianceReason,
+    ABCClass,
+    ApprovalLevel as VarianceApprovalLevel,
+)
 
 __all__ = [
     # Access Control
@@ -1238,4 +1257,21 @@ __all__ = [
     "BillingContractStatus",
     "BillingInvoiceStatus",
     "BillingPeriod",
+    # Cycle Counting (Inventory Accuracy & Physical Inventory)
+    "CycleCountPlan",
+    "CountSchedule",
+    "CountSession",
+    "CountTask",
+    "CountDetail",
+    "InventoryVariance",
+    "ABCClassification",
+    "CountType",
+    "CountFrequency",
+    "CountMethod",
+    "CountPlanStatus",
+    "CountTaskStatus",
+    "VarianceStatus",
+    "VarianceReason",
+    "ABCClass",
+    "VarianceApprovalLevel",
 ]

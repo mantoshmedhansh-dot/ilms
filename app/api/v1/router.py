@@ -107,6 +107,8 @@ from app.api.v1.endpoints import (
     returns_management,
     # Warehouse Billing (Storage & Operations Billing)
     warehouse_billing,
+    # Cycle Counting (Inventory Accuracy & Physical Inventory)
+    cycle_count,
     # Call Center CRM
     call_center,
     # Lead Management
@@ -475,6 +477,13 @@ api_router.include_router(
     warehouse_billing.router,
     prefix="/warehouse-billing",
     tags=["Warehouse Billing"]
+)
+
+# ==================== Cycle Counting (Inventory Accuracy & Physical Inventory) ====================
+api_router.include_router(
+    cycle_count.router,
+    prefix="/cycle-count",
+    tags=["Cycle Counting"]
 )
 
 # ==================== Call Center CRM ====================
