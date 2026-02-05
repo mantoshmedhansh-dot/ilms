@@ -55,11 +55,10 @@ export default function TenantLoginPage() {
     try {
       const response = await authApi.login(data);
       setTokens(response.access_token, response.refresh_token);
-      // Refresh auth provider state with user data
-      await refreshUser();
       toast.success('Welcome back!');
-      // Navigate directly to main dashboard (auth state is now valid)
-      router.push('/dashboard');
+      // Use full page reload to ensure auth state is fresh
+      // This avoids React state timing issues with client-side navigation
+      window.location.href = '/dashboard';
     } catch {
       toast.error('Invalid email or password');
     } finally {
