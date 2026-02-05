@@ -75,7 +75,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       setPermissions(null);
       setIsLoading(false);
-      router.push('/login');
+      // Redirect to tenant-specific login if tenant is known
+      const subdomain = typeof window !== 'undefined' ? localStorage.getItem('tenant_subdomain') : null;
+      if (subdomain) {
+        router.push(`/t/${subdomain}/login`);
+      } else {
+        router.push('/login');
+      }
     }
   };
 

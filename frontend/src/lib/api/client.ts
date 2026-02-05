@@ -125,9 +125,14 @@ apiClient.interceptors.response.use(
           processQueue(refreshError, null);
           clearTokens();
 
-          // Redirect to login
+          // Redirect to tenant-specific login if tenant is known
           if (typeof window !== 'undefined') {
-            window.location.href = '/login';
+            const subdomain = localStorage.getItem('tenant_subdomain');
+            if (subdomain) {
+              window.location.href = `/t/${subdomain}/login`;
+            } else {
+              window.location.href = '/login';
+            }
           }
 
           return Promise.reject(refreshError);
@@ -137,7 +142,12 @@ apiClient.interceptors.response.use(
       } else {
         clearTokens();
         if (typeof window !== 'undefined') {
-          window.location.href = '/login';
+          const subdomain = localStorage.getItem('tenant_subdomain');
+          if (subdomain) {
+            window.location.href = `/t/${subdomain}/login`;
+          } else {
+            window.location.href = '/login';
+          }
         }
       }
     }

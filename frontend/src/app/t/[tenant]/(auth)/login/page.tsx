@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { authApi } from '@/lib/api';
 import { setTokens } from '@/lib/api/client';
+import { useAuth } from '@/providers';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -26,6 +27,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 export default function TenantLoginPage() {
   const params = useParams();
   const router = useRouter();
+  const { refreshUser } = useAuth();
   const tenant = params.tenant as string;
   const [isLoading, setIsLoading] = useState(false);
   const [tenantName, setTenantName] = useState<string>('');
@@ -53,9 +55,11 @@ export default function TenantLoginPage() {
     try {
       const response = await authApi.login(data);
       setTokens(response.access_token, response.refresh_token);
+      // Refresh auth provider state with user data
+      await refreshUser();
       toast.success('Welcome back!');
-      // Navigate to tenant dashboard
-      router.push(`/t/${tenant}/dashboard`);
+      // Navigate directly to main dashboard (auth state is now valid)
+      router.push('/dashboard');
     } catch {
       toast.error('Invalid email or password');
     } finally {

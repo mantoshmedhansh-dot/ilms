@@ -18,7 +18,13 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/login');
+      // Redirect to tenant-specific login if tenant is known
+      const subdomain = localStorage.getItem('tenant_subdomain');
+      if (subdomain) {
+        router.push(`/t/${subdomain}/login`);
+      } else {
+        router.push('/login');
+      }
     }
   }, [isAuthenticated, isLoading, router]);
 
