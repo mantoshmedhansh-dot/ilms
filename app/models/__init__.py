@@ -625,6 +625,22 @@ from app.models.quality_control import (
     SamplingPlan,
     DispositionAction,
 )
+# Kitting & Assembly (Kit Management & Assembly Operations)
+from app.models.kitting import (
+    KitDefinition,
+    KitComponent,
+    AssemblyStation,
+    KitWorkOrder,
+    KitBuildRecord,
+    KitType,
+    KitStatus,
+    ComponentType,
+    WorkOrderType,
+    WorkOrderStatus,
+    WorkOrderPriority,
+    BuildStatus,
+    StationStatus,
+)
 
 __all__ = [
     # Access Control
@@ -1136,4 +1152,18 @@ __all__ = [
     "HoldStatus",
     "SamplingPlan",
     "DispositionAction",
+    # Kitting & Assembly (Kit Management & Assembly Operations)
+    "KitDefinition",
+    "KitComponent",
+    "AssemblyStation",
+    "KitWorkOrder",
+    "KitBuildRecord",
+    "KitType",
+    "KitStatus",
+    "ComponentType",
+    "WorkOrderType",
+    "WorkOrderStatus",
+    "WorkOrderPriority",
+    "BuildStatus",
+    "StationStatus",
 ]

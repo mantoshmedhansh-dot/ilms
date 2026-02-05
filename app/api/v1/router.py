@@ -101,6 +101,8 @@ from app.api.v1.endpoints import (
     yard_management,
     # Quality Control (Inspection & Quality Management)
     quality_control,
+    # Kitting & Assembly (Kit Management & Assembly Operations)
+    kitting,
     # Call Center CRM
     call_center,
     # Lead Management
@@ -448,6 +450,13 @@ api_router.include_router(
     quality_control.router,
     prefix="/qc",
     tags=["Quality Control"]
+)
+
+# ==================== Kitting & Assembly (Kit Management & Assembly Operations) ====================
+api_router.include_router(
+    kitting.router,
+    prefix="/kitting",
+    tags=["Kitting & Assembly"]
 )
 
 # ==================== Call Center CRM ====================
