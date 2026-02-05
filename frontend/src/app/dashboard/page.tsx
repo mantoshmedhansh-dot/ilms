@@ -265,13 +265,24 @@ export default function DashboardPage() {
 
   const revenueData = salesTrend || [];
 
-  const orderStatusData = (orderStatusDistribution || []).map((item: { status: string; count: number; percentage: number }) => ({
+  interface OrderStatusItem {
+    name: string;
+    value: number;
+    color: string;
+  }
+
+  interface CategoryItem {
+    name: string;
+    sales: number;
+  }
+
+  const orderStatusData: OrderStatusItem[] = (orderStatusDistribution || []).map((item: { status: string; count: number; percentage: number }) => ({
     name: item.status?.replace(/_/g, ' ') || 'Unknown',
     value: item.percentage || 0,
     color: statusColors[item.status] || '#6B7280',
   }));
 
-  const categoryData = (categorySales || []).map((item: { category: string; total_sales: number }) => ({
+  const categoryData: CategoryItem[] = (categorySales || []).map((item: { category: string; total_sales: number }) => ({
     name: item.category || 'Unknown',
     sales: item.total_sales || 0,
   }));
@@ -422,7 +433,7 @@ export default function DashboardPage() {
                     paddingAngle={2}
                     dataKey="value"
                   >
-                    {orderStatusData.map((entry, index) => (
+                    {orderStatusData.map((entry: OrderStatusItem, index: number) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
