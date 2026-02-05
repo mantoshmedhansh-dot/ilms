@@ -3,7 +3,7 @@ import uuid
 
 from fastapi import APIRouter, Depends, Query, Request
 
-from app.api.deps import DB, CurrentUser, Permissions
+from app.api.deps import DB, TenantDB, CurrentUser, Permissions
 from app.schemas.module import (
     ModuleResponse,
     ModuleListResponse,
@@ -86,7 +86,7 @@ async def list_modules(
 @require_module("system_admin")
 async def get_user_access_summary(
     request: Request,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     permission_checker: Permissions,
 ):
