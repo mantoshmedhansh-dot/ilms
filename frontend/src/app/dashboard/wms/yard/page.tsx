@@ -36,7 +36,7 @@ interface YardStats {
 const yardApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
-      const { data } = await apiClient.get('/wms/yard/appointments', { params });
+      const { data } = await apiClient.get('/yard/appointments', { params });
       return data;
     } catch {
       return { items: [], total: 0, pages: 0 };
@@ -44,7 +44,7 @@ const yardApi = {
   },
   getStats: async (): Promise<YardStats> => {
     try {
-      const { data } = await apiClient.get('/wms/yard/stats');
+      const { data } = await apiClient.get('/yard/stats');
       return data;
     } catch {
       return { total_appointments: 0, in_yard: 0, awaiting_arrival: 0, delayed: 0 };

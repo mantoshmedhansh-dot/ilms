@@ -34,7 +34,7 @@ interface MobileStats {
 const mobileApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
-      const { data } = await apiClient.get('/wms/mobile/devices', { params });
+      const { data } = await apiClient.get('/mobile-wms/devices', { params });
       return data;
     } catch {
       return { items: [], total: 0, pages: 0 };
@@ -42,7 +42,7 @@ const mobileApi = {
   },
   getStats: async (): Promise<MobileStats> => {
     try {
-      const { data } = await apiClient.get('/wms/mobile/stats');
+      const { data } = await apiClient.get('/mobile-wms/stats');
       return data;
     } catch {
       return { total_devices: 0, online_devices: 0, low_battery: 0, in_maintenance: 0 };

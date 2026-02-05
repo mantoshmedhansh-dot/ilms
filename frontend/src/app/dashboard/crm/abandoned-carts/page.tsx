@@ -35,7 +35,7 @@ interface AbandonedCartStats {
 const abandonedCartsApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
-      const { data } = await apiClient.get('/crm/abandoned-carts', { params });
+      const { data } = await apiClient.get('/abandoned-cart/', { params });
       return data;
     } catch {
       return { items: [], total: 0, pages: 0 };
@@ -43,7 +43,7 @@ const abandonedCartsApi = {
   },
   getStats: async (): Promise<AbandonedCartStats> => {
     try {
-      const { data } = await apiClient.get('/crm/abandoned-carts/stats');
+      const { data } = await apiClient.get('/abandoned-cart/stats');
       return data;
     } catch {
       return { total_abandoned: 0, total_value: 0, recovery_rate: 0, recovered_today: 0 };

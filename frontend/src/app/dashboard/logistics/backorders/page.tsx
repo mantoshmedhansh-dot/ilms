@@ -36,7 +36,7 @@ interface BackorderStats {
 const backordersApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
-      const { data } = await apiClient.get('/logistics/backorders', { params });
+      const { data } = await apiClient.get('/dom/backorders', { params });
       return data;
     } catch {
       return { items: [], total: 0, pages: 0 };
@@ -44,8 +44,13 @@ const backordersApi = {
   },
   getStats: async (): Promise<BackorderStats> => {
     try {
-      const { data } = await apiClient.get('/logistics/backorders/stats');
-      return data;
+      const { data } = await apiClient.get('/dom/stats');
+      return {
+        total_backorders: data.pending_backorders || 0,
+        total_value: data.backorder_value || 0,
+        avg_wait_days: data.avg_backorder_wait || 0,
+        ready_to_ship: data.backorders_ready || 0
+      };
     } catch {
       return { total_backorders: 0, total_value: 0, avg_wait_days: 0, ready_to_ship: 0 };
     }

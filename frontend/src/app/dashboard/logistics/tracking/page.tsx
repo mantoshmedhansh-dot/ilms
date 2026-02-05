@@ -36,7 +36,7 @@ interface TrackingStats {
 const trackingApi = {
   list: async (params?: { page?: number; size?: number; search?: string }) => {
     try {
-      const { data } = await apiClient.get('/logistics/tracking', { params });
+      const { data } = await apiClient.get('/order-tracking/', { params });
       return data;
     } catch {
       return { items: [], total: 0, pages: 0 };
@@ -44,7 +44,7 @@ const trackingApi = {
   },
   getStats: async (): Promise<TrackingStats> => {
     try {
-      const { data } = await apiClient.get('/logistics/tracking/stats');
+      const { data } = await apiClient.get('/order-tracking/stats');
       return data;
     } catch {
       return { total_shipments: 0, in_transit: 0, out_for_delivery: 0, exceptions: 0 };

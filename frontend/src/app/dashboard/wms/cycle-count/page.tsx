@@ -38,7 +38,7 @@ interface CycleCountStats {
 const cycleCountApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
-      const { data } = await apiClient.get('/wms/cycle-counts', { params });
+      const { data } = await apiClient.get('/cycle-count/', { params });
       return data;
     } catch {
       return { items: [], total: 0, pages: 0 };
@@ -46,7 +46,7 @@ const cycleCountApi = {
   },
   getStats: async (): Promise<CycleCountStats> => {
     try {
-      const { data } = await apiClient.get('/wms/cycle-counts/stats');
+      const { data } = await apiClient.get('/cycle-count/stats');
       return data;
     } catch {
       return { total_counts: 0, in_progress: 0, avg_accuracy: 0, variances_pending: 0 };

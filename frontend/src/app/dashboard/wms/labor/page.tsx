@@ -34,7 +34,7 @@ interface LaborStats {
 const laborApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
-      const { data } = await apiClient.get('/wms/labor', { params });
+      const { data } = await apiClient.get('/labor/', { params });
       return data;
     } catch {
       return { items: [], total: 0, pages: 0 };
@@ -42,7 +42,7 @@ const laborApi = {
   },
   getStats: async (): Promise<LaborStats> => {
     try {
-      const { data } = await apiClient.get('/wms/labor/stats');
+      const { data } = await apiClient.get('/labor/stats');
       return data;
     } catch {
       return { total_workers: 0, active_now: 0, avg_productivity: 0, tasks_completed_today: 0 };

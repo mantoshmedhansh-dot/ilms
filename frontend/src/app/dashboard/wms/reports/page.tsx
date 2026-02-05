@@ -46,7 +46,7 @@ interface ReportCard {
 const reportsApi = {
   getSummary: async (): Promise<ReportSummary> => {
     try {
-      const { data } = await apiClient.get('/wms/reports/summary');
+      const { data } = await apiClient.get('/wms-reports/summary');
       return data;
     } catch {
       return {

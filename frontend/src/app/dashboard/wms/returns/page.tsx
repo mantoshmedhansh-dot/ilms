@@ -35,7 +35,7 @@ interface ReturnsStats {
 const returnsApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
-      const { data } = await apiClient.get('/wms/returns', { params });
+      const { data } = await apiClient.get('/returns/', { params });
       return data;
     } catch {
       return { items: [], total: 0, pages: 0 };
@@ -43,7 +43,7 @@ const returnsApi = {
   },
   getStats: async (): Promise<ReturnsStats> => {
     try {
-      const { data } = await apiClient.get('/wms/returns/stats');
+      const { data } = await apiClient.get('/returns/stats');
       return data;
     } catch {
       return { total_returns: 0, pending_receipt: 0, in_inspection: 0, processed_today: 0 };

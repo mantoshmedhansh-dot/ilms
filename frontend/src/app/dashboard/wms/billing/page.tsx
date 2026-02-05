@@ -38,7 +38,7 @@ interface BillingStats {
 const billingApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
-      const { data } = await apiClient.get('/wms/billing', { params });
+      const { data } = await apiClient.get('/warehouse-billing/', { params });
       return data;
     } catch {
       return { items: [], total: 0, pages: 0 };
@@ -46,7 +46,7 @@ const billingApi = {
   },
   getStats: async (): Promise<BillingStats> => {
     try {
-      const { data } = await apiClient.get('/wms/billing/stats');
+      const { data } = await apiClient.get('/warehouse-billing/stats');
       return data;
     } catch {
       return { total_billed: 0, pending_amount: 0, overdue_amount: 0, collected_this_month: 0 };

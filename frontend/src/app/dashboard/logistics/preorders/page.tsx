@@ -37,7 +37,7 @@ interface PreorderStats {
 const preordersApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
-      const { data } = await apiClient.get('/logistics/preorders', { params });
+      const { data } = await apiClient.get('/dom/preorders', { params });
       return data;
     } catch {
       return { items: [], total: 0, pages: 0 };
@@ -45,8 +45,13 @@ const preordersApi = {
   },
   getStats: async (): Promise<PreorderStats> => {
     try {
-      const { data } = await apiClient.get('/logistics/preorders/stats');
-      return data;
+      const { data } = await apiClient.get('/dom/stats');
+      return {
+        total_preorders: data.active_preorders || 0,
+        total_value: data.preorder_value || 0,
+        confirmed_count: data.preorders_confirmed || 0,
+        pending_payment: data.preorders_pending || 0
+      };
     } catch {
       return { total_preorders: 0, total_value: 0, confirmed_count: 0, pending_payment: 0 };
     }

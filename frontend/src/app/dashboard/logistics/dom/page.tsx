@@ -36,7 +36,7 @@ interface DOMStats {
 const domApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
-      const { data } = await apiClient.get('/logistics/dom/rules', { params });
+      const { data } = await apiClient.get('/dom/rules', { params });
       return data;
     } catch {
       return { items: [], total: 0, pages: 0 };
@@ -44,7 +44,7 @@ const domApi = {
   },
   getStats: async (): Promise<DOMStats> => {
     try {
-      const { data } = await apiClient.get('/logistics/dom/stats');
+      const { data } = await apiClient.get('/dom/stats');
       return data;
     } catch {
       return { total_rules: 0, active_rules: 0, orders_today: 0, avg_routing_time: 0 };

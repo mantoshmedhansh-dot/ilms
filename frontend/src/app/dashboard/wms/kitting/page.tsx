@@ -36,7 +36,7 @@ interface KittingStats {
 const kittingApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
-      const { data } = await apiClient.get('/wms/kitting/orders', { params });
+      const { data } = await apiClient.get('/kitting/orders', { params });
       return data;
     } catch {
       return { items: [], total: 0, pages: 0 };
@@ -44,7 +44,7 @@ const kittingApi = {
   },
   getStats: async (): Promise<KittingStats> => {
     try {
-      const { data } = await apiClient.get('/wms/kitting/stats');
+      const { data } = await apiClient.get('/kitting/stats');
       return data;
     } catch {
       return { total_kits: 0, in_progress: 0, completed_today: 0, pending_components: 0 };

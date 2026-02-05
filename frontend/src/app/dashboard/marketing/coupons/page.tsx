@@ -39,7 +39,7 @@ interface CouponStats {
 const couponsApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
-      const { data } = await apiClient.get('/marketing/coupons', { params });
+      const { data } = await apiClient.get('/coupons/', { params });
       return data;
     } catch {
       return { items: [], total: 0, pages: 0 };
@@ -47,7 +47,7 @@ const couponsApi = {
   },
   getStats: async (): Promise<CouponStats> => {
     try {
-      const { data } = await apiClient.get('/marketing/coupons/stats');
+      const { data } = await apiClient.get('/coupons/stats');
       return data;
     } catch {
       return { total_coupons: 0, active_coupons: 0, total_redemptions: 0, total_discount_given: 0 };

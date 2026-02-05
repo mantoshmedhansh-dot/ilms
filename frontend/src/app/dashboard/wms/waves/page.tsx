@@ -34,7 +34,7 @@ interface WaveStats {
 const wavesApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
-      const { data } = await apiClient.get('/wms/waves', { params });
+      const { data } = await apiClient.get('/wms-advanced/waves', { params });
       return data;
     } catch {
       return { items: [], total: 0, pages: 0 };
@@ -42,7 +42,7 @@ const wavesApi = {
   },
   getStats: async (): Promise<WaveStats> => {
     try {
-      const { data } = await apiClient.get('/wms/waves/stats');
+      const { data } = await apiClient.get('/wms-advanced/waves/stats');
       return data;
     } catch {
       return { total_waves: 0, active_waves: 0, completed_today: 0, pending_orders: 0 };
