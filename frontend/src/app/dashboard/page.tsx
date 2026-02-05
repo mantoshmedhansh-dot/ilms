@@ -253,7 +253,7 @@ export default function DashboardPage() {
     }).format(value);
   };
 
-  // Chart data from API (with fallback empty arrays if API fails)
+  // Chart data from API (with fallback to sample data if API fails/empty)
   const statusColors: Record<string, string> = {
     DELIVERED: '#10B981',
     SHIPPED: '#3B82F6',
@@ -263,29 +263,37 @@ export default function DashboardPage() {
     RETURNED: '#8B5CF6',
   };
 
-  const revenueData = salesTrend || [];
+  const revenueData = (salesTrend && salesTrend.length > 0) ? salesTrend : [
+    { date: format(subDays(new Date(), 6), 'MMM dd'), revenue: 0, orders: 0 },
+    { date: format(subDays(new Date(), 5), 'MMM dd'), revenue: 0, orders: 0 },
+    { date: format(subDays(new Date(), 4), 'MMM dd'), revenue: 0, orders: 0 },
+    { date: format(subDays(new Date(), 3), 'MMM dd'), revenue: 0, orders: 0 },
+    { date: format(subDays(new Date(), 2), 'MMM dd'), revenue: 0, orders: 0 },
+    { date: format(subDays(new Date(), 1), 'MMM dd'), revenue: 0, orders: 0 },
+    { date: format(new Date(), 'MMM dd'), revenue: 0, orders: 0 },
+  ];
 
-  interface OrderStatusItem {
-    name: string;
-    value: number;
-    color: string;
-  }
+  const orderStatusData = (orderStatusDistribution && orderStatusDistribution.length > 0)
+    ? orderStatusDistribution.map((item: { status: string; count: number; percentage: number }) => ({
+        name: item.status?.replace(/_/g, ' ') || 'Unknown',
+        value: item.percentage || 0,
+        color: statusColors[item.status] || '#6B7280',
+      }))
+    : [
+        { name: 'Delivered', value: 0, color: '#10B981' },
+        { name: 'Shipped', value: 0, color: '#3B82F6' },
+        { name: 'Processing', value: 0, color: '#F59E0B' },
+        { name: 'Pending', value: 0, color: '#EF4444' },
+      ];
 
-  interface CategoryItem {
-    name: string;
-    sales: number;
-  }
-
-  const orderStatusData: OrderStatusItem[] = (orderStatusDistribution || []).map((item: { status: string; count: number; percentage: number }) => ({
-    name: item.status?.replace(/_/g, ' ') || 'Unknown',
-    value: item.percentage || 0,
-    color: statusColors[item.status] || '#6B7280',
-  }));
-
-  const categoryData: CategoryItem[] = (categorySales || []).map((item: { category: string; total_sales: number }) => ({
-    name: item.category || 'Unknown',
-    sales: item.total_sales || 0,
-  }));
+  const categoryData = (categorySales && categorySales.length > 0)
+    ? categorySales.map((item: { category: string; total_sales: number }) => ({
+        name: item.category || 'Unknown',
+        sales: item.total_sales || 0,
+      }))
+    : [
+        { name: 'No Data', sales: 0 },
+      ];
 
   return (
     <div className="space-y-6">
@@ -433,7 +441,7 @@ export default function DashboardPage() {
                     paddingAngle={2}
                     dataKey="value"
                   >
-                    {orderStatusData.map((entry: OrderStatusItem, index: number) => (
+                    {orderStatusData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
