@@ -1,43 +1,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/providers';
-import { siteConfig } from '@/config/site';
-
-const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const { login } = useAuth();
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
   const [tenantSubdomain, setTenantSubdomain] = useState('');
-  const [showTenantInput, setShowTenantInput] = useState(false);
 
-  // Check for stored tenant on mount
+  // Check for stored tenant on mount - redirect if found
   useEffect(() => {
     const storedSubdomain = localStorage.getItem('tenant_subdomain');
     if (storedSubdomain) {
-      // Redirect to tenant-specific login
-      router.push(`/t/${storedSubdomain}/login`);
+      // Redirect to tenant-specific login immediately
+      router.replace(`/t/${storedSubdomain}/login`);
     } else {
-      setShowTenantInput(true);
+      // No tenant stored, show tenant input
+      setIsChecking(false);
     }
   }, [router]);
 
@@ -48,76 +33,19 @@ export default function LoginPage() {
     }
   };
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginForm>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
-
-  // Show tenant selection if no tenant is stored
-  if (showTenantInput) {
+  // Show loading while checking for stored tenant
+  if (isChecking) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-muted/50 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1 text-center">
-            <div className="flex justify-center mb-4">
-              <Image
-                src="/logo.png"
-                alt="ILMS.AI Logo"
-                width={180}
-                height={180}
-                priority
-              />
-            </div>
-            <CardTitle className="text-2xl font-bold">Welcome to ILMS.AI</CardTitle>
-            <CardDescription>
-              Enter your organization ID to continue
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleTenantSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="tenant">Organization ID</Label>
-                <Input
-                  id="tenant"
-                  type="text"
-                  placeholder="e.g., mantosh"
-                  value={tenantSubdomain}
-                  onChange={(e) => setTenantSubdomain(e.target.value)}
-                  autoFocus
-                />
-                <p className="text-xs text-muted-foreground">
-                  This is the subdomain provided during registration
-                </p>
-              </div>
-              <Button type="submit" className="w-full" disabled={!tenantSubdomain.trim()}>
-                Continue
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen flex items-center justify-center bg-muted/50">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
       </div>
     );
   }
 
-  const onSubmit = async (data: LoginForm) => {
-    setIsLoading(true);
-    try {
-      await login(data);
-      toast.success('Welcome back!');
-    } catch {
-      toast.error('Invalid email or password');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // Only show tenant selector - never email/password form
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/50 p-4">
       <Card className="w-full max-w-md">
@@ -131,60 +59,31 @@ export default function LoginPage() {
               priority
             />
           </div>
-          <CardTitle className="text-2xl font-bold">{siteConfig.name}</CardTitle>
+          <CardTitle className="text-2xl font-bold">Welcome to ILMS.AI</CardTitle>
           <CardDescription>
-            Enter your credentials to access the control panel
+            Enter your organization ID to continue
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleTenantSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="tenant">Organization ID</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="admin@example.com"
-                {...register('email')}
-                disabled={isLoading}
+                id="tenant"
+                type="text"
+                placeholder="e.g., mantosh"
+                value={tenantSubdomain}
+                onChange={(e) => setTenantSubdomain(e.target.value)}
+                autoFocus
               />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
-              )}
+              <p className="text-xs text-muted-foreground">
+                This is the subdomain provided during registration
+              </p>
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link
-                  href="/forgot-password"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                {...register('password')}
-                disabled={isLoading}
-              />
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              )}
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign In
+            <Button type="submit" className="w-full" disabled={!tenantSubdomain.trim()}>
+              Continue
             </Button>
           </form>
-
-          <div className="mt-4">
-            <Button variant="outline" className="w-full" asChild>
-              <Link href="/forgot-password">
-                Forgot Password?
-              </Link>
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </div>
