@@ -4,6 +4,15 @@ import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { CreditCard, Building2, Phone } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface BillingHistory {
@@ -32,6 +41,7 @@ export default function BillingPage() {
   const [currentBilling, setCurrentBilling] = useState<CurrentBilling | null>(null);
   const [billingHistory, setBillingHistory] = useState<BillingHistory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
 
   useEffect(() => {
     async function fetchBillingData() {
@@ -231,10 +241,67 @@ export default function BillingPage() {
                 Add a payment method to enable automatic renewals
               </p>
             </div>
-            <Button variant="outline">Add Payment Method</Button>
+            <Button variant="outline" onClick={() => setShowPaymentDialog(true)}>
+              Add Payment Method
+            </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Add Payment Method Dialog */}
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Payment Method</DialogTitle>
+            <DialogDescription>
+              Choose how you&apos;d like to pay for your subscription
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <button
+              className="w-full flex items-center gap-4 p-4 rounded-lg border hover:bg-accent transition-colors text-left"
+              onClick={() => {
+                window.open('mailto:billing@ilms.ai?subject=Payment Method Setup', '_blank');
+                setShowPaymentDialog(false);
+              }}
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                <CreditCard className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="font-medium">Credit/Debit Card</p>
+                <p className="text-sm text-muted-foreground">Contact us to set up card payments</p>
+              </div>
+            </button>
+            <button
+              className="w-full flex items-center gap-4 p-4 rounded-lg border hover:bg-accent transition-colors text-left"
+              onClick={() => {
+                window.open('mailto:billing@ilms.ai?subject=Bank Transfer Setup', '_blank');
+                setShowPaymentDialog(false);
+              }}
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
+                <Building2 className="h-5 w-5 text-green-600" />
+              </div>
+              <div>
+                <p className="font-medium">Bank Transfer</p>
+                <p className="text-sm text-muted-foreground">Set up recurring bank transfers</p>
+              </div>
+            </button>
+            <div className="text-center pt-4 border-t">
+              <p className="text-sm text-muted-foreground flex items-center justify-center gap-2">
+                <Phone className="h-4 w-4" />
+                Need help? Call us at +91-XXX-XXX-XXXX
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPaymentDialog(false)}>
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

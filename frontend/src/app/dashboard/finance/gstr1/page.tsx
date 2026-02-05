@@ -692,7 +692,16 @@ export default function GSTR1Page() {
                       <TableCell className="font-medium">{item.invoice_number}</TableCell>
                       <TableCell>{item.error_message}</TableCell>
                       <TableCell>
-                        <Button size="sm" variant="outline">Fix</Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            window.open(`/dashboard/billing/invoices?search=${item.invoice_number}`, '_blank');
+                            toast.info(`Opening invoice ${item.invoice_number} for editing`);
+                          }}
+                        >
+                          Fix
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}

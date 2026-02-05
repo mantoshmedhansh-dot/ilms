@@ -268,6 +268,77 @@ async def cancel_wave(
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@router.get(
+    "/waves/stats",
+    dependencies=[Depends(require_permissions("wms:view"))]
+)
+async def get_waves_stats(
+    db: DB,
+    current_user: CurrentUser,
+    warehouse_id: Optional[uuid.UUID] = Query(None),
+):
+    """Get wave statistics for dashboard."""
+    from sqlalchemy import select, func, and_, Integer
+    from app.models.wms_advanced import PickWave, WaveStatus
+    from app.models.orders import Order, OrderStatus
+    from datetime import datetime, timezone
+
+    today_start = datetime.now(timezone.utc).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+
+    # Build base filter
+    wave_filters = []
+    if warehouse_id:
+        wave_filters.append(PickWave.warehouse_id == warehouse_id)
+
+    # Total waves count
+    total_result = await db.execute(
+        select(func.count()).select_from(PickWave).where(and_(*wave_filters) if wave_filters else True)
+    )
+    total_waves = total_result.scalar() or 0
+
+    # Active waves (IN_PROGRESS or RELEASED)
+    active_filters = wave_filters.copy()
+    active_filters.append(PickWave.status.in_([WaveStatus.IN_PROGRESS.value, WaveStatus.RELEASED.value]))
+    active_result = await db.execute(
+        select(func.count()).select_from(PickWave).where(and_(*active_filters) if active_filters else True)
+    )
+    active_waves = active_result.scalar() or 0
+
+    # Completed today
+    completed_filters = wave_filters.copy()
+    completed_filters.extend([
+        PickWave.status == WaveStatus.COMPLETED.value,
+        PickWave.completed_at >= today_start
+    ])
+    completed_result = await db.execute(
+        select(func.count()).select_from(PickWave).where(and_(*completed_filters))
+    )
+    completed_today = completed_result.scalar() or 0
+
+    # Pending orders (orders ready to be added to waves)
+    try:
+        pending_result = await db.execute(
+            select(func.count()).select_from(Order).where(
+                and_(
+                    Order.status.in_([OrderStatus.CONFIRMED.value, OrderStatus.PROCESSING.value]),
+                    Order.is_active == True
+                )
+            )
+        )
+        pending_orders = pending_result.scalar() or 0
+    except Exception:
+        pending_orders = 0
+
+    return {
+        "total_waves": total_waves,
+        "active_waves": active_waves,
+        "completed_today": completed_today,
+        "pending_orders": pending_orders
+    }
+
+
 # ============================================================================
 # TASK INTERLEAVING
 # ============================================================================

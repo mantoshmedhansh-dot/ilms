@@ -298,6 +298,18 @@ const createColumns = (
   },
 ];
 
+interface Warehouse {
+  id: string;
+  code: string;
+  name: string;
+}
+
+interface CreatePicklistForm {
+  warehouse_id: string;
+  priority: string;
+  picker_id?: string;
+}
+
 export default function PicklistsPage() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -305,6 +317,13 @@ export default function PicklistsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [viewPicklist, setViewPicklist] = useState<Picklist | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [formData, setFormData] = useState<CreatePicklistForm>({
+    warehouse_id: '',
+    priority: 'NORMAL',
+    picker_id: undefined,
+  });
+
+  const queryClient = useQueryClient();
 
   const handleView = (picklist: Picklist) => {
     setViewPicklist(picklist);
@@ -312,7 +331,6 @@ export default function PicklistsPage() {
   };
 
   const handlePrint = (picklist: Picklist) => {
-    // Open print dialog for picklist
     toast.success(`Printing picklist ${picklist.picklist_number}`);
     window.print();
   };
@@ -333,6 +351,48 @@ export default function PicklistsPage() {
     queryFn: picklistsApi.getStats,
   });
 
+  const { data: warehouses } = useQuery({
+    queryKey: ['warehouses-dropdown'],
+    queryFn: async (): Promise<Warehouse[]> => {
+      try {
+        const { data } = await apiClient.get('/warehouses/dropdown');
+        return data;
+      } catch {
+        return [];
+      }
+    },
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (data: CreatePicklistForm) => picklistsApi.create({
+      warehouse_id: data.warehouse_id,
+      order_ids: [], // Auto-select pending orders
+      priority: data.priority,
+    }),
+    onSuccess: async (data) => {
+      toast.success('Picklist created successfully');
+      if (formData.picker_id) {
+        // Assign picker if selected
+        await picklistsApi.assign(data.id, formData.picker_id);
+      }
+      setIsDialogOpen(false);
+      setFormData({ warehouse_id: '', priority: 'NORMAL', picker_id: undefined });
+      queryClient.invalidateQueries({ queryKey: ['picklists'] });
+      queryClient.invalidateQueries({ queryKey: ['picklists-stats'] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to create picklist');
+    },
+  });
+
+  const handleCreatePicklist = () => {
+    if (!formData.warehouse_id) {
+      toast.error('Please select a warehouse');
+      return;
+    }
+    createMutation.mutate(formData);
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -350,26 +410,34 @@ export default function PicklistsPage() {
               <DialogHeader>
                 <DialogTitle>Create Picklist</DialogTitle>
                 <DialogDescription>
-                  Select orders to include in a new picklist for warehouse picking.
+                  Create a new picklist for warehouse picking. Pending orders will be automatically assigned.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Warehouse</label>
-                  <Select>
+                  <label className="text-sm font-medium">Warehouse *</label>
+                  <Select
+                    value={formData.warehouse_id}
+                    onValueChange={(value) => setFormData({ ...formData, warehouse_id: value })}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select warehouse" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="wh1">Mumbai Main</SelectItem>
-                      <SelectItem value="wh2">Delhi Hub</SelectItem>
-                      <SelectItem value="wh3">Bangalore DC</SelectItem>
+                      {warehouses?.map((wh) => (
+                        <SelectItem key={wh.id} value={wh.id}>
+                          {wh.code} - {wh.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Priority</label>
-                  <Select>
+                  <Select
+                    value={formData.priority}
+                    onValueChange={(value) => setFormData({ ...formData, priority: value })}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select priority" />
                     </SelectTrigger>
@@ -381,23 +449,12 @@ export default function PicklistsPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Assign Picker</label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select picker (optional)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="picker1">Ramesh K.</SelectItem>
-                      <SelectItem value="picker2">Suresh M.</SelectItem>
-                      <SelectItem value="picker3">Vijay S.</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                <Button>Create Picklist</Button>
+                <Button onClick={handleCreatePicklist} disabled={createMutation.isPending}>
+                  {createMutation.isPending ? 'Creating...' : 'Create Picklist'}
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

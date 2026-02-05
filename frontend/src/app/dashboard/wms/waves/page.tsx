@@ -1,13 +1,33 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
-import { Waves, Plus, Play, Pause, CheckCircle, Clock, Package, Users } from 'lucide-react';
+import { Waves, Plus, Play, CheckCircle, Clock, Package, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataTable } from '@/components/data-table/data-table';
 import { PageHeader, StatusBadge } from '@/components/common';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { toast } from 'sonner';
 import apiClient from '@/lib/api/client';
 
 interface Wave {
@@ -31,6 +51,32 @@ interface WaveStats {
   pending_orders: number;
 }
 
+interface Warehouse {
+  id: string;
+  code: string;
+  name: string;
+}
+
+interface WaveCreatePayload {
+  warehouse_id: string;
+  wave_type: string;
+  name?: string;
+  auto_select_orders: boolean;
+  auto_release: boolean;
+  optimize_route: boolean;
+  group_by_zone: boolean;
+}
+
+const WAVE_TYPES = [
+  { value: 'CARRIER_CUTOFF', label: 'Carrier Cutoff', description: 'Group orders by carrier pickup time' },
+  { value: 'PRIORITY', label: 'Priority', description: 'Group by order priority/SLA' },
+  { value: 'ZONE', label: 'Zone', description: 'Group by warehouse zone' },
+  { value: 'PRODUCT', label: 'Product', description: 'Group by product category' },
+  { value: 'CHANNEL', label: 'Channel', description: 'Group by sales channel' },
+  { value: 'CUSTOMER', label: 'Customer', description: 'Group by customer type' },
+  { value: 'CUSTOM', label: 'Custom', description: 'Custom rule-based grouping' },
+];
+
 const wavesApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
@@ -46,6 +92,18 @@ const wavesApi = {
       return data;
     } catch {
       return { total_waves: 0, active_waves: 0, completed_today: 0, pending_orders: 0 };
+    }
+  },
+  create: async (payload: WaveCreatePayload) => {
+    const { data } = await apiClient.post('/wms-advanced/waves', payload);
+    return data;
+  },
+  getWarehouses: async (): Promise<Warehouse[]> => {
+    try {
+      const { data } = await apiClient.get('/warehouses/dropdown');
+      return data;
+    } catch {
+      return [];
     }
   },
 };
@@ -134,6 +192,18 @@ const columns: ColumnDef<Wave>[] = [
 export default function WavesPage() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [formData, setFormData] = useState<WaveCreatePayload>({
+    warehouse_id: '',
+    wave_type: 'CARRIER_CUTOFF',
+    name: '',
+    auto_select_orders: true,
+    auto_release: false,
+    optimize_route: true,
+    group_by_zone: true,
+  });
+
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ['wms-waves', page, pageSize],
@@ -145,16 +215,177 @@ export default function WavesPage() {
     queryFn: wavesApi.getStats,
   });
 
+  const { data: warehouses } = useQuery({
+    queryKey: ['warehouses-dropdown'],
+    queryFn: wavesApi.getWarehouses,
+  });
+
+  const createMutation = useMutation({
+    mutationFn: wavesApi.create,
+    onSuccess: () => {
+      toast.success('Wave created successfully');
+      setCreateDialogOpen(false);
+      setFormData({
+        warehouse_id: '',
+        wave_type: 'CARRIER_CUTOFF',
+        name: '',
+        auto_select_orders: true,
+        auto_release: false,
+        optimize_route: true,
+        group_by_zone: true,
+      });
+      queryClient.invalidateQueries({ queryKey: ['wms-waves'] });
+      queryClient.invalidateQueries({ queryKey: ['wms-waves-stats'] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to create wave');
+    },
+  });
+
+  const handleSubmit = () => {
+    if (!formData.warehouse_id) {
+      toast.error('Please select a warehouse');
+      return;
+    }
+    createMutation.mutate(formData);
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Wave Management"
         description="Create and manage picking waves for efficient order fulfillment"
         actions={
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Wave
-          </Button>
+          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Wave
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Create New Wave</DialogTitle>
+                <DialogDescription>
+                  Configure and create a new picking wave for order fulfillment
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="warehouse">Warehouse *</Label>
+                  <Select
+                    value={formData.warehouse_id}
+                    onValueChange={(value) => setFormData({ ...formData, warehouse_id: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select warehouse" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {warehouses?.map((wh) => (
+                        <SelectItem key={wh.id} value={wh.id}>
+                          {wh.code} - {wh.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="wave_type">Wave Type</Label>
+                  <Select
+                    value={formData.wave_type}
+                    onValueChange={(value) => setFormData({ ...formData, wave_type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select wave type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {WAVE_TYPES.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          <div>
+                            <div className="font-medium">{type.label}</div>
+                            <div className="text-xs text-muted-foreground">{type.description}</div>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Wave Name (Optional)</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g., Morning Batch"
+                  />
+                </div>
+
+                <div className="space-y-4 pt-2">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Auto-select Orders</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Automatically select eligible orders
+                      </p>
+                    </div>
+                    <Switch
+                      checked={formData.auto_select_orders}
+                      onCheckedChange={(checked) => setFormData({ ...formData, auto_select_orders: checked })}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Auto-release Wave</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Immediately release after creation
+                      </p>
+                    </div>
+                    <Switch
+                      checked={formData.auto_release}
+                      onCheckedChange={(checked) => setFormData({ ...formData, auto_release: checked })}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Optimize Route</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Optimize picking path for efficiency
+                      </p>
+                    </div>
+                    <Switch
+                      checked={formData.optimize_route}
+                      onCheckedChange={(checked) => setFormData({ ...formData, optimize_route: checked })}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Group by Zone</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Group picks by warehouse zone
+                      </p>
+                    </div>
+                    <Switch
+                      checked={formData.group_by_zone}
+                      onCheckedChange={(checked) => setFormData({ ...formData, group_by_zone: checked })}
+                    />
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSubmit} disabled={createMutation.isPending}>
+                  {createMutation.isPending ? 'Creating...' : 'Create Wave'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         }
       />
 

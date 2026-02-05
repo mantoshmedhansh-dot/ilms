@@ -1544,6 +1544,33 @@ export const dashboardApi = {
       return [];
     }
   },
+  getSalesTrend: async (days: number = 7) => {
+    try {
+      const { data } = await apiClient.get(`/dashboard/sales/trend?days=${days}`);
+      return data.items || data.trend || data || [];
+    } catch (error) {
+      console.warn('Sales trend endpoint not available:', error);
+      return [];
+    }
+  },
+  getOrderStatusDistribution: async () => {
+    try {
+      const { data } = await apiClient.get('/dashboard/orders/status-distribution');
+      return data.items || data.distribution || data || [];
+    } catch (error) {
+      console.warn('Order status distribution endpoint not available:', error);
+      return [];
+    }
+  },
+  getCategorySales: async (limit: number = 5) => {
+    try {
+      const { data } = await apiClient.get(`/dashboard/categories/sales?limit=${limit}`);
+      return data.items || data.categories || data || [];
+    } catch (error) {
+      console.warn('Category sales endpoint not available:', error);
+      return [];
+    }
+  },
 };
 
 // Approvals API

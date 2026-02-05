@@ -187,6 +187,43 @@ export default function DashboardPage() {
     },
   });
 
+  // Fetch real chart data from API
+  const { data: salesTrend } = useQuery({
+    queryKey: ['dashboard-sales-trend'],
+    queryFn: async () => {
+      try {
+        const result = await dashboardApi.getSalesTrend();
+        return result;
+      } catch {
+        return [];
+      }
+    },
+  });
+
+  const { data: orderStatusDistribution } = useQuery({
+    queryKey: ['dashboard-order-status'],
+    queryFn: async () => {
+      try {
+        const result = await dashboardApi.getOrderStatusDistribution();
+        return result;
+      } catch {
+        return [];
+      }
+    },
+  });
+
+  const { data: categorySales } = useQuery({
+    queryKey: ['dashboard-category-sales'],
+    queryFn: async () => {
+      try {
+        const result = await dashboardApi.getCategorySales();
+        return result;
+      } catch {
+        return [];
+      }
+    },
+  });
+
   const dismissAnnouncementMutation = useMutation({
     mutationFn: notificationsApi.dismissAnnouncement,
     onSuccess: () => {
@@ -216,27 +253,28 @@ export default function DashboardPage() {
     }).format(value);
   };
 
-  // Sample data for charts (in production, this would come from API)
-  const revenueData = Array.from({ length: 7 }, (_, i) => ({
-    date: format(subDays(new Date(), 6 - i), 'MMM dd'),
-    revenue: Math.floor(Math.random() * 500000) + 100000,
-    orders: Math.floor(Math.random() * 50) + 10,
+  // Chart data from API (with fallback empty arrays if API fails)
+  const statusColors: Record<string, string> = {
+    DELIVERED: '#10B981',
+    SHIPPED: '#3B82F6',
+    PROCESSING: '#F59E0B',
+    PENDING: '#EF4444',
+    CANCELLED: '#6B7280',
+    RETURNED: '#8B5CF6',
+  };
+
+  const revenueData = salesTrend || [];
+
+  const orderStatusData = (orderStatusDistribution || []).map((item: { status: string; count: number; percentage: number }) => ({
+    name: item.status?.replace(/_/g, ' ') || 'Unknown',
+    value: item.percentage || 0,
+    color: statusColors[item.status] || '#6B7280',
   }));
 
-  const orderStatusData = [
-    { name: 'Delivered', value: 45, color: '#10B981' },
-    { name: 'Shipped', value: 25, color: '#3B82F6' },
-    { name: 'Processing', value: 20, color: '#F59E0B' },
-    { name: 'Pending', value: 10, color: '#EF4444' },
-  ];
-
-  const categoryData = [
-    { name: 'Electronics', sales: 45000 },
-    { name: 'Home Appliances', sales: 38000 },
-    { name: 'Kitchen', sales: 32000 },
-    { name: 'Air Conditioners', sales: 28000 },
-    { name: 'Others', sales: 15000 },
-  ];
+  const categoryData = (categorySales || []).map((item: { category: string; total_sales: number }) => ({
+    name: item.category || 'Unknown',
+    sales: item.total_sales || 0,
+  }));
 
   return (
     <div className="space-y-6">

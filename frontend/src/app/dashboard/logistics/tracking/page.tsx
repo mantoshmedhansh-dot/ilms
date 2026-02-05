@@ -1,14 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
-import { MapPin, Package, Truck, Clock, CheckCircle, AlertTriangle, Search } from 'lucide-react';
+import { MapPin, Package, Truck, Clock, CheckCircle, AlertTriangle, Search, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataTable } from '@/components/data-table/data-table';
 import { PageHeader, StatusBadge } from '@/components/common';
+import { toast } from 'sonner';
 import apiClient from '@/lib/api/client';
 
 interface Shipment {
@@ -49,6 +50,10 @@ const trackingApi = {
     } catch {
       return { total_shipments: 0, in_transit: 0, out_for_delivery: 0, exceptions: 0 };
     }
+  },
+  track: async (trackingNumber: string) => {
+    const { data } = await apiClient.get(`/order-tracking/track/${trackingNumber}`);
+    return data;
   },
 };
 
@@ -147,6 +152,7 @@ export default function OrderTrackingPage() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [trackingSearch, setTrackingSearch] = useState('');
+  const [trackedShipment, setTrackedShipment] = useState<Shipment | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['logistics-tracking', page, pageSize],
@@ -157,6 +163,31 @@ export default function OrderTrackingPage() {
     queryKey: ['logistics-tracking-stats'],
     queryFn: trackingApi.getStats,
   });
+
+  const trackMutation = useMutation({
+    mutationFn: (trackingNumber: string) => trackingApi.track(trackingNumber),
+    onSuccess: (data) => {
+      setTrackedShipment(data);
+      toast.success('Shipment found!');
+    },
+    onError: () => {
+      toast.error('Shipment not found. Please check the tracking number.');
+    },
+  });
+
+  const handleTrack = () => {
+    if (!trackingSearch.trim()) {
+      toast.error('Please enter a tracking number');
+      return;
+    }
+    trackMutation.mutate(trackingSearch.trim());
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleTrack();
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -179,10 +210,49 @@ export default function OrderTrackingPage() {
                 className="pl-10"
                 value={trackingSearch}
                 onChange={(e) => setTrackingSearch(e.target.value)}
+                onKeyPress={handleKeyPress}
               />
             </div>
-            <Button>Track</Button>
+            <Button onClick={handleTrack} disabled={trackMutation.isPending}>
+              {trackMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Tracking...
+                </>
+              ) : (
+                'Track'
+              )}
+            </Button>
           </div>
+          {trackedShipment && (
+            <div className="mt-4 p-4 rounded-lg border bg-muted/50">
+              <h4 className="font-medium mb-2">Tracking Result</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Tracking #:</span>
+                  <p className="font-mono font-medium">{trackedShipment.tracking_number}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Status:</span>
+                  <p><span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[trackedShipment.status]}`}>
+                    {trackedShipment.status.replace(/_/g, ' ')}
+                  </span></p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Location:</span>
+                  <p className="font-medium">{trackedShipment.current_location || 'Unknown'}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">ETA:</span>
+                  <p className="font-medium">
+                    {trackedShipment.estimated_delivery
+                      ? new Date(trackedShipment.estimated_delivery).toLocaleDateString()
+                      : '-'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
