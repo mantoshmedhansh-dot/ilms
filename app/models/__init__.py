@@ -592,6 +592,23 @@ from app.models.mobile_wms import (
     ConfirmationStatus,
     OfflineSyncStatus,
 )
+# Yard Management (Dock Scheduling & Yard Operations)
+from app.models.yard_management import (
+    YardLocation,
+    DockDoor,
+    DockAppointment,
+    YardMove,
+    GateTransaction,
+    YardLocationType,
+    YardLocationStatus,
+    DockDoorType,
+    AppointmentStatus,
+    AppointmentType,
+    YardMoveType,
+    YardMoveStatus,
+    GateTransactionType,
+    VehicleType,
+)
 
 __all__ = [
     # Access Control
@@ -1074,4 +1091,19 @@ __all__ = [
     "ScanResult",
     "ConfirmationStatus",
     "OfflineSyncStatus",
+    # Yard Management (Dock Scheduling & Yard Operations)
+    "YardLocation",
+    "DockDoor",
+    "DockAppointment",
+    "YardMove",
+    "GateTransaction",
+    "YardLocationType",
+    "YardLocationStatus",
+    "DockDoorType",
+    "AppointmentStatus",
+    "AppointmentType",
+    "YardMoveType",
+    "YardMoveStatus",
+    "GateTransactionType",
+    "VehicleType",
 ]

@@ -97,6 +97,8 @@ from app.api.v1.endpoints import (
     labor,
     # Mobile WMS (RF Scanner & Mobile Operations)
     mobile_wms,
+    # Yard Management (Dock Scheduling & Yard Operations)
+    yard_management,
     # Call Center CRM
     call_center,
     # Lead Management
@@ -430,6 +432,13 @@ api_router.include_router(
     mobile_wms.router,
     prefix="/mobile-wms",
     tags=["Mobile WMS"]
+)
+
+# ==================== Yard Management (Dock Scheduling & Yard Operations) ====================
+api_router.include_router(
+    yard_management.router,
+    prefix="/yard",
+    tags=["Yard Management"]
 )
 
 # ==================== Call Center CRM ====================
