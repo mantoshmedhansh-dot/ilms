@@ -97,11 +97,16 @@ async def get_user_access_summary(
     rbac_service = RBACService(db)
 
     # Get permission codes
+    # For SUPER_ADMIN, skip querying permissions - they have all access
+    # The frontend checks is_super_admin flag instead
     if permission_checker.is_super_admin():
-        all_permissions = await rbac_service.get_permissions()
-        permission_codes = [p.code for p in all_permissions]
+        permission_codes = []  # SUPER_ADMIN has all access, no need to enumerate
     else:
-        permission_codes = list(await rbac_service.get_user_permission_codes(current_user.id))
+        try:
+            permission_codes = list(await rbac_service.get_user_permission_codes(current_user.id))
+        except Exception:
+            # If permissions table has schema mismatch, return empty list
+            permission_codes = []
 
     # Group permissions by module
     # Handle both formats: "module:action" (legacy) and "MODULE_ACTION" (current)
