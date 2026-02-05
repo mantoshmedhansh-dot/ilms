@@ -1,18 +1,35 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-// Default tenant ID for Mantosh Industries - can be overridden via env var
-const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID || '628733dd-aa60-4822-bb28-d173b5e9d78f';
+
+// Get tenant ID from localStorage (set by tenant provider from URL path)
+const getTenantId = (): string => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('tenant_id') || '';
+  }
+  return '';
+};
 
 // Create axios instance - increased timeout for Render.com cold starts
 export const apiClient: AxiosInstance = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,
   headers: {
     'Content-Type': 'application/json',
-    ...(TENANT_ID && { 'X-Tenant-ID': TENANT_ID }),
   },
   timeout: 60000, // 60 seconds to handle Render.com cold starts
 });
+
+// Add tenant ID header dynamically on each request
+apiClient.interceptors.request.use(
+  (config) => {
+    const tenantId = getTenantId();
+    if (tenantId) {
+      config.headers['X-Tenant-ID'] = tenantId;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // Log API base URL for debugging
 if (typeof window !== 'undefined') {

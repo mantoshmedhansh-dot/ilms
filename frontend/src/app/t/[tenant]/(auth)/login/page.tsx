@@ -6,15 +6,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/providers';
-import { siteConfig } from '@/config/site';
+import { authApi } from '@/lib/api';
+import { setTokens } from '@/lib/api/client';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -23,30 +23,18 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
-  const { login } = useAuth();
+export default function TenantLoginPage() {
+  const params = useParams();
   const router = useRouter();
+  const tenant = params.tenant as string;
   const [isLoading, setIsLoading] = useState(false);
-  const [tenantSubdomain, setTenantSubdomain] = useState('');
-  const [showTenantInput, setShowTenantInput] = useState(false);
+  const [tenantName, setTenantName] = useState<string>('');
 
-  // Check for stored tenant on mount
   useEffect(() => {
-    const storedSubdomain = localStorage.getItem('tenant_subdomain');
-    if (storedSubdomain) {
-      // Redirect to tenant-specific login
-      router.push(`/t/${storedSubdomain}/login`);
-    } else {
-      setShowTenantInput(true);
-    }
-  }, [router]);
-
-  const handleTenantSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (tenantSubdomain.trim()) {
-      router.push(`/t/${tenantSubdomain.trim().toLowerCase()}/login`);
-    }
-  };
+    // Get tenant name from localStorage (set by layout)
+    const name = localStorage.getItem('tenant_name');
+    if (name) setTenantName(name);
+  }, []);
 
   const {
     register,
@@ -60,57 +48,14 @@ export default function LoginPage() {
     },
   });
 
-  // Show tenant selection if no tenant is stored
-  if (showTenantInput) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-muted/50 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1 text-center">
-            <div className="flex justify-center mb-4">
-              <Image
-                src="/logo.png"
-                alt="ILMS.AI Logo"
-                width={180}
-                height={180}
-                priority
-              />
-            </div>
-            <CardTitle className="text-2xl font-bold">Welcome to ILMS.AI</CardTitle>
-            <CardDescription>
-              Enter your organization ID to continue
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleTenantSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="tenant">Organization ID</Label>
-                <Input
-                  id="tenant"
-                  type="text"
-                  placeholder="e.g., mantosh"
-                  value={tenantSubdomain}
-                  onChange={(e) => setTenantSubdomain(e.target.value)}
-                  autoFocus
-                />
-                <p className="text-xs text-muted-foreground">
-                  This is the subdomain provided during registration
-                </p>
-              </div>
-              <Button type="submit" className="w-full" disabled={!tenantSubdomain.trim()}>
-                Continue
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
     try {
-      await login(data);
+      const response = await authApi.login(data);
+      setTokens(response.access_token, response.refresh_token);
       toast.success('Welcome back!');
+      // Navigate to tenant dashboard
+      router.push(`/t/${tenant}/dashboard`);
     } catch {
       toast.error('Invalid email or password');
     } finally {
@@ -125,13 +70,15 @@ export default function LoginPage() {
           <div className="flex justify-center mb-4">
             <Image
               src="/logo.png"
-              alt="ILMS.AI Logo"
+              alt="Logo"
               width={180}
               height={180}
               priority
             />
           </div>
-          <CardTitle className="text-2xl font-bold">{siteConfig.name}</CardTitle>
+          <CardTitle className="text-2xl font-bold">
+            {tenantName || 'Sign In'}
+          </CardTitle>
           <CardDescription>
             Enter your credentials to access the control panel
           </CardDescription>
@@ -155,7 +102,7 @@ export default function LoginPage() {
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
                 <Link
-                  href="/forgot-password"
+                  href={`/t/${tenant}/forgot-password`}
                   className="text-sm text-primary hover:underline"
                 >
                   Forgot password?
@@ -178,12 +125,8 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-4">
-            <Button variant="outline" className="w-full" asChild>
-              <Link href="/forgot-password">
-                Forgot Password?
-              </Link>
-            </Button>
+          <div className="mt-4 text-center text-sm text-muted-foreground">
+            Signing into <strong>{tenantName || tenant}</strong>
           </div>
         </CardContent>
       </Card>

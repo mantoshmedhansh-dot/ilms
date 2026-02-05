@@ -251,3 +251,54 @@ async def retry_tenant_setup(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Retry failed: {str(e)}"
         )
+
+
+class TenantLookupResponse(BaseModel):
+    """Response for tenant lookup by subdomain."""
+    tenant_id: str
+    subdomain: str
+    name: str
+    status: str
+
+
+@router.get("/tenant-lookup", response_model=TenantLookupResponse)
+async def lookup_tenant_by_subdomain(
+    subdomain: str,
+    db: DB,
+):
+    """
+    Lookup tenant by subdomain.
+
+    This is a public endpoint used by the frontend to resolve
+    tenant context from URL path (e.g., /t/mantosh/login).
+
+    Returns tenant_id needed for X-Tenant-ID header.
+    """
+    try:
+        stmt = select(Tenant).where(
+            Tenant.subdomain == subdomain,
+            Tenant.status.in_(['active', 'pending'])
+        )
+        result = await db.execute(stmt)
+        tenant = result.scalar_one_or_none()
+
+        if not tenant:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Tenant with subdomain '{subdomain}' not found"
+            )
+
+        return TenantLookupResponse(
+            tenant_id=str(tenant.id),
+            subdomain=tenant.subdomain,
+            name=tenant.name,
+            status=tenant.status
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Lookup failed: {str(e)}"
+        )

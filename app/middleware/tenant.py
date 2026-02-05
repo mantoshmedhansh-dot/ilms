@@ -72,7 +72,7 @@ async def get_tenant_by_subdomain(db: AsyncSession, subdomain: str) -> Tenant:
     result = await db.execute(
         select(Tenant).where(
             Tenant.subdomain == subdomain,
-            Tenant.status == 'active'
+            Tenant.status.in_(['active', 'pending'])
         )
     )
     return result.scalar_one_or_none()
@@ -83,7 +83,7 @@ async def get_tenant_by_id(db: AsyncSession, tenant_id: str) -> Tenant:
     result = await db.execute(
         select(Tenant).where(
             Tenant.id == tenant_id,
-            Tenant.status == 'active'
+            Tenant.status.in_(['active', 'pending'])
         )
     )
     return result.scalar_one_or_none()
