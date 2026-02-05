@@ -15,7 +15,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.dependencies.auth import get_current_user, require_permissions
+from app.api.deps import get_current_user, require_permissions
 from app.models.user import User
 from app.models.warehouse_billing import ContractStatus, InvoiceStatus, ChargeCategory
 from app.schemas.warehouse_billing import (
