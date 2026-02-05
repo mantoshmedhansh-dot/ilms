@@ -609,6 +609,22 @@ from app.models.yard_management import (
     GateTransactionType,
     VehicleType,
 )
+# Quality Control (Inspection & Quality Management)
+from app.models.quality_control import (
+    QCConfiguration,
+    QCInspection,
+    QCDefect,
+    QCHoldArea,
+    QCSampling,
+    InspectionType,
+    InspectionStatus,
+    DefectSeverity,
+    DefectCategory,
+    HoldReason,
+    HoldStatus,
+    SamplingPlan,
+    DispositionAction,
+)
 
 __all__ = [
     # Access Control
@@ -1106,4 +1122,18 @@ __all__ = [
     "YardMoveStatus",
     "GateTransactionType",
     "VehicleType",
+    # Quality Control (Inspection & Quality Management)
+    "QCConfiguration",
+    "QCInspection",
+    "QCDefect",
+    "QCHoldArea",
+    "QCSampling",
+    "InspectionType",
+    "InspectionStatus",
+    "DefectSeverity",
+    "DefectCategory",
+    "HoldReason",
+    "HoldStatus",
+    "SamplingPlan",
+    "DispositionAction",
 ]

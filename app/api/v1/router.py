@@ -99,6 +99,8 @@ from app.api.v1.endpoints import (
     mobile_wms,
     # Yard Management (Dock Scheduling & Yard Operations)
     yard_management,
+    # Quality Control (Inspection & Quality Management)
+    quality_control,
     # Call Center CRM
     call_center,
     # Lead Management
@@ -439,6 +441,13 @@ api_router.include_router(
     yard_management.router,
     prefix="/yard",
     tags=["Yard Management"]
+)
+
+# ==================== Quality Control (Inspection & Quality Management) ====================
+api_router.include_router(
+    quality_control.router,
+    prefix="/qc",
+    tags=["Quality Control"]
 )
 
 # ==================== Call Center CRM ====================
