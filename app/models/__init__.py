@@ -529,6 +529,23 @@ from app.models.dom import (
     PreorderStatus,
     GlobalInventoryView,
 )
+# Advanced WMS (Wave Picking, Task Interleaving, Slot Optimization)
+from app.models.wms_advanced import (
+    PickWave,
+    WavePicklist,
+    WarehouseTask,
+    SlotScore,
+    CrossDock,
+    WorkerLocation,
+    WaveType,
+    WaveStatus,
+    TaskType,
+    TaskStatus,
+    TaskPriority,
+    SlotClass,
+    CrossDockType,
+    CrossDockStatus,
+)
 
 __all__ = [
     # Access Control
@@ -956,4 +973,19 @@ __all__ = [
     "Preorder",
     "PreorderStatus",
     "GlobalInventoryView",
+    # Advanced WMS (Wave Picking, Task Interleaving, Slot Optimization)
+    "PickWave",
+    "WavePicklist",
+    "WarehouseTask",
+    "SlotScore",
+    "CrossDock",
+    "WorkerLocation",
+    "WaveType",
+    "WaveStatus",
+    "TaskType",
+    "TaskStatus",
+    "TaskPriority",
+    "SlotClass",
+    "CrossDockType",
+    "CrossDockStatus",
 ]

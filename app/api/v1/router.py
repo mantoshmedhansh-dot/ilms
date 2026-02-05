@@ -89,6 +89,8 @@ from app.api.v1.endpoints import (
     rate_cards,  # Rate Cards (D2C, B2B, FTL)
     # DOM (Distributed Order Management)
     dom,
+    # Advanced WMS (Wave Picking, Task Interleaving, Slot Optimization)
+    wms_advanced,
     # Call Center CRM
     call_center,
     # Lead Management
@@ -394,6 +396,13 @@ api_router.include_router(
     dom.router,
     prefix="/dom",
     tags=["Distributed Order Management"]
+)
+
+# ==================== Advanced WMS (Wave Picking, Task Interleaving) ====================
+api_router.include_router(
+    wms_advanced.router,
+    prefix="/wms-advanced",
+    tags=["Advanced WMS"]
 )
 
 # ==================== Call Center CRM ====================
