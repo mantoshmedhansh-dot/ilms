@@ -95,6 +95,8 @@ from app.api.v1.endpoints import (
     omnichannel,
     # Labor Management (Workforce Optimization)
     labor,
+    # Mobile WMS (RF Scanner & Mobile Operations)
+    mobile_wms,
     # Call Center CRM
     call_center,
     # Lead Management
@@ -421,6 +423,13 @@ api_router.include_router(
     labor.router,
     prefix="/labor",
     tags=["Labor Management"]
+)
+
+# ==================== Mobile WMS (RF Scanner & Mobile Operations) ====================
+api_router.include_router(
+    mobile_wms.router,
+    prefix="/mobile-wms",
+    tags=["Mobile WMS"]
 )
 
 # ==================== Call Center CRM ====================

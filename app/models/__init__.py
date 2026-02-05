@@ -578,6 +578,20 @@ from app.models.labor import (
     LeaveType,
     LeaveStatus,
 )
+# Mobile WMS (RF Scanner & Mobile Operations)
+from app.models.mobile_wms import (
+    MobileDevice,
+    MobileScanLog,
+    MobileTaskQueue,
+    PickConfirmation,
+    OfflineSyncQueue,
+    DeviceType,
+    DeviceStatus,
+    ScanType,
+    ScanResult,
+    ConfirmationStatus,
+    OfflineSyncStatus,
+)
 
 __all__ = [
     # Access Control
@@ -1048,4 +1062,16 @@ __all__ = [
     "ShiftStatus",
     "LeaveType",
     "LeaveStatus",
+    # Mobile WMS (RF Scanner & Mobile Operations)
+    "MobileDevice",
+    "MobileScanLog",
+    "MobileTaskQueue",
+    "PickConfirmation",
+    "OfflineSyncQueue",
+    "DeviceType",
+    "DeviceStatus",
+    "ScanType",
+    "ScanResult",
+    "ConfirmationStatus",
+    "OfflineSyncStatus",
 ]
