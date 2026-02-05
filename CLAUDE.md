@@ -104,6 +104,32 @@ NEXT_PUBLIC_API_URL=https://ilms-z6dz.onrender.com
 
 ---
 
+## MANDATORY Pre-Deployment Checklist
+
+**CRITICAL: Claude MUST complete these steps BEFORE committing ANY code changes:**
+
+### Frontend Changes
+1. **Run TypeScript check:** `cd frontend && npx tsc --noEmit` - Must pass with no errors
+2. **Run lint:** `cd frontend && pnpm run lint` - Must pass
+3. **Test build locally:** `cd frontend && pnpm run build` - Must succeed
+4. **Verify all imports resolve** - No missing modules
+5. **Test the specific functionality changed** - Click buttons, verify API calls work
+
+### Backend Changes
+1. **Run Python syntax check:** `python -m py_compile app/main.py`
+2. **Run tests if available:** `pytest app/tests/`
+3. **Verify imports:** `python -c "from app.main import app"`
+4. **Check API endpoint exists:** `curl -s https://ilms-z6dz.onrender.com/openapi.json | jq '.paths | keys[]' | grep "endpoint-name"`
+
+### After Pushing
+1. **Monitor Vercel deployment** - Wait for build to succeed before claiming "done"
+2. **Monitor Render deployment** - Check GitHub Actions workflow status
+3. **Verify functionality on production URL** - Actually test the feature works
+
+**DO NOT claim work is complete until deployment succeeds and functionality is verified.**
+
+---
+
 ## Important Notes
 
 1. **Always push to `main` branch** - Both Vercel and Render auto-deploy from main

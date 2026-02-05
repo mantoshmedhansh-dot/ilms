@@ -441,7 +441,7 @@ export default function DashboardPage() {
                     paddingAngle={2}
                     dataKey="value"
                   >
-                    {orderStatusData.map((entry, index) => (
+                    {orderStatusData.map((entry: { name: string; value: number; color: string }, index: number) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
