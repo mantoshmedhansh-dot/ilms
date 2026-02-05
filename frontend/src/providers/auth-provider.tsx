@@ -33,18 +33,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const token = getAccessToken();
       if (!token) {
+        console.log('[Auth] No token found, skipping user fetch');
         setIsLoading(false);
         return;
       }
 
+      // Check if tenant_id is set (required for API calls)
+      const tenantId = localStorage.getItem('tenant_id');
+      if (!tenantId) {
+        console.warn('[Auth] No tenant_id in localStorage - API calls will fail');
+      }
+
+      console.log('[Auth] Fetching user and permissions...');
       const [userData, permissionsData] = await Promise.all([
         authApi.getCurrentUser(),
         authApi.getUserPermissions(),
       ]);
 
+      console.log('[Auth] User fetched successfully:', userData.email);
       setUser(userData);
       setPermissions(permissionsData);
-    } catch {
+    } catch (error) {
+      // Log the actual error for debugging
+      console.error('[Auth] Failed to fetch user/permissions:', error);
       setUser(null);
       setPermissions(null);
     } finally {

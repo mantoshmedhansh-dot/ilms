@@ -1,5 +1,6 @@
 from typing import Annotated, Optional, Set
 import uuid
+import logging
 
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -15,17 +16,22 @@ from app.models.role import Role, RoleLevel
 from app.models.permission import Permission, RolePermission
 
 
+logger = logging.getLogger(__name__)
+
 # HTTP Bearer security scheme
 security = HTTPBearer()
 
 
 async def get_current_user(
+    request: Request,
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)],
-    db: Annotated[AsyncSession, Depends(get_db)]
 ) -> User:
     """
     Dependency to get the current authenticated user.
     Validates the JWT token and returns the user object.
+
+    IMPORTANT: Uses tenant schema (via request.state.schema) to query users,
+    since users are stored per-tenant, not in public schema.
     """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -37,44 +43,55 @@ async def get_current_user(
     user_id = verify_access_token(token)
 
     if user_id is None:
+        logger.warning("Token verification failed - invalid or expired token")
         raise credentials_exception
 
     try:
         user_uuid = uuid.UUID(user_id)
     except ValueError:
+        logger.warning(f"Invalid user_id in token: {user_id}")
         raise credentials_exception
 
-    # Query user with roles eagerly loaded - use joinedload to avoid psycopg3 UUID type casting issues
-    stmt = (
-        select(User)
-        .options(
-            joinedload(User.user_roles).joinedload(UserRole.role),
-            joinedload(User.region)
+    # Get tenant database session - users are in tenant schema, not public!
+    async for db in get_db_with_tenant(request):
+        # Query user with roles eagerly loaded
+        stmt = (
+            select(User)
+            .options(
+                joinedload(User.user_roles).joinedload(UserRole.role),
+                joinedload(User.region)
+            )
+            .where(User.id == user_uuid)
         )
-        .where(User.id == user_uuid)
-    )
-    result = await db.execute(stmt)
-    user = result.unique().scalar_one_or_none()
+        result = await db.execute(stmt)
+        user = result.unique().scalar_one_or_none()
 
-    if user is None:
-        raise credentials_exception
+        if user is None:
+            schema = getattr(request.state, 'schema', 'unknown')
+            logger.warning(f"User {user_id} not found in schema {schema}")
+            raise credentials_exception
 
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is deactivated"
-        )
+        if not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User account is deactivated"
+            )
 
-    return user
+        return user
+
+    # Should not reach here
+    raise credentials_exception
 
 
 async def get_user_permissions(
+    request: Request,
     user: Annotated[User, Depends(get_current_user)],
-    db: Annotated[AsyncSession, Depends(get_db)]
 ) -> Set[str]:
     """
     Get all permission codes for the current user.
     Aggregates permissions from all user's roles.
+
+    Uses tenant schema since permissions/roles are per-tenant.
     """
     # SUPER_ADMIN has all permissions
     for role in user.roles:
@@ -88,17 +105,20 @@ async def get_user_permissions(
     if not role_ids:
         return set()
 
-    # Query all permissions for user's roles
-    stmt = (
-        select(Permission.code)
-        .join(RolePermission, Permission.id == RolePermission.permission_id)
-        .where(RolePermission.role_id.in_(role_ids))
-        .where(Permission.is_active == True)
-    )
-    result = await db.execute(stmt)
-    permission_codes = {row[0] for row in result.all()}
+    # Get tenant database session
+    async for db in get_db_with_tenant(request):
+        # Query all permissions for user's roles
+        stmt = (
+            select(Permission.code)
+            .join(RolePermission, Permission.id == RolePermission.permission_id)
+            .where(RolePermission.role_id.in_(role_ids))
+            .where(Permission.is_active == True)
+        )
+        result = await db.execute(stmt)
+        permission_codes = {row[0] for row in result.all()}
+        return permission_codes
 
-    return permission_codes
+    return set()
 
 
 async def get_permission_checker(
