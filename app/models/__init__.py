@@ -641,6 +641,26 @@ from app.models.kitting import (
     BuildStatus,
     StationStatus,
 )
+# Returns Management (Reverse Logistics & Return Processing)
+from app.models.returns_management import (
+    ReturnAuthorization,
+    ReturnAuthorizationItem,
+    ReturnReceipt,
+    ReturnReceiptItem,
+    ReturnInspection,
+    RefurbishmentOrder,
+    DispositionRecord,
+    ReturnType,
+    ReturnReason,
+    RMAStatus,
+    ReturnReceiptStatus,
+    InspectionGrade,
+    InspectionStatus as ReturnInspectionStatus,
+    DispositionAction as ReturnDispositionAction,
+    RefurbishmentStatus,
+    RefundType,
+    RefundStatus,
+)
 
 __all__ = [
     # Access Control
@@ -1166,4 +1186,22 @@ __all__ = [
     "WorkOrderPriority",
     "BuildStatus",
     "StationStatus",
+    # Returns Management (Reverse Logistics & Return Processing)
+    "ReturnAuthorization",
+    "ReturnAuthorizationItem",
+    "ReturnReceipt",
+    "ReturnReceiptItem",
+    "ReturnInspection",
+    "RefurbishmentOrder",
+    "DispositionRecord",
+    "ReturnType",
+    "ReturnReason",
+    "RMAStatus",
+    "ReturnReceiptStatus",
+    "InspectionGrade",
+    "ReturnInspectionStatus",
+    "ReturnDispositionAction",
+    "RefurbishmentStatus",
+    "RefundType",
+    "RefundStatus",
 ]

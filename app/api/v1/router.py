@@ -103,6 +103,8 @@ from app.api.v1.endpoints import (
     quality_control,
     # Kitting & Assembly (Kit Management & Assembly Operations)
     kitting,
+    # Returns Management (Reverse Logistics & Return Processing)
+    returns_management,
     # Call Center CRM
     call_center,
     # Lead Management
@@ -457,6 +459,13 @@ api_router.include_router(
     kitting.router,
     prefix="/kitting",
     tags=["Kitting & Assembly"]
+)
+
+# ==================== Returns Management (Reverse Logistics & Return Processing) ====================
+api_router.include_router(
+    returns_management.router,
+    prefix="/returns",
+    tags=["Returns Management"]
 )
 
 # ==================== Call Center CRM ====================
