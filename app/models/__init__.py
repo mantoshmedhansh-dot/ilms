@@ -133,6 +133,9 @@ from app.models.channel import (
     ChannelPricing,
     ChannelInventory,
     ChannelOrder,
+    ProductChannelSettings,
+    PricingRule,
+    PricingHistory,
 )
 # Accounting & Finance
 from app.models.accounting import (
@@ -836,6 +839,9 @@ __all__ = [
     "ChannelPricing",
     "ChannelInventory",
     "ChannelOrder",
+    "ProductChannelSettings",
+    "PricingRule",
+    "PricingHistory",
     # Accounting & Finance
     "ChartOfAccount",
     "AccountType",

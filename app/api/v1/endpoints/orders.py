@@ -142,7 +142,7 @@ async def list_orders(
     date_from: Optional[datetime] = Query(None),
     date_to: Optional[datetime] = Query(None),
     sort_by: str = Query("created_at"),
-    sort_order: str = Query("desc", regex="^(asc|desc)$"),
+    sort_order: str = Query("desc", pattern="^(asc|desc)$"),
 ):
     """
     Get paginated list of orders.

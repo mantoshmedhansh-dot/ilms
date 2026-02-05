@@ -293,7 +293,7 @@ async def get_franchisee_dashboard(
 async def get_franchisee_leaderboard(
     db: DB,
     current_user: CurrentUser,
-    period: str = Query("MONTHLY", regex="^(MONTHLY|QUARTERLY|YEARLY)$"),
+    period: str = Query("MONTHLY", pattern="^(MONTHLY|QUARTERLY|YEARLY)$"),
 ):
     """Get franchisee leaderboard."""
     today = date.today()

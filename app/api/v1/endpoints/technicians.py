@@ -434,8 +434,8 @@ async def get_performance_dashboard(
 )
 async def get_technician_rankings(
     db: DB,
-    rank_by: str = Query("jobs", regex="^(jobs|rating|efficiency)$"),
-    period: str = Query("month", regex="^(week|month|quarter|year)$"),
+    rank_by: str = Query("jobs", pattern="^(jobs|rating|efficiency)$"),
+    period: str = Query("month", pattern="^(week|month|quarter|year)$"),
     region_id: Optional[uuid.UUID] = Query(None),
     limit: int = Query(20, ge=1, le=100),
 ):

@@ -964,7 +964,7 @@ async def get_geographic_order_stats(
     db: DB,
     current_user: User = Depends(get_current_user),
     period: str = Query("this_month"),
-    group_by: str = Query("state", regex="^(state|city|pincode)$"),
+    group_by: str = Query("state", pattern="^(state|city|pincode)$"),
     limit: int = Query(20, ge=1, le=100),
 ):
     """
@@ -1042,7 +1042,7 @@ async def get_geographic_order_stats(
 async def get_geographic_customer_stats(
     db: DB,
     current_user: User = Depends(get_current_user),
-    group_by: str = Query("state", regex="^(state|city)$"),
+    group_by: str = Query("state", pattern="^(state|city)$"),
     limit: int = Query(20, ge=1, le=100),
 ):
     """
@@ -1101,7 +1101,7 @@ async def get_geographic_customer_stats(
 async def get_geographic_heatmap_data(
     db: DB,
     current_user: User = Depends(get_current_user),
-    metric: str = Query("orders", regex="^(orders|revenue|customers)$"),
+    metric: str = Query("orders", pattern="^(orders|revenue|customers)$"),
     period: str = Query("this_month"),
 ):
     """

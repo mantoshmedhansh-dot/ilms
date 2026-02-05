@@ -58,8 +58,8 @@ async def list_products(
     is_bestseller: Optional[bool] = None,
     is_new_arrival: Optional[bool] = None,
     search: Optional[str] = None,
-    sort_by: str = Query(default="created_at", regex="^(name|mrp|selling_price|created_at)$"),
-    sort_order: str = Query(default="desc", regex="^(asc|desc)$"),
+    sort_by: str = Query(default="created_at", pattern="^(name|mrp|selling_price|created_at)$"),
+    sort_order: str = Query(default="desc", pattern="^(asc|desc)$"),
     page: int = Query(default=1, ge=1),
     size: int = Query(default=12, ge=1, le=100),
 ):

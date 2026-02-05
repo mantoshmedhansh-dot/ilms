@@ -7,7 +7,7 @@ Vendor -> Accounts Payable (Creditors) ledger account
 Customer -> Accounts Receivable (Debtors) ledger account
 
 Revision ID: 20260122_gl_links
-Revises: 20260122_vouchers
+Revises: 2026012201
 Create Date: 2026-01-22
 
 """
@@ -19,7 +19,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision: str = '20260122_gl_links'
-down_revision: Union[str, None] = '20260122_vouchers'
+down_revision: Union[str, None] = '2026012201'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
