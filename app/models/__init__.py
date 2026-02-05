@@ -561,6 +561,23 @@ from app.models.omnichannel import (
     InventoryReservationType,
     PickupLocationType,
 )
+# Labor Management (Workforce Optimization)
+from app.models.labor import (
+    WarehouseWorker,
+    WorkShift,
+    LaborStandard,
+    ProductivityMetric,
+    WarehouseLeaveRequest,
+    ShiftTemplate,
+    WorkerType,
+    WorkerStatus,
+    SkillCategory,
+    SkillLevel,
+    ShiftType,
+    ShiftStatus,
+    LeaveType,
+    LeaveStatus,
+)
 
 __all__ = [
     # Access Control
@@ -1016,4 +1033,19 @@ __all__ = [
     "StoreReturnStatus",
     "InventoryReservationType",
     "PickupLocationType",
+    # Labor Management (Workforce Optimization)
+    "WarehouseWorker",
+    "WorkShift",
+    "LaborStandard",
+    "ProductivityMetric",
+    "WarehouseLeaveRequest",
+    "ShiftTemplate",
+    "WorkerType",
+    "WorkerStatus",
+    "SkillCategory",
+    "SkillLevel",
+    "ShiftType",
+    "ShiftStatus",
+    "LeaveType",
+    "LeaveStatus",
 ]

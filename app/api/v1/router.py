@@ -93,6 +93,8 @@ from app.api.v1.endpoints import (
     wms_advanced,
     # Omnichannel (BOPIS/BORIS/Ship-from-Store)
     omnichannel,
+    # Labor Management (Workforce Optimization)
+    labor,
     # Call Center CRM
     call_center,
     # Lead Management
@@ -412,6 +414,13 @@ api_router.include_router(
     omnichannel.router,
     prefix="/omnichannel",
     tags=["Omnichannel"]
+)
+
+# ==================== Labor Management (Workforce Optimization) ====================
+api_router.include_router(
+    labor.router,
+    prefix="/labor",
+    tags=["Labor Management"]
 )
 
 # ==================== Call Center CRM ====================
