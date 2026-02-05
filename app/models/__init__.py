@@ -698,6 +698,25 @@ from app.models.cycle_count import (
     ABCClass,
     ApprovalLevel as VarianceApprovalLevel,
 )
+# WMS Reports & Analytics
+from app.models.wms_reports import (
+    ReportDefinition,
+    ReportSchedule,
+    ReportExecution,
+    KPIDefinition,
+    KPISnapshot,
+    InventorySnapshot,
+    OperationsSnapshot,
+    DashboardWidget,
+    AlertRule,
+    ReportCategory,
+    ReportType,
+    ReportFormat,
+    ReportFrequency,
+    ReportStatus,
+    KPICategory,
+    TrendDirection,
+)
 
 __all__ = [
     # Access Control
@@ -1274,4 +1293,21 @@ __all__ = [
     "VarianceReason",
     "ABCClass",
     "VarianceApprovalLevel",
+    # WMS Reports & Analytics
+    "ReportDefinition",
+    "ReportSchedule",
+    "ReportExecution",
+    "KPIDefinition",
+    "KPISnapshot",
+    "InventorySnapshot",
+    "OperationsSnapshot",
+    "DashboardWidget",
+    "AlertRule",
+    "ReportCategory",
+    "ReportType",
+    "ReportFormat",
+    "ReportFrequency",
+    "ReportStatus",
+    "KPICategory",
+    "TrendDirection",
 ]

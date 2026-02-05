@@ -109,6 +109,8 @@ from app.api.v1.endpoints import (
     warehouse_billing,
     # Cycle Counting (Inventory Accuracy & Physical Inventory)
     cycle_count,
+    # WMS Reports & Analytics
+    wms_reports,
     # Call Center CRM
     call_center,
     # Lead Management
@@ -484,6 +486,13 @@ api_router.include_router(
     cycle_count.router,
     prefix="/cycle-count",
     tags=["Cycle Counting"]
+)
+
+# ==================== WMS Reports & Analytics ====================
+api_router.include_router(
+    wms_reports.router,
+    prefix="/wms-reports",
+    tags=["WMS Reports & Analytics"]
 )
 
 # ==================== Call Center CRM ====================
