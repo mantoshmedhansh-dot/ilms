@@ -1,7 +1,8 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID || '';
+// Default tenant ID for Mantosh Industries - can be overridden via env var
+const TENANT_ID = process.env.NEXT_PUBLIC_TENANT_ID || '628733dd-aa60-4822-bb28-d173b5e9d78f';
 
 // Create axios instance - increased timeout for Render.com cold starts
 export const apiClient: AxiosInstance = axios.create({
