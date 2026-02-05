@@ -546,6 +546,21 @@ from app.models.wms_advanced import (
     CrossDockType,
     CrossDockStatus,
 )
+# Omnichannel (BOPIS/BORIS/Ship-from-Store)
+from app.models.omnichannel import (
+    StoreLocation,
+    BOPISOrder,
+    ShipFromStoreOrder,
+    StoreInventoryReservation,
+    StoreReturn,
+    StoreType,
+    StoreStatus,
+    BOPISStatus,
+    ShipFromStoreStatus,
+    StoreReturnStatus,
+    InventoryReservationType,
+    PickupLocationType,
+)
 
 __all__ = [
     # Access Control
@@ -988,4 +1003,17 @@ __all__ = [
     "SlotClass",
     "CrossDockType",
     "CrossDockStatus",
+    # Omnichannel (BOPIS/BORIS/Ship-from-Store)
+    "StoreLocation",
+    "BOPISOrder",
+    "ShipFromStoreOrder",
+    "StoreInventoryReservation",
+    "StoreReturn",
+    "StoreType",
+    "StoreStatus",
+    "BOPISStatus",
+    "ShipFromStoreStatus",
+    "StoreReturnStatus",
+    "InventoryReservationType",
+    "PickupLocationType",
 ]

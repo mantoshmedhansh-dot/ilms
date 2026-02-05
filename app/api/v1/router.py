@@ -91,6 +91,8 @@ from app.api.v1.endpoints import (
     dom,
     # Advanced WMS (Wave Picking, Task Interleaving, Slot Optimization)
     wms_advanced,
+    # Omnichannel (BOPIS/BORIS/Ship-from-Store)
+    omnichannel,
     # Call Center CRM
     call_center,
     # Lead Management
@@ -403,6 +405,13 @@ api_router.include_router(
     wms_advanced.router,
     prefix="/wms-advanced",
     tags=["Advanced WMS"]
+)
+
+# ==================== Omnichannel (BOPIS/BORIS/Ship-from-Store) ====================
+api_router.include_router(
+    omnichannel.router,
+    prefix="/omnichannel",
+    tags=["Omnichannel"]
 )
 
 # ==================== Call Center CRM ====================
