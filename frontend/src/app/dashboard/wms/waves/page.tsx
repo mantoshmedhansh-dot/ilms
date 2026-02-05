@@ -15,7 +15,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   Select,
@@ -256,14 +255,15 @@ export default function WavesPage() {
         title="Wave Management"
         description="Create and manage picking waves for efficient order fulfillment"
         actions={
-          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Wave
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
+          <Button onClick={() => setCreateDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Wave
+          </Button>
+        }
+      />
+
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
                 <DialogTitle>Create New Wave</DialogTitle>
                 <DialogDescription>
@@ -384,10 +384,8 @@ export default function WavesPage() {
                   {createMutation.isPending ? 'Creating...' : 'Create Wave'}
                 </Button>
               </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        }
-      />
+        </DialogContent>
+      </Dialog>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
