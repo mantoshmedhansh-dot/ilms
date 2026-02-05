@@ -513,6 +513,22 @@ from app.models.community_partner import (
     PayoutStatus as PartnerPayoutStatus,
     PayoutMethod,
 )
+# DOM (Distributed Order Management)
+from app.models.dom import (
+    FulfillmentNode,
+    FulfillmentNodeType,
+    RoutingRule,
+    RoutingStrategy,
+    OrderSplit,
+    SplitReason,
+    OrchestrationLog,
+    OrchestrationStatus,
+    Backorder,
+    BackorderStatus,
+    Preorder,
+    PreorderStatus,
+    GlobalInventoryView,
+)
 
 __all__ = [
     # Access Control
@@ -926,4 +942,18 @@ __all__ = [
     "PartnerCommissionStatus",
     "PartnerPayoutStatus",
     "PayoutMethod",
+    # DOM (Distributed Order Management)
+    "FulfillmentNode",
+    "FulfillmentNodeType",
+    "RoutingRule",
+    "RoutingStrategy",
+    "OrderSplit",
+    "SplitReason",
+    "OrchestrationLog",
+    "OrchestrationStatus",
+    "Backorder",
+    "BackorderStatus",
+    "Preorder",
+    "PreorderStatus",
+    "GlobalInventoryView",
 ]
