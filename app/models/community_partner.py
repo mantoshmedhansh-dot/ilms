@@ -988,6 +988,94 @@ class PartnerTraining(Base):
         return f"<PartnerTraining(partner={self.partner_id}, module={self.module_code}, status={self.status})>"
 
 
+class TrainingModule(Base):
+    """
+    Training module definitions.
+
+    Admin-created training modules that partners can enroll in.
+    Separate from PartnerTraining which tracks individual progress.
+    """
+    __tablename__ = "training_modules"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4
+    )
+
+    # Module Identification
+    module_code: Mapped[str] = mapped_column(
+        String(50),
+        unique=True,
+        nullable=False,
+        index=True,
+        comment="Unique module code"
+    )
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Module Type
+    training_type: Mapped[str] = mapped_column(
+        String(50),
+        default="VIDEO",
+        comment="VIDEO, DOCUMENT, QUIZ, WEBINAR"
+    )
+
+    # Content
+    content_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    thumbnail_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    duration_minutes: Mapped[int] = mapped_column(Integer, default=0)
+
+    # Requirements
+    is_mandatory: Mapped[bool] = mapped_column(Boolean, default=False)
+    passing_score: Mapped[Optional[int]] = mapped_column(
+        Integer,
+        nullable=True,
+        comment="Minimum score to pass (0-100)"
+    )
+    prerequisites: Mapped[Optional[dict]] = mapped_column(
+        JSONB,
+        nullable=True,
+        comment="List of module_codes that must be completed first"
+    )
+
+    # Status
+    status: Mapped[str] = mapped_column(
+        String(50),
+        default="DRAFT",
+        comment="DRAFT, PUBLISHED, ARCHIVED"
+    )
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+
+    # Display Order
+    sort_order: Mapped[int] = mapped_column(Integer, default=0)
+    category: Mapped[Optional[str]] = mapped_column(
+        String(100),
+        nullable=True,
+        comment="Training category for grouping"
+    )
+
+    # Timestamps
+    published_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False
+    )
+
+    def __repr__(self) -> str:
+        return f"<TrainingModule(code={self.module_code}, title={self.title})>"
+
+
 class PartnerOrder(Base):
     """
     Links orders to community partners for attribution.

@@ -510,6 +510,7 @@ from app.models.community_partner import (
     PartnerReferral,
     PartnerTraining,
     PartnerOrder,
+    TrainingModule,
     PartnerStatus,
     KYCStatus,
     CommissionStatus as PartnerCommissionStatus,

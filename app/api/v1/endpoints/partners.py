@@ -18,18 +18,20 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy import select
+from sqlalchemy import select, func, and_, case
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
 
 from app.api.deps import get_db, get_current_user
 from app.models.user import User
-from app.models.community_partner import CommunityPartner, PartnerTier, PartnerCommission, PartnerPayout, PartnerOrder
+from app.models.community_partner import (
+    CommunityPartner, PartnerTier, PartnerCommission, PartnerPayout,
+    PartnerOrder, PartnerReferral, PartnerTraining, TrainingModule
+)
 from app.models.order import Order
 from app.services.partner_service import PartnerService
 from app.services.partner_auth_service import PartnerAuthService
 from app.schemas.community_partner import (
-
     CommunityPartnerCreate,
     CommunityPartnerUpdate,
     CommunityPartnerResponse,
@@ -47,6 +49,16 @@ from app.schemas.community_partner import (
     PartnerOrderList,
     PartnerDashboard,
     PartnerAnalytics,
+    # Training module schemas
+    TrainingModuleCreate,
+    TrainingModuleUpdate,
+    TrainingModuleResponse,
+    TrainingModuleListResponse,
+    TrainingStatsResponse,
+    # Referral admin schemas
+    ReferralAdminResponse,
+    ReferralListResponse,
+    ReferralStatsResponse,
 )
 from app.core.module_decorators import require_module
 
@@ -1228,3 +1240,377 @@ async def process_payout(
         return PartnerPayoutResponse.model_validate(payout)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+# ============================================================================
+# Training Module Admin Endpoints
+# ============================================================================
+
+@router.get("/training", response_model=TrainingModuleListResponse)
+@require_module("sales_distribution")
+async def list_training_modules(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    page: int = Query(1, ge=1),
+    size: int = Query(10, ge=1, le=100),
+    status: str = Query(None, description="Filter by status"),
+    training_type: str = Query(None, description="Filter by type"),
+):
+    """
+    List all training modules (Admin).
+
+    Returns training modules with enrollment and completion counts.
+    """
+    # Count total
+    count_query = select(func.count(TrainingModule.id))
+    if status:
+        count_query = count_query.where(TrainingModule.status == status)
+    if training_type:
+        count_query = count_query.where(TrainingModule.training_type == training_type)
+
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+
+    # Fetch modules with enrollment counts
+    query = select(TrainingModule)
+    if status:
+        query = query.where(TrainingModule.status == status)
+    if training_type:
+        query = query.where(TrainingModule.training_type == training_type)
+
+    query = query.order_by(TrainingModule.sort_order, TrainingModule.created_at.desc())
+    query = query.offset((page - 1) * size).limit(size)
+
+    result = await db.execute(query)
+    modules = result.scalars().all()
+
+    # Get enrollment counts for each module
+    items = []
+    for module in modules:
+        # Count enrollments
+        enrolled_query = select(func.count(PartnerTraining.id)).where(
+            PartnerTraining.module_code == module.module_code
+        )
+        enrolled_result = await db.execute(enrolled_query)
+        enrolled_count = enrolled_result.scalar() or 0
+
+        # Count completions
+        completed_query = select(func.count(PartnerTraining.id)).where(
+            and_(
+                PartnerTraining.module_code == module.module_code,
+                PartnerTraining.status == "COMPLETED"
+            )
+        )
+        completed_result = await db.execute(completed_query)
+        completed_count = completed_result.scalar() or 0
+
+        module_dict = {
+            "id": module.id,
+            "module_code": module.module_code,
+            "title": module.title,
+            "description": module.description,
+            "training_type": module.training_type,
+            "content_url": getattr(module, 'content_url', None),
+            "thumbnail_url": getattr(module, 'thumbnail_url', None),
+            "duration_minutes": module.duration_minutes,
+            "is_mandatory": module.is_mandatory,
+            "passing_score": getattr(module, 'passing_score', None),
+            "status": module.status,
+            "is_active": module.is_active,
+            "category": getattr(module, 'category', None),
+            "sort_order": module.sort_order,
+            "enrolled_count": enrolled_count,
+            "completed_count": completed_count,
+            "published_at": getattr(module, 'published_at', None),
+            "created_at": module.created_at,
+            "updated_at": module.updated_at,
+        }
+        items.append(TrainingModuleResponse.model_validate(module_dict))
+
+    return TrainingModuleListResponse(
+        items=items,
+        total=total,
+        page=page,
+        page_size=size,
+    )
+
+
+@router.get("/training/stats", response_model=TrainingStatsResponse)
+@require_module("sales_distribution")
+async def get_training_stats(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Get training statistics (Admin).
+    """
+    # Total modules
+    total_modules_result = await db.execute(
+        select(func.count(TrainingModule.id)).where(TrainingModule.status == "PUBLISHED")
+    )
+    total_modules = total_modules_result.scalar() or 0
+
+    # Total enrollments
+    total_enrollments_result = await db.execute(
+        select(func.count(PartnerTraining.id))
+    )
+    total_enrollments = total_enrollments_result.scalar() or 0
+
+    # Completed enrollments
+    completed_result = await db.execute(
+        select(func.count(PartnerTraining.id)).where(PartnerTraining.status == "COMPLETED")
+    )
+    completed = completed_result.scalar() or 0
+
+    # Completion rate
+    completion_rate = (completed / total_enrollments * 100) if total_enrollments > 0 else 0.0
+
+    # Active learners (partners with in-progress training)
+    active_learners_result = await db.execute(
+        select(func.count(func.distinct(PartnerTraining.partner_id))).where(
+            PartnerTraining.status == "IN_PROGRESS"
+        )
+    )
+    active_learners = active_learners_result.scalar() or 0
+
+    return TrainingStatsResponse(
+        total_modules=total_modules,
+        total_enrollments=total_enrollments,
+        completion_rate=round(completion_rate, 1),
+        active_learners=active_learners,
+    )
+
+
+@router.post("/training", response_model=TrainingModuleResponse, status_code=status.HTTP_201_CREATED)
+@require_module("sales_distribution")
+async def create_training_module(
+    data: TrainingModuleCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Create a new training module (Admin).
+    """
+    # Check if module code already exists
+    existing = await db.execute(
+        select(TrainingModule).where(TrainingModule.module_code == data.module_code)
+    )
+    if existing.scalar_one_or_none():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Module with code '{data.module_code}' already exists"
+        )
+
+    module = TrainingModule(
+        module_code=data.module_code,
+        title=data.title,
+        description=data.description,
+        training_type=data.training_type.value,
+        content_url=data.content_url,
+        thumbnail_url=data.thumbnail_url,
+        duration_minutes=data.duration_minutes,
+        is_mandatory=data.is_mandatory,
+        passing_score=data.passing_score,
+        category=data.category,
+        sort_order=data.sort_order,
+        status="DRAFT",
+    )
+
+    db.add(module)
+    await db.commit()
+    await db.refresh(module)
+
+    return TrainingModuleResponse.model_validate({
+        **module.__dict__,
+        "enrolled_count": 0,
+        "completed_count": 0,
+    })
+
+
+@router.put("/training/{module_id}", response_model=TrainingModuleResponse)
+@require_module("sales_distribution")
+async def update_training_module(
+    module_id: UUID,
+    data: TrainingModuleUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Update a training module (Admin).
+    """
+    result = await db.execute(
+        select(TrainingModule).where(TrainingModule.id == module_id)
+    )
+    module = result.scalar_one_or_none()
+
+    if not module:
+        raise HTTPException(status_code=404, detail="Training module not found")
+
+    update_data = data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        if hasattr(value, 'value'):  # Handle enums
+            value = value.value
+        setattr(module, field, value)
+
+    # Set published_at when publishing
+    if data.status and data.status.value == "PUBLISHED" and not module.published_at:
+        module.published_at = datetime.now(timezone.utc)
+
+    await db.commit()
+    await db.refresh(module)
+
+    # Get enrollment counts
+    enrolled_result = await db.execute(
+        select(func.count(PartnerTraining.id)).where(
+            PartnerTraining.module_code == module.module_code
+        )
+    )
+    enrolled_count = enrolled_result.scalar() or 0
+
+    completed_result = await db.execute(
+        select(func.count(PartnerTraining.id)).where(
+            and_(
+                PartnerTraining.module_code == module.module_code,
+                PartnerTraining.status == "COMPLETED"
+            )
+        )
+    )
+    completed_count = completed_result.scalar() or 0
+
+    return TrainingModuleResponse.model_validate({
+        **module.__dict__,
+        "enrolled_count": enrolled_count,
+        "completed_count": completed_count,
+    })
+
+
+# ============================================================================
+# Referral Admin Endpoints
+# ============================================================================
+
+@router.get("/referrals", response_model=ReferralListResponse)
+@require_module("sales_distribution")
+async def list_referrals(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    page: int = Query(1, ge=1),
+    size: int = Query(10, ge=1, le=100),
+    status: str = Query(None, description="Filter by status"),
+    is_qualified: bool = Query(None, description="Filter by qualification status"),
+):
+    """
+    List all referrals (Admin).
+
+    Returns referrals with referrer and referred partner details.
+    """
+    # Count total
+    count_query = select(func.count(PartnerReferral.id))
+    if status:
+        count_query = count_query.where(PartnerReferral.status == status)
+    if is_qualified is not None:
+        count_query = count_query.where(PartnerReferral.referred_qualified == is_qualified)
+
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+
+    # Fetch referrals with partner details
+    query = select(PartnerReferral)
+    if status:
+        query = query.where(PartnerReferral.status == status)
+    if is_qualified is not None:
+        query = query.where(PartnerReferral.referred_qualified == is_qualified)
+
+    query = query.order_by(PartnerReferral.created_at.desc())
+    query = query.offset((page - 1) * size).limit(size)
+
+    result = await db.execute(query)
+    referrals = result.scalars().all()
+
+    items = []
+    for ref in referrals:
+        # Get referrer details
+        referrer_result = await db.execute(
+            select(CommunityPartner).where(CommunityPartner.id == ref.referrer_id)
+        )
+        referrer = referrer_result.scalar_one_or_none()
+
+        # Get referred details
+        referred_result = await db.execute(
+            select(CommunityPartner).where(CommunityPartner.id == ref.referred_id)
+        )
+        referred = referred_result.scalar_one_or_none()
+
+        # Determine status based on flags
+        ref_status = "PENDING"
+        if ref.bonus_paid:
+            ref_status = "PAID"
+        elif ref.referred_qualified:
+            ref_status = "QUALIFIED"
+
+        items.append(ReferralAdminResponse(
+            id=ref.id,
+            referrer_id=ref.referrer_id,
+            referred_id=ref.referred_id,
+            referrer_name=referrer.full_name if referrer else "",
+            referrer_code=referrer.partner_code if referrer else "",
+            referred_name=referred.full_name if referred else "",
+            referred_phone=referred.phone if referred else "",
+            referral_code=ref.referral_code,
+            referral_bonus=ref.bonus_amount,
+            is_qualified=ref.referred_qualified,
+            qualified_at=ref.qualification_date,
+            qualification_order_id=None,
+            status=ref.status or ref_status,
+            bonus_paid=ref.bonus_paid,
+            bonus_paid_at=ref.bonus_paid_at,
+            created_at=ref.created_at,
+        ))
+
+    return ReferralListResponse(
+        items=items,
+        total=total,
+        page=page,
+        page_size=size,
+    )
+
+
+@router.get("/referrals/stats", response_model=ReferralStatsResponse)
+@require_module("sales_distribution")
+async def get_referral_stats(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Get referral statistics (Admin).
+    """
+    # Total referrals
+    total_result = await db.execute(
+        select(func.count(PartnerReferral.id))
+    )
+    total_referrals = total_result.scalar() or 0
+
+    # Qualified referrals
+    qualified_result = await db.execute(
+        select(func.count(PartnerReferral.id)).where(
+            PartnerReferral.referred_qualified == True
+        )
+    )
+    qualified_referrals = qualified_result.scalar() or 0
+
+    # Total bonus paid
+    bonus_result = await db.execute(
+        select(func.coalesce(func.sum(PartnerReferral.bonus_amount), 0)).where(
+            PartnerReferral.bonus_paid == True
+        )
+    )
+    total_bonus_paid = bonus_result.scalar() or 0
+
+    # Conversion rate
+    conversion_rate = (qualified_referrals / total_referrals * 100) if total_referrals > 0 else 0.0
+
+    return ReferralStatsResponse(
+        total_referrals=total_referrals,
+        qualified_referrals=qualified_referrals,
+        total_bonus_paid=total_bonus_paid,
+        conversion_rate=round(conversion_rate, 1),
+    )

@@ -507,3 +507,141 @@ class PartnerAnalytics(BaseModel):
     top_partners: List[dict] = []
     tier_distribution: dict = {}
     region_distribution: dict = {}
+
+
+# ============================================================================
+# Training Module Admin Schemas
+# ============================================================================
+
+class TrainingModuleStatus(str, Enum):
+    """Training module status"""
+    DRAFT = "DRAFT"
+    PUBLISHED = "PUBLISHED"
+    ARCHIVED = "ARCHIVED"
+
+
+class TrainingModuleType(str, Enum):
+    """Training module type"""
+    VIDEO = "VIDEO"
+    DOCUMENT = "DOCUMENT"
+    QUIZ = "QUIZ"
+    WEBINAR = "WEBINAR"
+
+
+class TrainingModuleCreate(BaseModel):
+    """Schema for creating a training module"""
+    module_code: str = Field(..., min_length=1, max_length=50)
+    title: str = Field(..., min_length=1, max_length=200)
+    description: Optional[str] = None
+    training_type: TrainingModuleType = TrainingModuleType.VIDEO
+    content_url: Optional[str] = None
+    thumbnail_url: Optional[str] = None
+    duration_minutes: int = Field(default=0, ge=0)
+    is_mandatory: bool = False
+    passing_score: Optional[int] = Field(None, ge=0, le=100)
+    category: Optional[str] = None
+    sort_order: int = 0
+
+
+class TrainingModuleUpdate(BaseModel):
+    """Schema for updating a training module"""
+    title: Optional[str] = Field(None, min_length=1, max_length=200)
+    description: Optional[str] = None
+    training_type: Optional[TrainingModuleType] = None
+    content_url: Optional[str] = None
+    thumbnail_url: Optional[str] = None
+    duration_minutes: Optional[int] = Field(None, ge=0)
+    is_mandatory: Optional[bool] = None
+    passing_score: Optional[int] = Field(None, ge=0, le=100)
+    status: Optional[TrainingModuleStatus] = None
+    category: Optional[str] = None
+    sort_order: Optional[int] = None
+
+
+class TrainingModuleResponse(BaseResponseSchema):
+    """Schema for training module response (admin view)"""
+    id: UUID
+    module_code: str
+    title: str
+    description: Optional[str] = None
+    training_type: str
+    content_url: Optional[str] = None
+    thumbnail_url: Optional[str] = None
+    duration_minutes: int = 0
+    is_mandatory: bool = False
+    passing_score: Optional[int] = None
+    status: str = "DRAFT"
+    is_active: bool = True
+    category: Optional[str] = None
+    sort_order: int = 0
+    # Computed fields for admin view
+    enrolled_count: int = 0
+    completed_count: int = 0
+    # Timestamps
+    published_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class TrainingModuleListResponse(BaseModel):
+    """Schema for paginated training module list"""
+    items: List[TrainingModuleResponse]
+    total: int
+    page: int
+    page_size: int
+
+
+class TrainingStatsResponse(BaseModel):
+    """Schema for training statistics"""
+    total_modules: int = 0
+    total_enrollments: int = 0
+    completion_rate: float = 0.0
+    active_learners: int = 0
+
+
+# ============================================================================
+# Referral Admin Schemas
+# ============================================================================
+
+class ReferralStatus(str, Enum):
+    """Referral status"""
+    PENDING = "PENDING"
+    QUALIFIED = "QUALIFIED"
+    PAID = "PAID"
+    EXPIRED = "EXPIRED"
+
+
+class ReferralAdminResponse(BaseResponseSchema):
+    """Schema for referral response (admin view with partner details)"""
+    id: UUID
+    referrer_id: UUID
+    referred_id: UUID
+    referrer_name: str = ""
+    referrer_code: str = ""
+    referred_name: str = ""
+    referred_phone: str = ""
+    referral_code: str
+    referral_bonus: Decimal = Decimal("0")
+    is_qualified: bool = False
+    qualified_at: Optional[datetime] = None
+    qualification_order_id: Optional[UUID] = None
+    status: str = "PENDING"
+    bonus_paid: bool = False
+    bonus_paid_at: Optional[datetime] = None
+    created_at: datetime
+
+
+class ReferralListResponse(BaseModel):
+    """Schema for paginated referral list"""
+    items: List[ReferralAdminResponse]
+    total: int
+    page: int
+    page_size: int
+
+
+class ReferralStatsResponse(BaseModel):
+    """Schema for referral statistics"""
+    total_referrals: int = 0
+    qualified_referrals: int = 0
+    total_bonus_paid: Decimal = Decimal("0")
+    conversion_rate: float = 0.0
