@@ -258,20 +258,10 @@ export default function WavesPage() {
             Create and manage picking waves for efficient order fulfillment
           </p>
         </div>
-        <div className="flex gap-2">
-          {/* Test with native button */}
-          <button
-            type="button"
-            onClick={() => alert('Native button works!')}
-            className="px-4 py-2 bg-red-500 text-white rounded"
-          >
-            Test Native
-          </button>
-          <Button onClick={() => setIsDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Wave
-          </Button>
-        </div>
+        <Button onClick={() => setIsDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Create Wave
+        </Button>
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
