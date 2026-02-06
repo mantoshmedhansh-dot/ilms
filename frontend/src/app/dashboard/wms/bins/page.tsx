@@ -21,7 +21,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -504,161 +503,160 @@ export default function BinsPage() {
         title="Warehouse Bins"
         description="Manage bin locations for precise inventory placement"
         actions={
-          <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleDialogClose()}>
-            <DialogTrigger asChild>
-              <Button onClick={() => { setIsEditMode(false); setIsDialogOpen(true); }}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Bin
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>{isEditMode ? 'Edit Bin' : 'Create New Bin'}</DialogTitle>
-                <DialogDescription>
-                  {isEditMode ? 'Update bin details.' : 'Add a new bin location within a zone.'}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="warehouse">Warehouse *</Label>
-                  <Select
-                    value={newBin.warehouse_id || 'select'}
-                    onValueChange={(value) => setNewBin({ ...newBin, warehouse_id: value === 'select' ? '' : value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select warehouse" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="select" disabled>Select warehouse</SelectItem>
-                      {warehouses.map((wh: { id: string; name: string; code?: string }) => (
-                        <SelectItem key={wh.id} value={wh.id}>
-                          {wh.name} {wh.code && `(${wh.code})`}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="zone">Zone</Label>
-                    <Select
-                      value={newBin.zone_id || 'none'}
-                      onValueChange={(value) => setNewBin({ ...newBin, zone_id: value === 'none' ? '' : value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select zone" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">No Zone</SelectItem>
-                        {zones.map((zone) => (
-                          <SelectItem key={zone.id} value={zone.id}>
-                            {zone.zone_name} ({zone.zone_code})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="bin_code">Bin Code *</Label>
-                    <Input
-                      id="bin_code"
-                      placeholder="A-01-01-01"
-                      value={newBin.bin_code}
-                      onChange={(e) => setNewBin({ ...newBin, bin_code: e.target.value.toUpperCase() })}
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="aisle">Aisle</Label>
-                    <Input
-                      id="aisle"
-                      placeholder="A"
-                      value={newBin.aisle}
-                      onChange={(e) => setNewBin({ ...newBin, aisle: e.target.value.toUpperCase() })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="rack">Rack</Label>
-                    <Input
-                      id="rack"
-                      placeholder="01"
-                      value={newBin.rack}
-                      onChange={(e) => setNewBin({ ...newBin, rack: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="shelf">Shelf</Label>
-                    <Input
-                      id="shelf"
-                      placeholder="01"
-                      value={newBin.shelf}
-                      onChange={(e) => setNewBin({ ...newBin, shelf: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="type">Bin Type</Label>
-                  <Select
-                    value={newBin.bin_type}
-                    onValueChange={(value: 'SHELF' | 'PALLET' | 'FLOOR' | 'RACK' | 'BULK') =>
-                      setNewBin({ ...newBin, bin_type: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {binTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="max_capacity">Max Capacity (items)</Label>
-                    <Input
-                      id="max_capacity"
-                      type="number"
-                      placeholder="100"
-                      value={newBin.max_capacity}
-                      onChange={(e) => setNewBin({ ...newBin, max_capacity: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="max_weight_kg">Max Weight (kg)</Label>
-                    <Input
-                      id="max_weight_kg"
-                      type="number"
-                      placeholder="100"
-                      step="0.1"
-                      value={newBin.max_weight_kg}
-                      onChange={(e) => setNewBin({ ...newBin, max_weight_kg: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="is_active"
-                    checked={newBin.is_active}
-                    onCheckedChange={(checked) => setNewBin({ ...newBin, is_active: checked })}
-                  />
-                  <Label htmlFor="is_active">Active</Label>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={handleDialogClose}>Cancel</Button>
-                <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
-                  {createMutation.isPending || updateMutation.isPending ? 'Saving...' : isEditMode ? 'Update Bin' : 'Create Bin'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => { setIsEditMode(false); setIsDialogOpen(true); }}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Bin
+          </Button>
         }
       />
+
+      <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleDialogClose()}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{isEditMode ? 'Edit Bin' : 'Create New Bin'}</DialogTitle>
+            <DialogDescription>
+              {isEditMode ? 'Update bin details.' : 'Add a new bin location within a zone.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="warehouse">Warehouse *</Label>
+              <Select
+                value={newBin.warehouse_id || 'select'}
+                onValueChange={(value) => setNewBin({ ...newBin, warehouse_id: value === 'select' ? '' : value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select warehouse" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="select" disabled>Select warehouse</SelectItem>
+                  {warehouses.map((wh: { id: string; name: string; code?: string }) => (
+                    <SelectItem key={wh.id} value={wh.id}>
+                      {wh.name} {wh.code && `(${wh.code})`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="zone">Zone</Label>
+                <Select
+                  value={newBin.zone_id || 'none'}
+                  onValueChange={(value) => setNewBin({ ...newBin, zone_id: value === 'none' ? '' : value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select zone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No Zone</SelectItem>
+                    {zones.map((zone) => (
+                      <SelectItem key={zone.id} value={zone.id}>
+                        {zone.zone_name} ({zone.zone_code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bin_code">Bin Code *</Label>
+                <Input
+                  id="bin_code"
+                  placeholder="A-01-01-01"
+                  value={newBin.bin_code}
+                  onChange={(e) => setNewBin({ ...newBin, bin_code: e.target.value.toUpperCase() })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="aisle">Aisle</Label>
+                <Input
+                  id="aisle"
+                  placeholder="A"
+                  value={newBin.aisle}
+                  onChange={(e) => setNewBin({ ...newBin, aisle: e.target.value.toUpperCase() })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="rack">Rack</Label>
+                <Input
+                  id="rack"
+                  placeholder="01"
+                  value={newBin.rack}
+                  onChange={(e) => setNewBin({ ...newBin, rack: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="shelf">Shelf</Label>
+                <Input
+                  id="shelf"
+                  placeholder="01"
+                  value={newBin.shelf}
+                  onChange={(e) => setNewBin({ ...newBin, shelf: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="type">Bin Type</Label>
+              <Select
+                value={newBin.bin_type}
+                onValueChange={(value: 'SHELF' | 'PALLET' | 'FLOOR' | 'RACK' | 'BULK') =>
+                  setNewBin({ ...newBin, bin_type: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {binTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="max_capacity">Max Capacity (items)</Label>
+                <Input
+                  id="max_capacity"
+                  type="number"
+                  placeholder="100"
+                  value={newBin.max_capacity}
+                  onChange={(e) => setNewBin({ ...newBin, max_capacity: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="max_weight_kg">Max Weight (kg)</Label>
+                <Input
+                  id="max_weight_kg"
+                  type="number"
+                  placeholder="100"
+                  step="0.1"
+                  value={newBin.max_weight_kg}
+                  onChange={(e) => setNewBin({ ...newBin, max_weight_kg: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="is_active"
+                checked={newBin.is_active}
+                onCheckedChange={(checked) => setNewBin({ ...newBin, is_active: checked })}
+              />
+              <Label htmlFor="is_active">Active</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleDialogClose}>Cancel</Button>
+            <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
+              {createMutation.isPending || updateMutation.isPending ? 'Saving...' : isEditMode ? 'Update Bin' : 'Create Bin'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* View Bin Sheet */}
       <Sheet open={!!viewBin} onOpenChange={() => setViewBin(null)}>

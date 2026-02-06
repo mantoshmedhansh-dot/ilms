@@ -21,7 +21,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -392,121 +391,120 @@ export default function ZonesPage() {
         title="Warehouse Zones"
         description="Manage warehouse zones for organized inventory storage"
         actions={
-          <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleDialogClose()}>
-            <DialogTrigger asChild>
-              <Button onClick={() => { setIsEditMode(false); setIsDialogOpen(true); }}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Zone
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>{isEditMode ? 'Edit Zone' : 'Create New Zone'}</DialogTitle>
-                <DialogDescription>
-                  {isEditMode ? 'Update zone details.' : 'Add a new zone to organize inventory within a warehouse.'}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Zone Name *</Label>
-                    <Input
-                      id="name"
-                      placeholder="e.g., Zone A"
-                      value={newZone.name}
-                      onChange={(e) => setNewZone({ ...newZone, name: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="code">Code *</Label>
-                    <Input
-                      id="code"
-                      placeholder="ZONE-A"
-                      value={newZone.code}
-                      onChange={(e) => setNewZone({ ...newZone, code: e.target.value.toUpperCase() })}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="warehouse">Warehouse *</Label>
-                  <Select
-                    value={newZone.warehouse_id || 'select'}
-                    onValueChange={(value) => setNewZone({ ...newZone, warehouse_id: value === 'select' ? '' : value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select warehouse" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="select" disabled>Select warehouse</SelectItem>
-                      {warehouses.map((wh: { id: string; name: string; code?: string }) => (
-                        <SelectItem key={wh.id} value={wh.id}>
-                          {wh.name} {wh.code && `(${wh.code})`}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="type">Zone Type</Label>
-                    <Select
-                      value={newZone.zone_type}
-                      onValueChange={(value: 'STORAGE' | 'PICKING' | 'PACKING' | 'RECEIVING' | 'SHIPPING' | 'QUARANTINE' | 'RETURNS') =>
-                        setNewZone({ ...newZone, zone_type: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {zoneTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="capacity">Max Capacity</Label>
-                    <Input
-                      id="capacity"
-                      type="number"
-                      placeholder="Units"
-                      value={newZone.max_capacity}
-                      onChange={(e) => setNewZone({ ...newZone, max_capacity: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="temp_controlled"
-                      checked={newZone.temperature_controlled}
-                      onCheckedChange={(checked) => setNewZone({ ...newZone, temperature_controlled: checked })}
-                    />
-                    <Label htmlFor="temp_controlled">Temperature Controlled</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="is_active"
-                      checked={newZone.is_active}
-                      onCheckedChange={(checked) => setNewZone({ ...newZone, is_active: checked })}
-                    />
-                    <Label htmlFor="is_active">Active</Label>
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={handleDialogClose}>Cancel</Button>
-                <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
-                  {createMutation.isPending || updateMutation.isPending ? 'Saving...' : isEditMode ? 'Update Zone' : 'Create Zone'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => { setIsEditMode(false); setIsDialogOpen(true); }}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Zone
+          </Button>
         }
       />
+
+      <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleDialogClose()}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{isEditMode ? 'Edit Zone' : 'Create New Zone'}</DialogTitle>
+            <DialogDescription>
+              {isEditMode ? 'Update zone details.' : 'Add a new zone to organize inventory within a warehouse.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Zone Name *</Label>
+                <Input
+                  id="name"
+                  placeholder="e.g., Zone A"
+                  value={newZone.name}
+                  onChange={(e) => setNewZone({ ...newZone, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="code">Code *</Label>
+                <Input
+                  id="code"
+                  placeholder="ZONE-A"
+                  value={newZone.code}
+                  onChange={(e) => setNewZone({ ...newZone, code: e.target.value.toUpperCase() })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="warehouse">Warehouse *</Label>
+              <Select
+                value={newZone.warehouse_id || 'select'}
+                onValueChange={(value) => setNewZone({ ...newZone, warehouse_id: value === 'select' ? '' : value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select warehouse" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="select" disabled>Select warehouse</SelectItem>
+                  {warehouses.map((wh: { id: string; name: string; code?: string }) => (
+                    <SelectItem key={wh.id} value={wh.id}>
+                      {wh.name} {wh.code && `(${wh.code})`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="type">Zone Type</Label>
+                <Select
+                  value={newZone.zone_type}
+                  onValueChange={(value: 'STORAGE' | 'PICKING' | 'PACKING' | 'RECEIVING' | 'SHIPPING' | 'QUARANTINE' | 'RETURNS') =>
+                    setNewZone({ ...newZone, zone_type: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {zoneTypes.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="capacity">Max Capacity</Label>
+                <Input
+                  id="capacity"
+                  type="number"
+                  placeholder="Units"
+                  value={newZone.max_capacity}
+                  onChange={(e) => setNewZone({ ...newZone, max_capacity: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="temp_controlled"
+                  checked={newZone.temperature_controlled}
+                  onCheckedChange={(checked) => setNewZone({ ...newZone, temperature_controlled: checked })}
+                />
+                <Label htmlFor="temp_controlled">Temperature Controlled</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="is_active"
+                  checked={newZone.is_active}
+                  onCheckedChange={(checked) => setNewZone({ ...newZone, is_active: checked })}
+                />
+                <Label htmlFor="is_active">Active</Label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleDialogClose}>Cancel</Button>
+            <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
+              {createMutation.isPending || updateMutation.isPending ? 'Saving...' : isEditMode ? 'Update Zone' : 'Create Zone'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteZone} onOpenChange={() => setDeleteZone(null)}>

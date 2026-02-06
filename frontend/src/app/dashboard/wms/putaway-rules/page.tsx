@@ -21,7 +21,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -434,179 +433,178 @@ export default function PutawayRulesPage() {
         title="Putaway Rules"
         description="Configure automatic putaway logic for incoming inventory"
         actions={
-          <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleDialogClose()}>
-            <DialogTrigger asChild>
-              <Button onClick={() => { setIsEditMode(false); setIsDialogOpen(true); }}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Rule
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader>
-                <DialogTitle>{isEditMode ? 'Edit Putaway Rule' : 'Create Putaway Rule'}</DialogTitle>
-                <DialogDescription>
-                  Define conditions to automatically route items to specific zones.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Rule Name *</Label>
-                  <Input
-                    id="name"
-                    placeholder="e.g., Electronics to Zone A"
-                    value={newRule.name}
-                    onChange={(e) => setNewRule({ ...newRule, name: e.target.value })}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="warehouse">Warehouse *</Label>
-                    <Select
-                      value={newRule.warehouse_id || 'select'}
-                      onValueChange={(value) => setNewRule({ ...newRule, warehouse_id: value === 'select' ? '' : value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select warehouse" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="select" disabled>Select warehouse</SelectItem>
-                        {warehouses.map((wh: Warehouse) => (
-                          <SelectItem key={wh.id} value={wh.id}>
-                            {wh.name} {wh.code && `(${wh.code})`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="type">Rule Type</Label>
-                    <Select
-                      value={newRule.rule_type}
-                      onValueChange={(value: 'CATEGORY' | 'BRAND' | 'SKU' | 'VELOCITY' | 'SIZE' | 'WEIGHT' | 'CUSTOM') =>
-                        setNewRule({ ...newRule, rule_type: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {ruleTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm">Condition</CardTitle>
-                    <CardDescription>When item matches this condition...</CardDescription>
-                  </CardHeader>
-                  <CardContent className="grid grid-cols-3 gap-2">
-                    <Select
-                      value={newRule.condition_field}
-                      onValueChange={(value) => setNewRule({ ...newRule, condition_field: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Field" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="category_name">Category</SelectItem>
-                        <SelectItem value="brand_name">Brand</SelectItem>
-                        <SelectItem value="sku">SKU</SelectItem>
-                        <SelectItem value="velocity_class">Velocity Class</SelectItem>
-                        <SelectItem value="weight">Weight (kg)</SelectItem>
-                        <SelectItem value="volume">Volume (m³)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Select
-                      value={newRule.condition_operator}
-                      onValueChange={(value: 'EQUALS' | 'CONTAINS' | 'GREATER_THAN' | 'LESS_THAN' | 'IN' | 'NOT_IN') =>
-                        setNewRule({ ...newRule, condition_operator: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Operator" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {operators.map((op) => (
-                          <SelectItem key={op.value} value={op.value}>
-                            {op.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Input
-                      placeholder="Value"
-                      value={newRule.condition_value}
-                      onChange={(e) => setNewRule({ ...newRule, condition_value: e.target.value })}
-                    />
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm">Target Location</CardTitle>
-                    <CardDescription>...route to this zone</CardDescription>
-                  </CardHeader>
-                  <CardContent className="grid grid-cols-2 gap-4">
-                    <Select
-                      value={newRule.target_zone_id || 'select'}
-                      onValueChange={(value) => setNewRule({ ...newRule, target_zone_id: value === 'select' ? '' : value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Target Zone" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="select" disabled>Select zone</SelectItem>
-                        {zones.map((zone: Zone) => (
-                          <SelectItem key={zone.id} value={zone.id}>
-                            {zone.zone_name} ({zone.zone_code})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Select
-                      value={newRule.target_bin_type || 'any'}
-                      onValueChange={(value) => setNewRule({ ...newRule, target_bin_type: value === 'any' ? '' : value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Bin Type (optional)" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="any">Any Bin Type</SelectItem>
-                        <SelectItem value="SHELF">Shelf</SelectItem>
-                        <SelectItem value="PALLET">Pallet</SelectItem>
-                        <SelectItem value="FLOOR">Floor</SelectItem>
-                        <SelectItem value="RACK">Rack</SelectItem>
-                        <SelectItem value="BULK">Bulk</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </CardContent>
-                </Card>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="is_active"
-                    checked={newRule.is_active}
-                    onCheckedChange={(checked) => setNewRule({ ...newRule, is_active: checked })}
-                  />
-                  <Label htmlFor="is_active">Active</Label>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={handleDialogClose}>Cancel</Button>
-                <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
-                  {createMutation.isPending || updateMutation.isPending ? 'Saving...' : isEditMode ? 'Update Rule' : 'Create Rule'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => { setIsEditMode(false); setIsDialogOpen(true); }}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Rule
+          </Button>
         }
       />
+
+      <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleDialogClose()}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{isEditMode ? 'Edit Putaway Rule' : 'Create Putaway Rule'}</DialogTitle>
+            <DialogDescription>
+              Define conditions to automatically route items to specific zones.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
+            <div className="space-y-2">
+              <Label htmlFor="name">Rule Name *</Label>
+              <Input
+                id="name"
+                placeholder="e.g., Electronics to Zone A"
+                value={newRule.name}
+                onChange={(e) => setNewRule({ ...newRule, name: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="warehouse">Warehouse *</Label>
+                <Select
+                  value={newRule.warehouse_id || 'select'}
+                  onValueChange={(value) => setNewRule({ ...newRule, warehouse_id: value === 'select' ? '' : value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select warehouse" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="select" disabled>Select warehouse</SelectItem>
+                    {warehouses.map((wh: Warehouse) => (
+                      <SelectItem key={wh.id} value={wh.id}>
+                        {wh.name} {wh.code && `(${wh.code})`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="type">Rule Type</Label>
+                <Select
+                  value={newRule.rule_type}
+                  onValueChange={(value: 'CATEGORY' | 'BRAND' | 'SKU' | 'VELOCITY' | 'SIZE' | 'WEIGHT' | 'CUSTOM') =>
+                    setNewRule({ ...newRule, rule_type: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ruleTypes.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Condition</CardTitle>
+                <CardDescription>When item matches this condition...</CardDescription>
+              </CardHeader>
+              <CardContent className="grid grid-cols-3 gap-2">
+                <Select
+                  value={newRule.condition_field}
+                  onValueChange={(value) => setNewRule({ ...newRule, condition_field: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Field" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="category_name">Category</SelectItem>
+                    <SelectItem value="brand_name">Brand</SelectItem>
+                    <SelectItem value="sku">SKU</SelectItem>
+                    <SelectItem value="velocity_class">Velocity Class</SelectItem>
+                    <SelectItem value="weight">Weight (kg)</SelectItem>
+                    <SelectItem value="volume">Volume (m³)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={newRule.condition_operator}
+                  onValueChange={(value: 'EQUALS' | 'CONTAINS' | 'GREATER_THAN' | 'LESS_THAN' | 'IN' | 'NOT_IN') =>
+                    setNewRule({ ...newRule, condition_operator: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Operator" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {operators.map((op) => (
+                      <SelectItem key={op.value} value={op.value}>
+                        {op.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  placeholder="Value"
+                  value={newRule.condition_value}
+                  onChange={(e) => setNewRule({ ...newRule, condition_value: e.target.value })}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Target Location</CardTitle>
+                <CardDescription>...route to this zone</CardDescription>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 gap-4">
+                <Select
+                  value={newRule.target_zone_id || 'select'}
+                  onValueChange={(value) => setNewRule({ ...newRule, target_zone_id: value === 'select' ? '' : value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Target Zone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="select" disabled>Select zone</SelectItem>
+                    {zones.map((zone: Zone) => (
+                      <SelectItem key={zone.id} value={zone.id}>
+                        {zone.zone_name} ({zone.zone_code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={newRule.target_bin_type || 'any'}
+                  onValueChange={(value) => setNewRule({ ...newRule, target_bin_type: value === 'any' ? '' : value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Bin Type (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="any">Any Bin Type</SelectItem>
+                    <SelectItem value="SHELF">Shelf</SelectItem>
+                    <SelectItem value="PALLET">Pallet</SelectItem>
+                    <SelectItem value="FLOOR">Floor</SelectItem>
+                    <SelectItem value="RACK">Rack</SelectItem>
+                    <SelectItem value="BULK">Bulk</SelectItem>
+                  </SelectContent>
+                </Select>
+              </CardContent>
+            </Card>
+
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="is_active"
+                checked={newRule.is_active}
+                onCheckedChange={(checked) => setNewRule({ ...newRule, is_active: checked })}
+              />
+              <Label htmlFor="is_active">Active</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleDialogClose}>Cancel</Button>
+            <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
+              {createMutation.isPending || updateMutation.isPending ? 'Saving...' : isEditMode ? 'Update Rule' : 'Create Rule'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteRule} onOpenChange={() => setDeleteRule(null)}>
