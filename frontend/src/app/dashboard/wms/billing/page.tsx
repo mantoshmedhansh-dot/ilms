@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
 import { Receipt, Plus, DollarSign, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataTable } from '@/components/data-table/data-table';
@@ -139,7 +140,7 @@ export default function BillingPage() {
         title="Warehouse Billing"
         description="Manage 3PL billing, storage fees, and handling charges"
         actions={
-          <Button>
+          <Button onClick={() => toast.info('Feature coming soon')}>
             <Plus className="mr-2 h-4 w-4" />
             Generate Invoice
           </Button>

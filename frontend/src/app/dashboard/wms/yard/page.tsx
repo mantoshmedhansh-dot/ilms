@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
 import { Truck, Plus, MapPin, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataTable } from '@/components/data-table/data-table';
@@ -141,7 +142,7 @@ export default function YardPage() {
         title="Yard Management"
         description="Manage dock appointments and yard operations"
         actions={
-          <Button>
+          <Button onClick={() => toast.info('Feature coming soon')}>
             <Plus className="mr-2 h-4 w-4" />
             New Appointment
           </Button>
