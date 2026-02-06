@@ -233,7 +233,6 @@ export const navigation: NavItem[] = [
       { title: 'Stock Summary', href: '/dashboard/inventory', icon: BarChart3, permissions: ['INVENTORY_VIEW'] },
       { title: 'Stock Items', href: '/dashboard/inventory/stock-items', icon: Package, permissions: ['INVENTORY_VIEW'] },
       { title: 'Stock Movements', href: '/dashboard/inventory/movements', icon: History, permissions: ['INVENTORY_VIEW'] },
-      { title: 'Warehouses', href: '/dashboard/inventory/warehouses', icon: Warehouse, permissions: ['INVENTORY_VIEW'] },
       { title: 'Stock Transfers', href: '/dashboard/inventory/transfers', icon: ArrowRightLeft, permissions: ['INVENTORY_VIEW'] },
       { title: 'Stock Adjustments', href: '/dashboard/inventory/adjustments', icon: Calculator, permissions: ['INVENTORY_VIEW'] },
     ],
@@ -246,6 +245,7 @@ export const navigation: NavItem[] = [
     permissions: ['INVENTORY_VIEW', 'ORDERS_VIEW'],
     moduleCode: 'oms_fulfillment',
     children: [
+      { title: 'Warehouses', href: '/dashboard/wms/warehouses', icon: Warehouse, permissions: ['INVENTORY_VIEW'] },
       { title: 'Zones', href: '/dashboard/wms/zones', icon: Layers, permissions: ['INVENTORY_VIEW'] },
       { title: 'Bins & Locations', href: '/dashboard/wms/bins', icon: Grid3X3, permissions: ['INVENTORY_VIEW'] },
       { title: 'Bin Enquiry', href: '/dashboard/wms/bin-enquiry', icon: PackageSearch, permissions: ['INVENTORY_VIEW'] },

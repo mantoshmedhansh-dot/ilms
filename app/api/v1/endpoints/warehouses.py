@@ -60,6 +60,21 @@ async def list_warehouses(
 
 
 @router.get(
+    "/next-code",
+    response_model=dict,
+    dependencies=[Depends(require_permissions("inventory:view"))]
+)
+async def get_next_warehouse_code(db: DB):
+    """
+    Get the next auto-generated warehouse code.
+    Returns the next sequential code (WH001, WH002, etc.)
+    """
+    service = InventoryService(db)
+    next_code = await service.get_next_warehouse_code()
+    return {"code": next_code}
+
+
+@router.get(
     "/dropdown",
     response_model=list[WarehouseBrief],
     dependencies=[Depends(require_permissions("inventory:view"))]

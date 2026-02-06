@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Plus, Pencil, Trash2, Warehouse, MapPin, Loader2 } from 'lucide-react';
+import { MoreHorizontal, Plus, Pencil, Trash2, Warehouse, MapPin, Loader2, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/providers/auth-provider';
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -67,6 +66,7 @@ export default function WarehousesPage() {
   const [editingWarehouse, setEditingWarehouse] = useState<WarehouseType | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [warehouseToDelete, setWarehouseToDelete] = useState<WarehouseType | null>(null);
+  const [isLoadingCode, setIsLoadingCode] = useState(false);
   const [newWarehouse, setNewWarehouse] = useState<{
     name: string;
     code: string;
@@ -90,6 +90,25 @@ export default function WarehousesPage() {
   });
 
   const queryClient = useQueryClient();
+
+  // Fetch next warehouse code when opening dialog for new warehouse
+  useEffect(() => {
+    const fetchNextCode = async () => {
+      if (isDialogOpen && !isEditMode) {
+        setIsLoadingCode(true);
+        try {
+          const nextCode = await warehousesApi.getNextCode();
+          setNewWarehouse(prev => ({ ...prev, code: nextCode }));
+        } catch (error) {
+          console.error('Failed to fetch next warehouse code:', error);
+          toast.error('Failed to generate warehouse code');
+        } finally {
+          setIsLoadingCode(false);
+        }
+      }
+    };
+    fetchNextCode();
+  }, [isDialogOpen, isEditMode]);
 
   const handleEdit = (warehouse: WarehouseType) => {
     setEditingWarehouse(warehouse);
@@ -123,6 +142,11 @@ export default function WarehousesPage() {
       capacity: '',
       is_active: true,
     });
+  };
+
+  const handleOpenNewDialog = () => {
+    setIsEditMode(false);
+    setIsDialogOpen(true);
   };
 
   const { data, isLoading } = useQuery({
@@ -178,7 +202,7 @@ export default function WarehousesPage() {
           </div>
           <div>
             <div className="font-medium">{row.original.name}</div>
-            <div className="text-sm text-muted-foreground">{row.original.code}</div>
+            <div className="text-sm text-muted-foreground font-mono">{row.original.code}</div>
           </div>
         </div>
       ),
@@ -278,7 +302,9 @@ export default function WarehousesPage() {
     };
 
     if (isEditMode && editingWarehouse) {
-      updateMutation.mutate({ id: editingWarehouse.id, data: warehouseData });
+      // Don't allow code change in edit mode
+      const { code: _, ...updateData } = warehouseData;
+      updateMutation.mutate({ id: editingWarehouse.id, data: updateData });
     } else {
       createMutation.mutate(warehouseData);
     }
@@ -290,148 +316,153 @@ export default function WarehousesPage() {
         title="Warehouses"
         description="Manage warehouse locations and inventory storage"
         actions={
-          <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleDialogClose()}>
-            <DialogTrigger asChild>
-              <Button onClick={() => { setIsEditMode(false); setIsDialogOpen(true); }}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Warehouse
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>{isEditMode ? 'Edit Warehouse' : 'Create New Warehouse'}</DialogTitle>
-                <DialogDescription>
-                  {isEditMode ? 'Update warehouse details.' : 'Add a new warehouse location for inventory storage.'}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Name *</Label>
-                    <Input
-                      id="name"
-                      placeholder="Warehouse name"
-                      value={newWarehouse.name}
-                      onChange={(e) =>
-                        setNewWarehouse({ ...newWarehouse, name: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="code">Code *</Label>
-                    <Input
-                      id="code"
-                      placeholder="WH001"
-                      value={newWarehouse.code}
-                      onChange={(e) =>
-                        setNewWarehouse({ ...newWarehouse, code: e.target.value.toUpperCase() })
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="type">Type</Label>
-                  <Select
-                    value={newWarehouse.type}
-                    onValueChange={(value: 'MAIN' | 'REGIONAL' | 'SERVICE_CENTER' | 'DEALER' | 'VIRTUAL') =>
-                      setNewWarehouse({ ...newWarehouse, type: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {warehouseTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    placeholder="Street address"
-                    value={newWarehouse.address}
-                    onChange={(e) =>
-                      setNewWarehouse({ ...newWarehouse, address: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="city">City</Label>
-                    <Input
-                      id="city"
-                      placeholder="City"
-                      value={newWarehouse.city}
-                      onChange={(e) =>
-                        setNewWarehouse({ ...newWarehouse, city: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="state">State</Label>
-                    <Input
-                      id="state"
-                      placeholder="State"
-                      value={newWarehouse.state}
-                      onChange={(e) =>
-                        setNewWarehouse({ ...newWarehouse, state: e.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="pincode">Pincode</Label>
-                    <Input
-                      id="pincode"
-                      placeholder="110001"
-                      value={newWarehouse.pincode}
-                      onChange={(e) =>
-                        setNewWarehouse({ ...newWarehouse, pincode: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="capacity">Capacity</Label>
-                    <Input
-                      id="capacity"
-                      type="number"
-                      placeholder="Units"
-                      value={newWarehouse.capacity}
-                      onChange={(e) =>
-                        setNewWarehouse({ ...newWarehouse, capacity: e.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="is_active"
-                    checked={newWarehouse.is_active}
-                    onCheckedChange={(checked) =>
-                      setNewWarehouse({ ...newWarehouse, is_active: checked })
-                    }
-                  />
-                  <Label htmlFor="is_active">Active</Label>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={handleDialogClose}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
-                  {createMutation.isPending || updateMutation.isPending ? 'Saving...' : isEditMode ? 'Update Warehouse' : 'Create Warehouse'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={handleOpenNewDialog}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Warehouse
+          </Button>
         }
       />
+
+      <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleDialogClose()}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{isEditMode ? 'Edit Warehouse' : 'Create New Warehouse'}</DialogTitle>
+            <DialogDescription>
+              {isEditMode ? 'Update warehouse details.' : 'Add a new warehouse location for inventory storage.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name *</Label>
+                <Input
+                  id="name"
+                  placeholder="Warehouse name"
+                  value={newWarehouse.name}
+                  onChange={(e) =>
+                    setNewWarehouse({ ...newWarehouse, name: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="code" className="flex items-center gap-1">
+                  Code
+                  <Lock className="h-3 w-3 text-muted-foreground" />
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="code"
+                    value={isLoadingCode ? 'Loading...' : newWarehouse.code}
+                    disabled
+                    className="bg-muted font-mono cursor-not-allowed"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Auto-generated code (cannot be modified)
+                </p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="type">Type</Label>
+              <Select
+                value={newWarehouse.type}
+                onValueChange={(value: 'MAIN' | 'REGIONAL' | 'SERVICE_CENTER' | 'DEALER' | 'VIRTUAL') =>
+                  setNewWarehouse({ ...newWarehouse, type: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {warehouseTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="address">Address</Label>
+              <Input
+                id="address"
+                placeholder="Street address"
+                value={newWarehouse.address}
+                onChange={(e) =>
+                  setNewWarehouse({ ...newWarehouse, address: e.target.value })
+                }
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="city">City</Label>
+                <Input
+                  id="city"
+                  placeholder="City"
+                  value={newWarehouse.city}
+                  onChange={(e) =>
+                    setNewWarehouse({ ...newWarehouse, city: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="state">State</Label>
+                <Input
+                  id="state"
+                  placeholder="State"
+                  value={newWarehouse.state}
+                  onChange={(e) =>
+                    setNewWarehouse({ ...newWarehouse, state: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="pincode">Pincode</Label>
+                <Input
+                  id="pincode"
+                  placeholder="110001"
+                  value={newWarehouse.pincode}
+                  onChange={(e) =>
+                    setNewWarehouse({ ...newWarehouse, pincode: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="capacity">Capacity</Label>
+                <Input
+                  id="capacity"
+                  type="number"
+                  placeholder="Units"
+                  value={newWarehouse.capacity}
+                  onChange={(e) =>
+                    setNewWarehouse({ ...newWarehouse, capacity: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="is_active"
+                checked={newWarehouse.is_active}
+                onCheckedChange={(checked) =>
+                  setNewWarehouse({ ...newWarehouse, is_active: checked })
+                }
+              />
+              <Label htmlFor="is_active">Active</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleDialogClose}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending || isLoadingCode}>
+              {createMutation.isPending || updateMutation.isPending ? 'Saving...' : isEditMode ? 'Update Warehouse' : 'Create Warehouse'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <DataTable
         columns={columns}

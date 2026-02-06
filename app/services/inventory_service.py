@@ -111,30 +111,30 @@ class InventoryService:
         await self.db.refresh(warehouse)
         return warehouse
 
-    async def _generate_warehouse_code(self, warehouse_type: WarehouseType) -> str:
-        """Generate unique warehouse code."""
-        prefix_map = {
-            WarehouseType.MAIN: "WH-M",
-            WarehouseType.REGIONAL: "WH-R",
-            WarehouseType.SERVICE_CENTER: "WH-S",
-            WarehouseType.DEALER: "WH-D",
-            WarehouseType.VIRTUAL: "WH-V",
-        }
-        prefix = prefix_map.get(warehouse_type, "WH")
+    async def _generate_warehouse_code(self, warehouse_type: WarehouseType = None) -> str:
+        """Generate unique warehouse code in format WH001, WH002, etc."""
+        # Industry standard: Simple sequential warehouse codes
+        prefix = "WH"
 
-        # Get max number
+        # Get max number from all warehouse codes starting with WH
         query = select(func.max(Warehouse.code)).where(Warehouse.code.like(f"{prefix}%"))
         result = await self.db.scalar(query)
 
         if result:
             try:
-                num = int(result.split("-")[-1]) + 1
+                # Extract numeric part from code like WH001, WH002
+                num_str = result.replace(prefix, "")
+                num = int(num_str) + 1
             except (ValueError, IndexError):
                 num = 1
         else:
             num = 1
 
-        return f"{prefix}-{num:04d}"
+        return f"{prefix}{num:03d}"
+
+    async def get_next_warehouse_code(self) -> str:
+        """Get the next warehouse code without creating a warehouse."""
+        return await self._generate_warehouse_code()
 
     # ==================== STOCK ITEM METHODS ====================
 

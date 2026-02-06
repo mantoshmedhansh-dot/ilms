@@ -544,6 +544,11 @@ export const warehousesApi = {
     const { data } = await apiClient.get<Array<{ id: string; name: string; code: string; warehouse_type: string }>>('/warehouses/dropdown');
     return data;
   },
+  getNextCode: async (): Promise<string> => {
+    // Get next auto-generated warehouse code (WH001, WH002, etc.)
+    const { data } = await apiClient.get<{ code: string }>('/warehouses/next-code');
+    return data.code;
+  },
 };
 
 // Channels API
