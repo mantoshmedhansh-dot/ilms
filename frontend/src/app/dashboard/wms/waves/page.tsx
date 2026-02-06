@@ -191,7 +191,7 @@ const columns: ColumnDef<Wave>[] = [
 export default function WavesPage() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState<WaveCreatePayload>({
     warehouse_id: '',
     wave_type: 'CARRIER_CUTOFF',
@@ -223,7 +223,7 @@ export default function WavesPage() {
     mutationFn: wavesApi.create,
     onSuccess: () => {
       toast.success('Wave created successfully');
-      setCreateDialogOpen(false);
+      setIsDialogOpen(false);
       setFormData({
         warehouse_id: '',
         wave_type: 'CARRIER_CUTOFF',
@@ -251,139 +251,151 @@ export default function WavesPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Wave Management"
-        description="Create and manage picking waves for efficient order fulfillment"
-        actions={
-          <Button onClick={() => setCreateDialogOpen(true)}>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Wave Management</h1>
+          <p className="text-muted-foreground mt-1">
+            Create and manage picking waves for efficient order fulfillment
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {/* Test with native button */}
+          <button
+            type="button"
+            onClick={() => alert('Native button works!')}
+            className="px-4 py-2 bg-red-500 text-white rounded"
+          >
+            Test Native
+          </button>
+          <Button onClick={() => setIsDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Create Wave
           </Button>
-        }
-      />
+        </div>
+      </div>
 
-      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>Create New Wave</DialogTitle>
-                <DialogDescription>
-                  Configure and create a new picking wave for order fulfillment
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="warehouse">Warehouse *</Label>
-                  <Select
-                    value={formData.warehouse_id}
-                    onValueChange={(value) => setFormData({ ...formData, warehouse_id: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select warehouse" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {warehouses?.map((wh) => (
-                        <SelectItem key={wh.id} value={wh.id}>
-                          {wh.code} - {wh.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+          <DialogHeader>
+            <DialogTitle>Create New Wave</DialogTitle>
+            <DialogDescription>
+              Configure and create a new picking wave for order fulfillment
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="warehouse">Warehouse *</Label>
+              <Select
+                value={formData.warehouse_id}
+                onValueChange={(value) => setFormData({ ...formData, warehouse_id: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select warehouse" />
+                </SelectTrigger>
+                <SelectContent>
+                  {warehouses?.map((wh) => (
+                    <SelectItem key={wh.id} value={wh.id}>
+                      {wh.code} - {wh.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="wave_type">Wave Type</Label>
+              <Select
+                value={formData.wave_type}
+                onValueChange={(value) => setFormData({ ...formData, wave_type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select wave type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {WAVE_TYPES.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      <div>
+                        <div className="font-medium">{type.label}</div>
+                        <div className="text-xs text-muted-foreground">{type.description}</div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="name">Wave Name (Optional)</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="e.g., Morning Batch"
+              />
+            </div>
+
+            <div className="space-y-4 pt-2">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Auto-select Orders</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Automatically select eligible orders
+                  </p>
                 </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="wave_type">Wave Type</Label>
-                  <Select
-                    value={formData.wave_type}
-                    onValueChange={(value) => setFormData({ ...formData, wave_type: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select wave type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {WAVE_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          <div>
-                            <div className="font-medium">{type.label}</div>
-                            <div className="text-xs text-muted-foreground">{type.description}</div>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="grid gap-2">
-                  <Label htmlFor="name">Wave Name (Optional)</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g., Morning Batch"
-                  />
-                </div>
-
-                <div className="space-y-4 pt-2">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Auto-select Orders</Label>
-                      <p className="text-xs text-muted-foreground">
-                        Automatically select eligible orders
-                      </p>
-                    </div>
-                    <Switch
-                      checked={formData.auto_select_orders}
-                      onCheckedChange={(checked) => setFormData({ ...formData, auto_select_orders: checked })}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Auto-release Wave</Label>
-                      <p className="text-xs text-muted-foreground">
-                        Immediately release after creation
-                      </p>
-                    </div>
-                    <Switch
-                      checked={formData.auto_release}
-                      onCheckedChange={(checked) => setFormData({ ...formData, auto_release: checked })}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Optimize Route</Label>
-                      <p className="text-xs text-muted-foreground">
-                        Optimize picking path for efficiency
-                      </p>
-                    </div>
-                    <Switch
-                      checked={formData.optimize_route}
-                      onCheckedChange={(checked) => setFormData({ ...formData, optimize_route: checked })}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Group by Zone</Label>
-                      <p className="text-xs text-muted-foreground">
-                        Group picks by warehouse zone
-                      </p>
-                    </div>
-                    <Switch
-                      checked={formData.group_by_zone}
-                      onCheckedChange={(checked) => setFormData({ ...formData, group_by_zone: checked })}
-                    />
-                  </div>
-                </div>
+                <Switch
+                  checked={formData.auto_select_orders}
+                  onCheckedChange={(checked) => setFormData({ ...formData, auto_select_orders: checked })}
+                />
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSubmit} disabled={createMutation.isPending}>
-                  {createMutation.isPending ? 'Creating...' : 'Create Wave'}
-                </Button>
-              </DialogFooter>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Auto-release Wave</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Immediately release after creation
+                  </p>
+                </div>
+                <Switch
+                  checked={formData.auto_release}
+                  onCheckedChange={(checked) => setFormData({ ...formData, auto_release: checked })}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Optimize Route</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Optimize picking path for efficiency
+                  </p>
+                </div>
+                <Switch
+                  checked={formData.optimize_route}
+                  onCheckedChange={(checked) => setFormData({ ...formData, optimize_route: checked })}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Group by Zone</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Group picks by warehouse zone
+                  </p>
+                </div>
+                <Switch
+                  checked={formData.group_by_zone}
+                  onCheckedChange={(checked) => setFormData({ ...formData, group_by_zone: checked })}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} disabled={createMutation.isPending}>
+              {createMutation.isPending ? 'Creating...' : 'Create Wave'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
