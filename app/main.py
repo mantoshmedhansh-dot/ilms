@@ -343,8 +343,18 @@ app.include_router(api_router)
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Return detailed error information for debugging."""
+    from fastapi import HTTPException
+
+    # Preserve HTTP status code for HTTPException, default to 500 for others
+    if isinstance(exc, HTTPException):
+        status_code = exc.status_code
+        error_message = exc.detail
+    else:
+        status_code = 500
+        error_message = str(exc)
+
     error_detail = {
-        "error": str(exc),
+        "error": error_message,
         "type": type(exc).__name__,
         "path": str(request.url.path),
         "method": request.method,
@@ -355,7 +365,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 
     # Build response with CORS headers for error responses
     response = JSONResponse(
-        status_code=500,
+        status_code=status_code,
         content=error_detail
     )
 

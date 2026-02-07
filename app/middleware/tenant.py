@@ -80,9 +80,17 @@ async def get_tenant_by_subdomain(db: AsyncSession, subdomain: str) -> Tenant:
 
 async def get_tenant_by_id(db: AsyncSession, tenant_id: str) -> Tenant:
     """Get tenant by ID"""
+    import uuid as uuid_module
+    try:
+        # Convert string to UUID for proper comparison
+        tenant_uuid = uuid_module.UUID(tenant_id)
+    except (ValueError, AttributeError):
+        logger.warning(f"Invalid tenant_id format: {tenant_id}")
+        return None
+
     result = await db.execute(
         select(Tenant).where(
-            Tenant.id == tenant_id,
+            Tenant.id == tenant_uuid,
             Tenant.status.in_(['active', 'pending'])
         )
     )
