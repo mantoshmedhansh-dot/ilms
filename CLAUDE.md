@@ -59,8 +59,22 @@
 ## Auto-Deploy Configuration
 
 ### Frontend (Vercel)
-- Linked via `.vercel/project.json`
+- **Project ID:** prj_K6nSHAHK0rnH02qfDRDq07AZSw9i
+- **Org ID:** team_OT5CWaqk30ASE3WfEeeAZaQP
+- **Project Name:** frontend
+- **Production URL:** https://frontend-ilms.vercel.app
+- Linked via `frontend/.vercel/project.json`
 - Auto-deploys on push to `main` (via Vercel GitHub integration)
+
+**IMPORTANT: Always deploy from the `frontend` directory:**
+```bash
+cd frontend && npx vercel link --project frontend --yes && npx vercel --prod --yes
+```
+
+**If Vercel links to wrong project, manually reset:**
+```bash
+cd frontend && rm -rf .vercel && npx vercel link --project frontend --yes
+```
 
 ### Backend (Render)
 - Auto-deploys via GitHub Actions workflow
