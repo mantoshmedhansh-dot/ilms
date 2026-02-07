@@ -1,12 +1,29 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
-import { Truck, Plus, MapPin, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Truck, Plus, MapPin, Clock, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { DataTable } from '@/components/data-table/data-table';
 import { PageHeader, StatusBadge } from '@/components/common';
 import apiClient from '@/lib/api/client';
@@ -34,6 +51,44 @@ interface YardStats {
   delayed: number;
 }
 
+interface NewAppointmentData {
+  carrier_name: string;
+  vehicle_number: string;
+  driver_name: string;
+  appointment_type: 'INBOUND' | 'OUTBOUND';
+  dock_door: string;
+  scheduled_time: string;
+  status: 'SCHEDULED' | 'ARRIVED' | 'DOCKED' | 'LOADING' | 'UNLOADING' | 'COMPLETED' | 'CANCELLED' | 'DELAYED';
+  notes: string;
+}
+
+const initialFormData: NewAppointmentData = {
+  carrier_name: '',
+  vehicle_number: '',
+  driver_name: '',
+  appointment_type: 'INBOUND',
+  dock_door: '',
+  scheduled_time: '',
+  status: 'SCHEDULED',
+  notes: '',
+};
+
+const appointmentTypes = [
+  { label: 'Inbound', value: 'INBOUND' },
+  { label: 'Outbound', value: 'OUTBOUND' },
+];
+
+const appointmentStatuses = [
+  { label: 'Scheduled', value: 'SCHEDULED' },
+  { label: 'Arrived', value: 'ARRIVED' },
+  { label: 'Docked', value: 'DOCKED' },
+  { label: 'Loading', value: 'LOADING' },
+  { label: 'Unloading', value: 'UNLOADING' },
+  { label: 'Completed', value: 'COMPLETED' },
+  { label: 'Cancelled', value: 'CANCELLED' },
+  { label: 'Delayed', value: 'DELAYED' },
+];
+
 const yardApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
@@ -50,6 +105,10 @@ const yardApi = {
     } catch {
       return { total_appointments: 0, in_yard: 0, awaiting_arrival: 0, delayed: 0 };
     }
+  },
+  create: async (appointmentData: NewAppointmentData) => {
+    const { data } = await apiClient.post('/yard/appointments', appointmentData);
+    return data;
   },
 };
 
@@ -125,6 +184,10 @@ const columns: ColumnDef<YardAppointment>[] = [
 export default function YardPage() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState<NewAppointmentData>(initialFormData);
+
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ['wms-yard', page, pageSize],
@@ -136,13 +199,48 @@ export default function YardPage() {
     queryFn: yardApi.getStats,
   });
 
+  const createMutation = useMutation({
+    mutationFn: yardApi.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wms-yard'] });
+      queryClient.invalidateQueries({ queryKey: ['wms-yard-stats'] });
+      toast.success('Appointment created successfully');
+      handleDialogClose();
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to create appointment');
+    },
+  });
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+    setFormData(initialFormData);
+  };
+
+  const handleSubmit = () => {
+    if (!formData.carrier_name.trim()) {
+      toast.error('Carrier name is required');
+      return;
+    }
+    if (!formData.vehicle_number.trim()) {
+      toast.error('Vehicle number is required');
+      return;
+    }
+    if (!formData.scheduled_time) {
+      toast.error('Scheduled time is required');
+      return;
+    }
+
+    createMutation.mutate(formData);
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Yard Management"
         description="Manage dock appointments and yard operations"
         actions={
-          <Button onClick={() => toast.info('Feature coming soon')}>
+          <Button onClick={() => setIsDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             New Appointment
           </Button>
@@ -191,6 +289,137 @@ export default function YardPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleDialogClose()}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create New Appointment</DialogTitle>
+            <DialogDescription>
+              Schedule a new yard appointment for dock operations.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
+            <div className="space-y-2">
+              <Label htmlFor="carrier_name">Carrier Name *</Label>
+              <Input
+                id="carrier_name"
+                placeholder="Enter carrier name"
+                value={formData.carrier_name}
+                onChange={(e) =>
+                  setFormData({ ...formData, carrier_name: e.target.value })
+                }
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="vehicle_number">Vehicle Number *</Label>
+                <Input
+                  id="vehicle_number"
+                  placeholder="e.g., ABC-1234"
+                  value={formData.vehicle_number}
+                  onChange={(e) =>
+                    setFormData({ ...formData, vehicle_number: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="driver_name">Driver Name</Label>
+                <Input
+                  id="driver_name"
+                  placeholder="Driver name"
+                  value={formData.driver_name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, driver_name: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="appointment_type">Appointment Type *</Label>
+              <Select
+                value={formData.appointment_type}
+                onValueChange={(value: 'INBOUND' | 'OUTBOUND') =>
+                  setFormData({ ...formData, appointment_type: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {appointmentTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="dock_door">Dock Number</Label>
+                <Input
+                  id="dock_door"
+                  placeholder="e.g., D-01"
+                  value={formData.dock_door}
+                  onChange={(e) =>
+                    setFormData({ ...formData, dock_door: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="scheduled_time">Scheduled Time *</Label>
+                <Input
+                  id="scheduled_time"
+                  type="datetime-local"
+                  value={formData.scheduled_time}
+                  onChange={(e) =>
+                    setFormData({ ...formData, scheduled_time: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="status">Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value: NewAppointmentData['status']) =>
+                  setFormData({ ...formData, status: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {appointmentStatuses.map((status) => (
+                    <SelectItem key={status.value} value={status.value}>
+                      {status.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notes</Label>
+              <Input
+                id="notes"
+                placeholder="Additional notes"
+                value={formData.notes}
+                onChange={(e) =>
+                  setFormData({ ...formData, notes: e.target.value })
+                }
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleDialogClose}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} disabled={createMutation.isPending}>
+              {createMutation.isPending ? 'Creating...' : 'Create Appointment'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <DataTable
         columns={columns}

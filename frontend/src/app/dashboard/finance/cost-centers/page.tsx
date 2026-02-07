@@ -21,7 +21,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   Select,
@@ -316,129 +315,129 @@ export default function CostCentersPage() {
         title="Cost Centers"
         description="Manage departmental cost centers for expense tracking"
         actions={
-          <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setIsDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Cost Center
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>{isEditMode ? 'Edit Cost Center' : 'Add New Cost Center'}</DialogTitle>
-                <DialogDescription>
-                  {isEditMode ? 'Update cost center details' : 'Create a new cost center for expense tracking'}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Code *</Label>
-                    <Input
-                      placeholder="CC001"
-                      value={formData.code}
-                      onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                      disabled={isEditMode}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Type *</Label>
-                    <Select
-                      value={formData.cost_center_type}
-                      onValueChange={(value) => setFormData({ ...formData, cost_center_type: value })}
-                      disabled={isEditMode}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {costCenterTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Name *</Label>
-                  <Input
-                    placeholder="Sales Department"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Parent Cost Center</Label>
-                  <Select
-                    value={formData.parent_id || 'none'}
-                    onValueChange={(value) => setFormData({ ...formData, parent_id: value === 'none' ? '' : value })}
-                    disabled={isEditMode}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select parent (optional)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">No Parent (Top Level)</SelectItem>
-                      {parentCostCenters.map((cc: CostCenter) => (
-                        <SelectItem key={cc.id} value={cc.id}>
-                          {cc.code} - {cc.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Annual Budget</Label>
-                  <div className="relative">
-                    <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      type="number"
-                      min="0"
-                      step="1000"
-                      placeholder="0"
-                      className="pl-10"
-                      value={formData.annual_budget || ''}
-                      onChange={(e) => setFormData({ ...formData, annual_budget: parseFloat(e.target.value) || 0 })}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Description</Label>
-                  <Textarea
-                    placeholder="Cost center description (optional)"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  />
-                </div>
-                {isEditMode && (
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="is_active"
-                      checked={formData.is_active}
-                      onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-                    />
-                    <Label htmlFor="is_active">Active</Label>
-                  </div>
-                )}
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={resetForm}>Cancel</Button>
-                <Button
-                  onClick={handleSubmit}
-                  disabled={createMutation.isPending || updateMutation.isPending}
-                >
-                  {(createMutation.isPending || updateMutation.isPending) && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  {isEditMode ? 'Update' : 'Create'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Cost Center
+          </Button>
         }
       />
+
+      {/* Create/Edit Cost Center Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{isEditMode ? 'Edit Cost Center' : 'Add New Cost Center'}</DialogTitle>
+            <DialogDescription>
+              {isEditMode ? 'Update cost center details' : 'Create a new cost center for expense tracking'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Code *</Label>
+                <Input
+                  placeholder="CC001"
+                  value={formData.code}
+                  onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                  disabled={isEditMode}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Type *</Label>
+                <Select
+                  value={formData.cost_center_type}
+                  onValueChange={(value) => setFormData({ ...formData, cost_center_type: value })}
+                  disabled={isEditMode}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {costCenterTypes.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Name *</Label>
+              <Input
+                placeholder="Sales Department"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Parent Cost Center</Label>
+              <Select
+                value={formData.parent_id || 'none'}
+                onValueChange={(value) => setFormData({ ...formData, parent_id: value === 'none' ? '' : value })}
+                disabled={isEditMode}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select parent (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Parent (Top Level)</SelectItem>
+                  {parentCostCenters.map((cc: CostCenter) => (
+                    <SelectItem key={cc.id} value={cc.id}>
+                      {cc.code} - {cc.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Annual Budget</Label>
+              <div className="relative">
+                <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="number"
+                  min="0"
+                  step="1000"
+                  placeholder="0"
+                  className="pl-10"
+                  value={formData.annual_budget || ''}
+                  onChange={(e) => setFormData({ ...formData, annual_budget: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea
+                placeholder="Cost center description (optional)"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </div>
+            {isEditMode && (
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="is_active"
+                  checked={formData.is_active}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                />
+                <Label htmlFor="is_active">Active</Label>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={resetForm}>Cancel</Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={createMutation.isPending || updateMutation.isPending}
+            >
+              {(createMutation.isPending || updateMutation.isPending) && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              {isEditMode ? 'Update' : 'Create'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <DataTable
         columns={columns}

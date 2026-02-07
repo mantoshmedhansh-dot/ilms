@@ -25,7 +25,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -543,14 +542,15 @@ export default function FTLRateCardsPage() {
         title="FTL Rate Cards (Full Truck Load)"
         description="Manage rate cards for Full Truck Load shipments with lane-based pricing"
         actions={
-          <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setIsDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add FTL Rate Card
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add FTL Rate Card
+          </Button>
+        }
+      />
+
+      <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
+        <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle>{isEditMode ? 'Edit FTL Rate Card' : 'Add FTL Rate Card'}</DialogTitle>
                 <DialogDescription>
@@ -710,10 +710,8 @@ export default function FTLRateCardsPage() {
                   {isEditMode ? 'Update' : 'Create'} Rate Card
                 </Button>
               </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        }
-      />
+        </DialogContent>
+      </Dialog>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">

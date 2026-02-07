@@ -1,12 +1,29 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
 import { ClipboardList, Plus, CheckCircle, XCircle, Clock, BarChart3, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { DataTable } from '@/components/data-table/data-table';
 import { PageHeader, StatusBadge } from '@/components/common';
 import apiClient from '@/lib/api/client';
@@ -36,6 +53,14 @@ interface CycleCountStats {
   variances_pending: number;
 }
 
+interface ScheduleCycleCountData {
+  zone_name: string;
+  count_type: 'FULL' | 'ABC' | 'RANDOM';
+  scheduled_date: string;
+  assigned_to: string;
+  priority: 'LOW' | 'MEDIUM' | 'HIGH';
+}
+
 const cycleCountApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
@@ -52,6 +77,10 @@ const cycleCountApi = {
     } catch {
       return { total_counts: 0, in_progress: 0, avg_accuracy: 0, variances_pending: 0 };
     }
+  },
+  schedule: async (data: ScheduleCycleCountData) => {
+    const response = await apiClient.post('/cycle-count/', data);
+    return response.data;
   },
 };
 
@@ -153,9 +182,37 @@ const columns: ColumnDef<CycleCount>[] = [
   },
 ];
 
+const countTypes = [
+  { label: 'Full Count', value: 'FULL' },
+  { label: 'ABC Analysis', value: 'ABC' },
+  { label: 'Random Sample', value: 'RANDOM' },
+];
+
+const priorityOptions = [
+  { label: 'Low', value: 'LOW' },
+  { label: 'Medium', value: 'MEDIUM' },
+  { label: 'High', value: 'HIGH' },
+];
+
 export default function CycleCountPage() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState<{
+    zone_name: string;
+    count_type: 'FULL' | 'ABC' | 'RANDOM';
+    scheduled_date: string;
+    assigned_to: string;
+    priority: 'LOW' | 'MEDIUM' | 'HIGH';
+  }>({
+    zone_name: '',
+    count_type: 'FULL',
+    scheduled_date: '',
+    assigned_to: '',
+    priority: 'MEDIUM',
+  });
+
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ['wms-cycle-count', page, pageSize],
@@ -167,18 +224,149 @@ export default function CycleCountPage() {
     queryFn: cycleCountApi.getStats,
   });
 
+  const scheduleMutation = useMutation({
+    mutationFn: cycleCountApi.schedule,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wms-cycle-count'] });
+      queryClient.invalidateQueries({ queryKey: ['wms-cycle-count-stats'] });
+      toast.success('Cycle count scheduled successfully');
+      handleDialogClose();
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to schedule cycle count');
+    },
+  });
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+    setFormData({
+      zone_name: '',
+      count_type: 'FULL',
+      scheduled_date: '',
+      assigned_to: '',
+      priority: 'MEDIUM',
+    });
+  };
+
+  const handleSubmit = () => {
+    if (!formData.zone_name.trim()) {
+      toast.error('Zone/Area is required');
+      return;
+    }
+    if (!formData.scheduled_date) {
+      toast.error('Scheduled date is required');
+      return;
+    }
+
+    scheduleMutation.mutate(formData);
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Cycle Counting"
         description="Schedule and manage inventory cycle counts for accuracy"
         actions={
-          <Button onClick={() => toast.info('Feature coming soon')}>
+          <Button onClick={() => setIsDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Schedule Count
           </Button>
         }
       />
+
+      <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleDialogClose()}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Schedule Cycle Count</DialogTitle>
+            <DialogDescription>
+              Schedule a new cycle count for inventory accuracy verification.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="zone_name">Zone/Area *</Label>
+              <Input
+                id="zone_name"
+                placeholder="e.g., Zone A, Receiving Area"
+                value={formData.zone_name}
+                onChange={(e) =>
+                  setFormData({ ...formData, zone_name: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="count_type">Count Type</Label>
+              <Select
+                value={formData.count_type}
+                onValueChange={(value: 'FULL' | 'ABC' | 'RANDOM') =>
+                  setFormData({ ...formData, count_type: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select count type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {countTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="scheduled_date">Scheduled Date *</Label>
+              <Input
+                id="scheduled_date"
+                type="date"
+                value={formData.scheduled_date}
+                onChange={(e) =>
+                  setFormData({ ...formData, scheduled_date: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="assigned_to">Assigned Counter</Label>
+              <Input
+                id="assigned_to"
+                placeholder="Counter name"
+                value={formData.assigned_to}
+                onChange={(e) =>
+                  setFormData({ ...formData, assigned_to: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="priority">Priority</Label>
+              <Select
+                value={formData.priority}
+                onValueChange={(value: 'LOW' | 'MEDIUM' | 'HIGH') =>
+                  setFormData({ ...formData, priority: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  {priorityOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleDialogClose}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} disabled={scheduleMutation.isPending}>
+              {scheduleMutation.isPending ? 'Scheduling...' : 'Schedule Count'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>

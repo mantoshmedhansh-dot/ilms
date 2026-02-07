@@ -22,7 +22,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   Sheet,
@@ -413,134 +412,133 @@ export default function InvoicesPage() {
         title="Invoices"
         description="Manage sales invoices and billing"
         actions={
-          <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setIsDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Invoice
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Create Invoice</DialogTitle>
-                <DialogDescription>Create a new sales invoice</DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label>Customer *</Label>
-                  <Select
-                    value={formData.customer_id || 'select'}
-                    onValueChange={(value) => setFormData({ ...formData, customer_id: value === 'select' ? '' : value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select customer" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="select" disabled>Select customer</SelectItem>
-                      {customers
-                        .filter((c: Customer) => c.id && c.id.trim() !== '')
-                        .map((c: Customer) => (
-                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Invoice Date *</Label>
-                    <Input
-                      type="date"
-                      value={formData.invoice_date}
-                      onChange={(e) => setFormData({ ...formData, invoice_date: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Due Date *</Label>
-                    <Input
-                      type="date"
-                      value={formData.due_date}
-                      onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label>Items</Label>
-                    <Button type="button" variant="outline" size="sm" onClick={addItem}>
-                      <Plus className="h-3 w-3 mr-1" /> Add Item
-                    </Button>
-                  </div>
-                  {formData.items.map((item, index) => (
-                    <div key={index} className="grid grid-cols-12 gap-2 items-end p-2 border rounded-md">
-                      <div className="col-span-4 space-y-1">
-                        <Label className="text-xs">Description</Label>
-                        <Input
-                          placeholder="Product/Service"
-                          value={item.product_name}
-                          onChange={(e) => updateItem(index, 'product_name', e.target.value)}
-                        />
-                      </div>
-                      <div className="col-span-2 space-y-1">
-                        <Label className="text-xs">Qty</Label>
-                        <Input
-                          type="number"
-                          min="1"
-                          value={item.quantity}
-                          onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 1)}
-                        />
-                      </div>
-                      <div className="col-span-2 space-y-1">
-                        <Label className="text-xs">Price</Label>
-                        <Input
-                          type="number"
-                          min="0"
-                          value={item.unit_price}
-                          onChange={(e) => updateItem(index, 'unit_price', parseFloat(e.target.value) || 0)}
-                        />
-                      </div>
-                      <div className="col-span-2 space-y-1">
-                        <Label className="text-xs">Tax %</Label>
-                        <Input
-                          type="number"
-                          min="0"
-                          value={item.tax_rate}
-                          onChange={(e) => updateItem(index, 'tax_rate', parseFloat(e.target.value) || 0)}
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeItem(index)}
-                          disabled={formData.items.length === 1}
-                        >
-                          <XCircle className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="space-y-2">
-                  <Label>Notes</Label>
-                  <Textarea
-                    placeholder="Additional notes (optional)"
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={resetForm}>Cancel</Button>
-                <Button onClick={handleSubmit} disabled={createMutation.isPending}>
-                  {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Invoice
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Invoice
+          </Button>
         }
       />
+
+      <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create Invoice</DialogTitle>
+            <DialogDescription>Create a new sales invoice</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label>Customer *</Label>
+              <Select
+                value={formData.customer_id || 'select'}
+                onValueChange={(value) => setFormData({ ...formData, customer_id: value === 'select' ? '' : value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select customer" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="select" disabled>Select customer</SelectItem>
+                  {customers
+                    .filter((c: Customer) => c.id && c.id.trim() !== '')
+                    .map((c: Customer) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Invoice Date *</Label>
+                <Input
+                  type="date"
+                  value={formData.invoice_date}
+                  onChange={(e) => setFormData({ ...formData, invoice_date: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Due Date *</Label>
+                <Input
+                  type="date"
+                  value={formData.due_date}
+                  onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label>Items</Label>
+                <Button type="button" variant="outline" size="sm" onClick={addItem}>
+                  <Plus className="h-3 w-3 mr-1" /> Add Item
+                </Button>
+              </div>
+              {formData.items.map((item, index) => (
+                <div key={index} className="grid grid-cols-12 gap-2 items-end p-2 border rounded-md">
+                  <div className="col-span-4 space-y-1">
+                    <Label className="text-xs">Description</Label>
+                    <Input
+                      placeholder="Product/Service"
+                      value={item.product_name}
+                      onChange={(e) => updateItem(index, 'product_name', e.target.value)}
+                    />
+                  </div>
+                  <div className="col-span-2 space-y-1">
+                    <Label className="text-xs">Qty</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={item.quantity}
+                      onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                    />
+                  </div>
+                  <div className="col-span-2 space-y-1">
+                    <Label className="text-xs">Price</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={item.unit_price}
+                      onChange={(e) => updateItem(index, 'unit_price', parseFloat(e.target.value) || 0)}
+                    />
+                  </div>
+                  <div className="col-span-2 space-y-1">
+                    <Label className="text-xs">Tax %</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={item.tax_rate}
+                      onChange={(e) => updateItem(index, 'tax_rate', parseFloat(e.target.value) || 0)}
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeItem(index)}
+                      disabled={formData.items.length === 1}
+                    >
+                      <XCircle className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              <Textarea
+                placeholder="Additional notes (optional)"
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={resetForm}>Cancel</Button>
+            <Button onClick={handleSubmit} disabled={createMutation.isPending}>
+              {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Invoice
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <DataTable
         columns={columns}

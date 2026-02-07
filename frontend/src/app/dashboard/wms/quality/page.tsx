@@ -1,12 +1,30 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
-import { ClipboardCheck, Plus, CheckCircle, XCircle, AlertTriangle, Package } from 'lucide-react';
+import { ClipboardCheck, Plus, CheckCircle, XCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { DataTable } from '@/components/data-table/data-table';
 import { PageHeader, StatusBadge } from '@/components/common';
 import apiClient from '@/lib/api/client';
@@ -36,6 +54,16 @@ interface QualityStats {
   failed_today: number;
 }
 
+interface CreateInspectionData {
+  inspection_type: 'RECEIVING' | 'IN_PROCESS' | 'FINAL' | 'RANDOM';
+  reference_number: string;
+  product_sku: string;
+  product_name: string;
+  quantity_inspected: number;
+  inspector_name: string;
+  notes?: string;
+}
+
 const qualityApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
@@ -53,6 +81,10 @@ const qualityApi = {
       return { total_inspections: 0, pass_rate: 0, pending_inspections: 0, failed_today: 0 };
     }
   },
+  create: async (inspection: CreateInspectionData) => {
+    const { data } = await apiClient.post('/qc/inspections', inspection);
+    return data;
+  },
 };
 
 const typeColors: Record<string, string> = {
@@ -61,6 +93,13 @@ const typeColors: Record<string, string> = {
   FINAL: 'bg-green-100 text-green-800',
   RANDOM: 'bg-orange-100 text-orange-800',
 };
+
+const inspectionTypes = [
+  { label: 'Receiving Inspection', value: 'RECEIVING' },
+  { label: 'In-Process Inspection', value: 'IN_PROCESS' },
+  { label: 'Final Inspection', value: 'FINAL' },
+  { label: 'Random Inspection', value: 'RANDOM' },
+];
 
 const columns: ColumnDef<QualityInspection>[] = [
   {
@@ -136,9 +175,23 @@ const columns: ColumnDef<QualityInspection>[] = [
   },
 ];
 
+const initialFormState = {
+  inspection_type: 'RECEIVING' as 'RECEIVING' | 'IN_PROCESS' | 'FINAL' | 'RANDOM',
+  reference_number: '',
+  product_sku: '',
+  product_name: '',
+  quantity_inspected: '',
+  inspector_name: '',
+  notes: '',
+};
+
 export default function QualityPage() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState(initialFormState);
+
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ['wms-quality', page, pageSize],
@@ -150,13 +203,64 @@ export default function QualityPage() {
     queryFn: qualityApi.getStats,
   });
 
+  const createMutation = useMutation({
+    mutationFn: qualityApi.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wms-quality'] });
+      queryClient.invalidateQueries({ queryKey: ['wms-quality-stats'] });
+      toast.success('Inspection created successfully');
+      handleDialogClose();
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to create inspection');
+    },
+  });
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+    setFormData(initialFormState);
+  };
+
+  const handleSubmit = () => {
+    if (!formData.reference_number.trim()) {
+      toast.error('Reference number is required');
+      return;
+    }
+    if (!formData.product_sku.trim()) {
+      toast.error('Product SKU is required');
+      return;
+    }
+    if (!formData.product_name.trim()) {
+      toast.error('Product name is required');
+      return;
+    }
+    if (!formData.quantity_inspected || parseInt(formData.quantity_inspected) <= 0) {
+      toast.error('Quantity must be greater than 0');
+      return;
+    }
+    if (!formData.inspector_name.trim()) {
+      toast.error('Inspector name is required');
+      return;
+    }
+
+    createMutation.mutate({
+      inspection_type: formData.inspection_type,
+      reference_number: formData.reference_number,
+      product_sku: formData.product_sku,
+      product_name: formData.product_name,
+      quantity_inspected: parseInt(formData.quantity_inspected),
+      inspector_name: formData.inspector_name,
+      notes: formData.notes || undefined,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Quality Control"
         description="Manage product inspections and quality standards"
         actions={
-          <Button onClick={() => toast.info('Feature coming soon')}>
+          <Button onClick={() => setIsDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             New Inspection
           </Button>
@@ -205,6 +309,119 @@ export default function QualityPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleDialogClose()}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create New Inspection</DialogTitle>
+            <DialogDescription>
+              Add a new quality control inspection for products.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
+            <div className="space-y-2">
+              <Label htmlFor="inspection_type">Inspection Type *</Label>
+              <Select
+                value={formData.inspection_type}
+                onValueChange={(value: 'RECEIVING' | 'IN_PROCESS' | 'FINAL' | 'RANDOM') =>
+                  setFormData({ ...formData, inspection_type: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select inspection type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {inspectionTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reference_number">Reference Number *</Label>
+              <Input
+                id="reference_number"
+                placeholder="PO-12345 or GRN-67890"
+                value={formData.reference_number}
+                onChange={(e) =>
+                  setFormData({ ...formData, reference_number: e.target.value })
+                }
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="product_sku">Product SKU *</Label>
+                <Input
+                  id="product_sku"
+                  placeholder="SKU-001"
+                  value={formData.product_sku}
+                  onChange={(e) =>
+                    setFormData({ ...formData, product_sku: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="quantity_inspected">Quantity *</Label>
+                <Input
+                  id="quantity_inspected"
+                  type="number"
+                  min="1"
+                  placeholder="100"
+                  value={formData.quantity_inspected}
+                  onChange={(e) =>
+                    setFormData({ ...formData, quantity_inspected: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="product_name">Product Name *</Label>
+              <Input
+                id="product_name"
+                placeholder="Product name"
+                value={formData.product_name}
+                onChange={(e) =>
+                  setFormData({ ...formData, product_name: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="inspector_name">Inspector *</Label>
+              <Input
+                id="inspector_name"
+                placeholder="Inspector name"
+                value={formData.inspector_name}
+                onChange={(e) =>
+                  setFormData({ ...formData, inspector_name: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea
+                id="notes"
+                placeholder="Additional notes or observations..."
+                value={formData.notes}
+                onChange={(e) =>
+                  setFormData({ ...formData, notes: e.target.value })
+                }
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleDialogClose}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} disabled={createMutation.isPending}>
+              {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {createMutation.isPending ? 'Creating...' : 'Create Inspection'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <DataTable
         columns={columns}

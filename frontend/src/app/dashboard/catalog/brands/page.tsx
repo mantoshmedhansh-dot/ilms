@@ -21,7 +21,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -255,88 +254,88 @@ export default function BrandsPage() {
         title="Brands"
         description="Manage product brands"
         actions={
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Brand
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Brand</DialogTitle>
-                <DialogDescription>
-                  Add a new product brand to your catalog.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="create-name">Name *</Label>
-                  <Input
-                    id="create-name"
-                    placeholder="Brand name"
-                    value={createFormData.name}
-                    onChange={(e) =>
-                      setCreateFormData({ ...createFormData, name: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="create-code">Code *</Label>
-                  <Input
-                    id="create-code"
-                    placeholder="BRAND_CODE"
-                    value={createFormData.code}
-                    onChange={(e) =>
-                      setCreateFormData({ ...createFormData, code: e.target.value.toUpperCase() })
-                    }
-                  />
-                </div>
-                <ImageUpload
-                  value={createFormData.logo_url || undefined}
-                  onChange={(url) =>
-                    setCreateFormData({ ...createFormData, logo_url: url || '' })
-                  }
-                  category="brands"
-                  label="Brand Logo"
-                  description="Upload logo image (recommended: 200x60 px)"
-                  aspectRatio="logo"
-                />
-                <div className="space-y-2">
-                  <Label htmlFor="create-description">Description</Label>
-                  <Textarea
-                    id="create-description"
-                    placeholder="Brand description"
-                    value={createFormData.description}
-                    onChange={(e) =>
-                      setCreateFormData({ ...createFormData, description: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="create-active"
-                    checked={createFormData.is_active}
-                    onCheckedChange={(checked) =>
-                      setCreateFormData({ ...createFormData, is_active: checked })
-                    }
-                  />
-                  <Label htmlFor="create-active">Active</Label>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleCreate} disabled={createMutation.isPending}>
-                  {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Brand
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Brand
+          </Button>
         }
       />
+
+      {/* Create Dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Brand</DialogTitle>
+            <DialogDescription>
+              Add a new product brand to your catalog.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="create-name">Name *</Label>
+              <Input
+                id="create-name"
+                placeholder="Brand name"
+                value={createFormData.name}
+                onChange={(e) =>
+                  setCreateFormData({ ...createFormData, name: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-code">Code *</Label>
+              <Input
+                id="create-code"
+                placeholder="BRAND_CODE"
+                value={createFormData.code}
+                onChange={(e) =>
+                  setCreateFormData({ ...createFormData, code: e.target.value.toUpperCase() })
+                }
+              />
+            </div>
+            <ImageUpload
+              value={createFormData.logo_url || undefined}
+              onChange={(url) =>
+                setCreateFormData({ ...createFormData, logo_url: url || '' })
+              }
+              category="brands"
+              label="Brand Logo"
+              description="Upload logo image (recommended: 200x60 px)"
+              aspectRatio="logo"
+            />
+            <div className="space-y-2">
+              <Label htmlFor="create-description">Description</Label>
+              <Textarea
+                id="create-description"
+                placeholder="Brand description"
+                value={createFormData.description}
+                onChange={(e) =>
+                  setCreateFormData({ ...createFormData, description: e.target.value })
+                }
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="create-active"
+                checked={createFormData.is_active}
+                onCheckedChange={(checked) =>
+                  setCreateFormData({ ...createFormData, is_active: checked })
+                }
+              />
+              <Label htmlFor="create-active">Active</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreate} disabled={createMutation.isPending}>
+              {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Brand
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <DataTable
         columns={columns}

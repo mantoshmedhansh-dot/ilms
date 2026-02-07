@@ -20,7 +20,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -347,113 +346,113 @@ export default function CategoriesPage() {
         title="Categories"
         description="Manage product categories and subcategories"
         actions={
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Category
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Category</DialogTitle>
-                <DialogDescription>
-                  Add a new product category to organize your catalog.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="create-name">Name *</Label>
-                  <Input
-                    id="create-name"
-                    placeholder="Category name"
-                    value={createFormData.name}
-                    onChange={(e) =>
-                      setCreateFormData({ ...createFormData, name: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="create-slug">Slug</Label>
-                  <Input
-                    id="create-slug"
-                    placeholder="category-slug (auto-generated if empty)"
-                    value={createFormData.slug}
-                    onChange={(e) =>
-                      setCreateFormData({ ...createFormData, slug: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="create-parent">Parent Category</Label>
-                  <Select
-                    value={createFormData.parent_id || 'none'}
-                    onValueChange={(value) =>
-                      setCreateFormData({ ...createFormData, parent_id: value === 'none' ? '' : value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select parent (optional)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">None (Root Category)</SelectItem>
-                      {rootCategories.map((cat: Category) => (
-                        <SelectItem key={cat.id} value={cat.id}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="create-description">Description</Label>
-                  <Textarea
-                    id="create-description"
-                    placeholder="Category description"
-                    value={createFormData.description}
-                    onChange={(e) =>
-                      setCreateFormData({ ...createFormData, description: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="create-order">Sort Order</Label>
-                    <Input
-                      id="create-order"
-                      type="number"
-                      placeholder="0"
-                      value={createFormData.sort_order}
-                      onChange={(e) =>
-                        setCreateFormData({ ...createFormData, sort_order: parseInt(e.target.value) || 0 })
-                      }
-                    />
-                  </div>
-                  <div className="flex items-center justify-between pt-6">
-                    <Label htmlFor="create-active">Active</Label>
-                    <Switch
-                      id="create-active"
-                      checked={createFormData.is_active}
-                      onCheckedChange={(checked) =>
-                        setCreateFormData({ ...createFormData, is_active: checked })
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleCreate} disabled={createMutation.isPending}>
-                  {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Category
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Category
+          </Button>
         }
       />
+
+      {/* Create Dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Category</DialogTitle>
+            <DialogDescription>
+              Add a new product category to organize your catalog.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="create-name">Name *</Label>
+              <Input
+                id="create-name"
+                placeholder="Category name"
+                value={createFormData.name}
+                onChange={(e) =>
+                  setCreateFormData({ ...createFormData, name: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-slug">Slug</Label>
+              <Input
+                id="create-slug"
+                placeholder="category-slug (auto-generated if empty)"
+                value={createFormData.slug}
+                onChange={(e) =>
+                  setCreateFormData({ ...createFormData, slug: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-parent">Parent Category</Label>
+              <Select
+                value={createFormData.parent_id || 'none'}
+                onValueChange={(value) =>
+                  setCreateFormData({ ...createFormData, parent_id: value === 'none' ? '' : value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select parent (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None (Root Category)</SelectItem>
+                  {rootCategories.map((cat: Category) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="create-description">Description</Label>
+              <Textarea
+                id="create-description"
+                placeholder="Category description"
+                value={createFormData.description}
+                onChange={(e) =>
+                  setCreateFormData({ ...createFormData, description: e.target.value })
+                }
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="create-order">Sort Order</Label>
+                <Input
+                  id="create-order"
+                  type="number"
+                  placeholder="0"
+                  value={createFormData.sort_order}
+                  onChange={(e) =>
+                    setCreateFormData({ ...createFormData, sort_order: parseInt(e.target.value) || 0 })
+                  }
+                />
+              </div>
+              <div className="flex items-center justify-between pt-6">
+                <Label htmlFor="create-active">Active</Label>
+                <Switch
+                  id="create-active"
+                  checked={createFormData.is_active}
+                  onCheckedChange={(checked) =>
+                    setCreateFormData({ ...createFormData, is_active: checked })
+                  }
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreate} disabled={createMutation.isPending}>
+              {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Category
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Search and Actions */}
       <div className="flex items-center justify-between gap-4">

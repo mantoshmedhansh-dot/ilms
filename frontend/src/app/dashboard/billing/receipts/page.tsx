@@ -21,7 +21,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   Sheet,
@@ -260,145 +259,144 @@ export default function PaymentReceiptsPage() {
         title="Payment Receipts"
         description="Record and manage payment receipts from customers"
         actions={
-          <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setIsDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Record Payment
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Record Payment</DialogTitle>
-                <DialogDescription>Record a new payment receipt</DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label>Customer *</Label>
-                  <Select
-                    value={formData.customer_id || 'select'}
-                    onValueChange={(value) => setFormData({ ...formData, customer_id: value === 'select' ? '' : value, invoice_id: '' })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select customer" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="select" disabled>Select customer</SelectItem>
-                      {customers
-                        .filter((c: Customer) => c.id && c.id.trim() !== '')
-                        .map((c: Customer) => (
-                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {formData.customer_id && invoices.length > 0 && (
-                  <div className="space-y-2">
-                    <Label>Against Invoice (Optional)</Label>
-                    <Select
-                      value={formData.invoice_id || 'none'}
-                      onValueChange={(value) => {
-                        const inv = invoices.find((i: Invoice) => i.id === value);
-                        setFormData({
-                          ...formData,
-                          invoice_id: value === 'none' ? '' : value,
-                          amount: inv ? inv.total_amount - inv.paid_amount : formData.amount,
-                        });
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select invoice" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">No specific invoice</SelectItem>
-                        {invoices
-                          .filter((inv: Invoice) => inv.id && inv.id.trim() !== '')
-                          .map((inv: Invoice) => (
-                            <SelectItem key={inv.id} value={inv.id}>
-                              {inv.invoice_number} - Due: {formatCurrency(inv.total_amount - inv.paid_amount)}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Amount *</Label>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder="0.00"
-                      value={formData.amount || ''}
-                      onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Date *</Label>
-                    <Input
-                      type="date"
-                      value={formData.payment_date}
-                      onChange={(e) => setFormData({ ...formData, payment_date: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Payment Mode</Label>
-                  <Select
-                    value={formData.payment_mode}
-                    onValueChange={(value) => setFormData({ ...formData, payment_mode: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {paymentModes.map((mode) => (
-                        <SelectItem key={mode.value} value={mode.value}>
-                          <div className="flex items-center gap-2">
-                            <mode.icon className="h-4 w-4" />
-                            {mode.label}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {formData.payment_mode !== 'CASH' && (
-                  <div className="space-y-2">
-                    <Label>Reference / Transaction ID</Label>
-                    <Input
-                      placeholder="Transaction reference number"
-                      value={formData.reference_number}
-                      onChange={(e) => setFormData({ ...formData, reference_number: e.target.value })}
-                    />
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <Label>Notes</Label>
-                  <Textarea
-                    placeholder="Additional notes (optional)"
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={resetForm}>Cancel</Button>
-                <Button onClick={handleSubmit} disabled={createMutation.isPending}>
-                  {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Record Payment
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Record Payment
+          </Button>
         }
       />
+
+      <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Record Payment</DialogTitle>
+            <DialogDescription>Record a new payment receipt</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label>Customer *</Label>
+              <Select
+                value={formData.customer_id || 'select'}
+                onValueChange={(value) => setFormData({ ...formData, customer_id: value === 'select' ? '' : value, invoice_id: '' })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select customer" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="select" disabled>Select customer</SelectItem>
+                  {customers
+                    .filter((c: Customer) => c.id && c.id.trim() !== '')
+                    .map((c: Customer) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {formData.customer_id && invoices.length > 0 && (
+              <div className="space-y-2">
+                <Label>Against Invoice (Optional)</Label>
+                <Select
+                  value={formData.invoice_id || 'none'}
+                  onValueChange={(value) => {
+                    const inv = invoices.find((i: Invoice) => i.id === value);
+                    setFormData({
+                      ...formData,
+                      invoice_id: value === 'none' ? '' : value,
+                      amount: inv ? inv.total_amount - inv.paid_amount : formData.amount,
+                    });
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select invoice" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No specific invoice</SelectItem>
+                    {invoices
+                      .filter((inv: Invoice) => inv.id && inv.id.trim() !== '')
+                      .map((inv: Invoice) => (
+                        <SelectItem key={inv.id} value={inv.id}>
+                          {inv.invoice_number} - Due: {formatCurrency(inv.total_amount - inv.paid_amount)}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Amount *</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={formData.amount || ''}
+                  onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Date *</Label>
+                <Input
+                  type="date"
+                  value={formData.payment_date}
+                  onChange={(e) => setFormData({ ...formData, payment_date: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Payment Mode</Label>
+              <Select
+                value={formData.payment_mode}
+                onValueChange={(value) => setFormData({ ...formData, payment_mode: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {paymentModes.map((mode) => (
+                    <SelectItem key={mode.value} value={mode.value}>
+                      <div className="flex items-center gap-2">
+                        <mode.icon className="h-4 w-4" />
+                        {mode.label}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {formData.payment_mode !== 'CASH' && (
+              <div className="space-y-2">
+                <Label>Reference / Transaction ID</Label>
+                <Input
+                  placeholder="Transaction reference number"
+                  value={formData.reference_number}
+                  onChange={(e) => setFormData({ ...formData, reference_number: e.target.value })}
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              <Textarea
+                placeholder="Additional notes (optional)"
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={resetForm}>Cancel</Button>
+            <Button onClick={handleSubmit} disabled={createMutation.isPending}>
+              {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Record Payment
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <DataTable
         columns={columns}

@@ -21,7 +21,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -316,141 +315,140 @@ export default function AllocationRulesPage() {
         title="Allocation Rules"
         description="Configure warehouse and courier allocation logic for orders"
         actions={
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Rule
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader>
-                <DialogTitle>Create Allocation Rule</DialogTitle>
-                <DialogDescription>
-                  Define how orders should be allocated to warehouses and couriers.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Rule Name *</Label>
-                  <Input
-                    id="name"
-                    placeholder="e.g., Amazon Orders - Mumbai Warehouse"
-                    value={newRule.name}
-                    onChange={(e) => setNewRule({ ...newRule, name: e.target.value })}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="type">Rule Type</Label>
-                    <Select
-                      value={newRule.rule_type}
-                      onValueChange={(value: 'NEAREST' | 'COST_OPTIMIZED' | 'PRIORITY' | 'ROUND_ROBIN' | 'FIFO' | 'CHANNEL_SPECIFIC' | 'CUSTOM') =>
-                        setNewRule({ ...newRule, rule_type: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="NEAREST">Nearest Warehouse</SelectItem>
-                        <SelectItem value="COST_OPTIMIZED">Cost Optimized</SelectItem>
-                        <SelectItem value="PRIORITY">Priority Based</SelectItem>
-                        <SelectItem value="ROUND_ROBIN">Round Robin</SelectItem>
-                        <SelectItem value="FIFO">FIFO</SelectItem>
-                        <SelectItem value="CHANNEL_SPECIFIC">Channel Specific</SelectItem>
-                        <SelectItem value="CUSTOM">Custom</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="channel">Channel (Optional)</Label>
-                    <Select
-                      value={newRule.channel_id}
-                      onValueChange={(value) => setNewRule({ ...newRule, channel_id: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="All Channels" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Channels</SelectItem>
-                        <SelectItem value="d2c">D2C Website</SelectItem>
-                        <SelectItem value="amazon">Amazon</SelectItem>
-                        <SelectItem value="flipkart">Flipkart</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="max_distance">Max Distance (km)</Label>
-                  <Input
-                    id="max_distance"
-                    type="number"
-                    placeholder="e.g., 500"
-                    value={newRule.max_distance_km}
-                    onChange={(e) => setNewRule({ ...newRule, max_distance_km: e.target.value })}
-                  />
-                </div>
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm">Considerations</CardTitle>
-                    <CardDescription>What factors to consider during allocation</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="consider_inventory">Inventory Availability</Label>
-                      <Switch
-                        id="consider_inventory"
-                        checked={newRule.consider_inventory}
-                        onCheckedChange={(checked) => setNewRule({ ...newRule, consider_inventory: checked })}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="consider_cost">Shipping Cost</Label>
-                      <Switch
-                        id="consider_cost"
-                        checked={newRule.consider_cost}
-                        onCheckedChange={(checked) => setNewRule({ ...newRule, consider_cost: checked })}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="consider_sla">SLA Compliance</Label>
-                      <Switch
-                        id="consider_sla"
-                        checked={newRule.consider_sla}
-                        onCheckedChange={(checked) => setNewRule({ ...newRule, consider_sla: checked })}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    placeholder="Describe when this rule should apply..."
-                    value={newRule.description}
-                    onChange={(e) => setNewRule({ ...newRule, description: e.target.value })}
-                  />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="is_active"
-                    checked={newRule.is_active}
-                    onCheckedChange={(checked) => setNewRule({ ...newRule, is_active: checked })}
-                  />
-                  <Label htmlFor="is_active">Active</Label>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                <Button onClick={handleCreate} disabled={createMutation.isPending}>
-                  {createMutation.isPending ? 'Creating...' : 'Create Rule'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Rule
+          </Button>
         }
       />
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create Allocation Rule</DialogTitle>
+            <DialogDescription>
+              Define how orders should be allocated to warehouses and couriers.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
+            <div className="space-y-2">
+              <Label htmlFor="name">Rule Name *</Label>
+              <Input
+                id="name"
+                placeholder="e.g., Amazon Orders - Mumbai Warehouse"
+                value={newRule.name}
+                onChange={(e) => setNewRule({ ...newRule, name: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="type">Rule Type</Label>
+                <Select
+                  value={newRule.rule_type}
+                  onValueChange={(value: 'NEAREST' | 'COST_OPTIMIZED' | 'PRIORITY' | 'ROUND_ROBIN' | 'FIFO' | 'CHANNEL_SPECIFIC' | 'CUSTOM') =>
+                    setNewRule({ ...newRule, rule_type: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="NEAREST">Nearest Warehouse</SelectItem>
+                    <SelectItem value="COST_OPTIMIZED">Cost Optimized</SelectItem>
+                    <SelectItem value="PRIORITY">Priority Based</SelectItem>
+                    <SelectItem value="ROUND_ROBIN">Round Robin</SelectItem>
+                    <SelectItem value="FIFO">FIFO</SelectItem>
+                    <SelectItem value="CHANNEL_SPECIFIC">Channel Specific</SelectItem>
+                    <SelectItem value="CUSTOM">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="channel">Channel (Optional)</Label>
+                <Select
+                  value={newRule.channel_id}
+                  onValueChange={(value) => setNewRule({ ...newRule, channel_id: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Channels" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Channels</SelectItem>
+                    <SelectItem value="d2c">D2C Website</SelectItem>
+                    <SelectItem value="amazon">Amazon</SelectItem>
+                    <SelectItem value="flipkart">Flipkart</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="max_distance">Max Distance (km)</Label>
+              <Input
+                id="max_distance"
+                type="number"
+                placeholder="e.g., 500"
+                value={newRule.max_distance_km}
+                onChange={(e) => setNewRule({ ...newRule, max_distance_km: e.target.value })}
+              />
+            </div>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Considerations</CardTitle>
+                <CardDescription>What factors to consider during allocation</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="consider_inventory">Inventory Availability</Label>
+                  <Switch
+                    id="consider_inventory"
+                    checked={newRule.consider_inventory}
+                    onCheckedChange={(checked) => setNewRule({ ...newRule, consider_inventory: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="consider_cost">Shipping Cost</Label>
+                  <Switch
+                    id="consider_cost"
+                    checked={newRule.consider_cost}
+                    onCheckedChange={(checked) => setNewRule({ ...newRule, consider_cost: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="consider_sla">SLA Compliance</Label>
+                  <Switch
+                    id="consider_sla"
+                    checked={newRule.consider_sla}
+                    onCheckedChange={(checked) => setNewRule({ ...newRule, consider_sla: checked })}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Describe when this rule should apply..."
+                value={newRule.description}
+                onChange={(e) => setNewRule({ ...newRule, description: e.target.value })}
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="is_active"
+                checked={newRule.is_active}
+                onCheckedChange={(checked) => setNewRule({ ...newRule, is_active: checked })}
+              />
+              <Label htmlFor="is_active">Active</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleCreate} disabled={createMutation.isPending}>
+              {createMutation.isPending ? 'Creating...' : 'Create Rule'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">

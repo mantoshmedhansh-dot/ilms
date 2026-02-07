@@ -21,7 +21,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   Sheet,
@@ -317,155 +316,154 @@ export default function EWayBillsPage() {
         title="E-Way Bills"
         description="Manage GST E-Way bills for goods transportation"
         actions={
-          <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setIsDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Generate E-Way Bill
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader>
-                <DialogTitle>Generate E-Way Bill</DialogTitle>
-                <DialogDescription>Create a new E-Way Bill for goods transportation</DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label>Invoice *</Label>
-                  <Select
-                    value={formData.invoice_id || 'select'}
-                    onValueChange={(value) => setFormData({ ...formData, invoice_id: value === 'select' ? '' : value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select invoice" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="select" disabled>Select invoice</SelectItem>
-                      {invoices
-                        .filter((inv: Invoice) => inv.id && inv.id.trim() !== '')
-                        .map((inv: Invoice) => (
-                          <SelectItem key={inv.id} value={inv.id}>
-                            {inv.invoice_number} - {formatCurrency(inv.total_amount)}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>From GSTIN</Label>
-                    <Input
-                      placeholder="22AAAAA0000A1Z5"
-                      value={formData.from_gstin}
-                      onChange={(e) => setFormData({ ...formData, from_gstin: e.target.value.toUpperCase() })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>To GSTIN</Label>
-                    <Input
-                      placeholder="22BBBBB0000B1Z5"
-                      value={formData.to_gstin}
-                      onChange={(e) => setFormData({ ...formData, to_gstin: e.target.value.toUpperCase() })}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>From Place *</Label>
-                    <Input
-                      placeholder="Mumbai"
-                      value={formData.from_place}
-                      onChange={(e) => setFormData({ ...formData, from_place: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>To Place *</Label>
-                    <Input
-                      placeholder="Delhi"
-                      value={formData.to_place}
-                      onChange={(e) => setFormData({ ...formData, to_place: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Transport Mode</Label>
-                    <Select
-                      value={formData.transport_mode}
-                      onValueChange={(value) => setFormData({ ...formData, transport_mode: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {transportModes.map((mode) => (
-                          <SelectItem key={mode.value} value={mode.value}>{mode.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Vehicle Type</Label>
-                    <Select
-                      value={formData.vehicle_type}
-                      onValueChange={(value) => setFormData({ ...formData, vehicle_type: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {vehicleTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Vehicle Number</Label>
-                    <Input
-                      placeholder="MH01AB1234"
-                      value={formData.vehicle_number}
-                      onChange={(e) => setFormData({ ...formData, vehicle_number: e.target.value.toUpperCase() })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Distance (km)</Label>
-                    <Input
-                      type="number"
-                      min="0"
-                      placeholder="500"
-                      value={formData.distance_km || ''}
-                      onChange={(e) => setFormData({ ...formData, distance_km: parseInt(e.target.value) || 0 })}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Transporter Name</Label>
-                  <Input
-                    placeholder="ABC Logistics"
-                    value={formData.transporter_name}
-                    onChange={(e) => setFormData({ ...formData, transporter_name: e.target.value })}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={resetForm}>Cancel</Button>
-                <Button onClick={handleSubmit} disabled={generateMutation.isPending}>
-                  {generateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Generate E-Way Bill
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Generate E-Way Bill
+          </Button>
         }
       />
+
+      <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Generate E-Way Bill</DialogTitle>
+            <DialogDescription>Create a new E-Way Bill for goods transportation</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label>Invoice *</Label>
+              <Select
+                value={formData.invoice_id || 'select'}
+                onValueChange={(value) => setFormData({ ...formData, invoice_id: value === 'select' ? '' : value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select invoice" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="select" disabled>Select invoice</SelectItem>
+                  {invoices
+                    .filter((inv: Invoice) => inv.id && inv.id.trim() !== '')
+                    .map((inv: Invoice) => (
+                      <SelectItem key={inv.id} value={inv.id}>
+                        {inv.invoice_number} - {formatCurrency(inv.total_amount)}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>From GSTIN</Label>
+                <Input
+                  placeholder="22AAAAA0000A1Z5"
+                  value={formData.from_gstin}
+                  onChange={(e) => setFormData({ ...formData, from_gstin: e.target.value.toUpperCase() })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>To GSTIN</Label>
+                <Input
+                  placeholder="22BBBBB0000B1Z5"
+                  value={formData.to_gstin}
+                  onChange={(e) => setFormData({ ...formData, to_gstin: e.target.value.toUpperCase() })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>From Place *</Label>
+                <Input
+                  placeholder="Mumbai"
+                  value={formData.from_place}
+                  onChange={(e) => setFormData({ ...formData, from_place: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>To Place *</Label>
+                <Input
+                  placeholder="Delhi"
+                  value={formData.to_place}
+                  onChange={(e) => setFormData({ ...formData, to_place: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Transport Mode</Label>
+                <Select
+                  value={formData.transport_mode}
+                  onValueChange={(value) => setFormData({ ...formData, transport_mode: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {transportModes.map((mode) => (
+                      <SelectItem key={mode.value} value={mode.value}>{mode.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Vehicle Type</Label>
+                <Select
+                  value={formData.vehicle_type}
+                  onValueChange={(value) => setFormData({ ...formData, vehicle_type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {vehicleTypes.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Vehicle Number</Label>
+                <Input
+                  placeholder="MH01AB1234"
+                  value={formData.vehicle_number}
+                  onChange={(e) => setFormData({ ...formData, vehicle_number: e.target.value.toUpperCase() })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Distance (km)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  placeholder="500"
+                  value={formData.distance_km || ''}
+                  onChange={(e) => setFormData({ ...formData, distance_km: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Transporter Name</Label>
+              <Input
+                placeholder="ABC Logistics"
+                value={formData.transporter_name}
+                onChange={(e) => setFormData({ ...formData, transporter_name: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={resetForm}>Cancel</Button>
+            <Button onClick={handleSubmit} disabled={generateMutation.isPending}>
+              {generateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Generate E-Way Bill
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <DataTable
         columns={columns}

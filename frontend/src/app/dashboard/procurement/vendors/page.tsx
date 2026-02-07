@@ -21,7 +21,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -435,305 +434,304 @@ export default function VendorsPage() {
         title="Vendors"
         description="Manage suppliers and vendor relationships"
         actions={
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Vendor
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Create New Vendor</DialogTitle>
-                <DialogDescription>
-                  Add a new vendor to your supplier network.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                {/* Basic Information */}
-                <div className="text-sm font-medium text-muted-foreground">Basic Information</div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Name *</Label>
-                    <Input
-                      id="name"
-                      placeholder="Vendor name"
-                      value={newVendor.name}
-                      onChange={(e) =>
-                        setNewVendor({ ...newVendor, name: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="code">Code (Auto-generated)</Label>
-                    <div className="relative">
-                      <Input
-                        id="code"
-                        placeholder={isLoadingCode ? "Loading..." : "VND-MFR-00001"}
-                        value={newVendor.code}
-                        readOnly
-                        disabled
-                        className="bg-muted pr-8 font-mono"
-                      />
-                      <Lock className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="vendor_type">Vendor Type *</Label>
-                    <Select
-                      value={newVendor.vendor_type}
-                      onValueChange={handleVendorTypeChange}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="MANUFACTURER">Manufacturer (MFR)</SelectItem>
-                        <SelectItem value="SPARE_PARTS">Spare Parts (SPR)</SelectItem>
-                        <SelectItem value="DISTRIBUTOR">Distributor (DST)</SelectItem>
-                        <SelectItem value="RAW_MATERIAL">Raw Material (RAW)</SelectItem>
-                        <SelectItem value="SERVICE_PROVIDER">Service Provider (SVC)</SelectItem>
-                        <SelectItem value="TRANSPORTER">Transporter (TRN)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="tier">Tier</Label>
-                    <Select
-                      value={newVendor.tier}
-                      onValueChange={(value: 'PLATINUM' | 'GOLD' | 'SILVER' | 'BRONZE') =>
-                        setNewVendor({ ...newVendor, tier: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select tier" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="PLATINUM">Platinum</SelectItem>
-                        <SelectItem value="GOLD">Gold</SelectItem>
-                        <SelectItem value="SILVER">Silver</SelectItem>
-                        <SelectItem value="BRONZE">Bronze</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Contact Information */}
-                <div className="text-sm font-medium text-muted-foreground mt-2">Contact Information</div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="contact_person">Contact Person</Label>
-                    <Input
-                      id="contact_person"
-                      placeholder="Contact person name"
-                      value={newVendor.contact_person}
-                      onChange={(e) =>
-                        setNewVendor({ ...newVendor, contact_person: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="vendor@example.com"
-                      value={newVendor.email}
-                      onChange={(e) =>
-                        setNewVendor({ ...newVendor, email: e.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input
-                    id="phone"
-                    placeholder="+91 9876543210"
-                    value={newVendor.phone}
-                    onChange={(e) =>
-                      setNewVendor({ ...newVendor, phone: e.target.value })
-                    }
-                  />
-                </div>
-
-                {/* Tax Information */}
-                <div className="text-sm font-medium text-muted-foreground mt-2">Tax Information</div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="gst_number">GSTIN (15 characters)</Label>
-                    <Input
-                      id="gst_number"
-                      placeholder="22AAAAA0000A1Z5"
-                      maxLength={15}
-                      value={newVendor.gst_number}
-                      onChange={(e) =>
-                        setNewVendor({ ...newVendor, gst_number: e.target.value.toUpperCase() })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="pan_number">PAN (10 characters) *</Label>
-                    <Input
-                      id="pan_number"
-                      placeholder="AAAAA0000A"
-                      maxLength={10}
-                      value={newVendor.pan_number}
-                      onChange={(e) =>
-                        setNewVendor({ ...newVendor, pan_number: e.target.value.toUpperCase() })
-                      }
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Address Information */}
-                <div className="text-sm font-medium text-muted-foreground mt-2">Address Information</div>
-                <div className="space-y-2">
-                  <Label htmlFor="address_line1">Address *</Label>
-                  <Input
-                    id="address_line1"
-                    placeholder="Street address"
-                    value={newVendor.address_line1}
-                    onChange={(e) =>
-                      setNewVendor({ ...newVendor, address_line1: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="city">City *</Label>
-                    <Input
-                      id="city"
-                      placeholder="City"
-                      value={newVendor.city}
-                      onChange={(e) =>
-                        setNewVendor({ ...newVendor, city: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="state">State *</Label>
-                    <Input
-                      id="state"
-                      placeholder="State"
-                      value={newVendor.state}
-                      onChange={(e) =>
-                        setNewVendor({ ...newVendor, state: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="pincode">Pincode *</Label>
-                    <Input
-                      id="pincode"
-                      placeholder="110001"
-                      maxLength={6}
-                      value={newVendor.pincode}
-                      onChange={(e) =>
-                        setNewVendor({ ...newVendor, pincode: e.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-
-                {/* Bank Details */}
-                <div className="text-sm font-medium text-muted-foreground mt-2">Bank Details (for Payment)</div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="bank_name">Bank Name</Label>
-                    <Input
-                      id="bank_name"
-                      placeholder="e.g., HDFC Bank"
-                      value={newVendor.bank_name}
-                      onChange={(e) =>
-                        setNewVendor({ ...newVendor, bank_name: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="bank_branch">Branch</Label>
-                    <Input
-                      id="bank_branch"
-                      placeholder="e.g., Connaught Place"
-                      value={newVendor.bank_branch}
-                      onChange={(e) =>
-                        setNewVendor({ ...newVendor, bank_branch: e.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="bank_account_number">Account Number</Label>
-                    <Input
-                      id="bank_account_number"
-                      placeholder="e.g., 50100123456789"
-                      value={newVendor.bank_account_number}
-                      onChange={(e) =>
-                        setNewVendor({ ...newVendor, bank_account_number: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="bank_ifsc">IFSC Code</Label>
-                    <Input
-                      id="bank_ifsc"
-                      placeholder="e.g., HDFC0001234"
-                      maxLength={11}
-                      value={newVendor.bank_ifsc}
-                      onChange={(e) =>
-                        setNewVendor({ ...newVendor, bank_ifsc: e.target.value.toUpperCase() })
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="bank_account_type">Account Type</Label>
-                    <Select
-                      value={newVendor.bank_account_type}
-                      onValueChange={(value: 'SAVINGS' | 'CURRENT' | 'OD') =>
-                        setNewVendor({ ...newVendor, bank_account_type: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select account type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="CURRENT">Current Account</SelectItem>
-                        <SelectItem value="SAVINGS">Savings Account</SelectItem>
-                        <SelectItem value="OD">Overdraft (OD)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="beneficiary_name">Beneficiary Name</Label>
-                    <Input
-                      id="beneficiary_name"
-                      placeholder="Name as per bank records"
-                      value={newVendor.beneficiary_name}
-                      onChange={(e) =>
-                        setNewVendor({ ...newVendor, beneficiary_name: e.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleCreate} disabled={createMutation.isPending}>
-                  {createMutation.isPending ? 'Creating...' : 'Create Vendor'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Vendor
+          </Button>
         }
       />
+
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create New Vendor</DialogTitle>
+            <DialogDescription>
+              Add a new vendor to your supplier network.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {/* Basic Information */}
+            <div className="text-sm font-medium text-muted-foreground">Basic Information</div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name *</Label>
+                <Input
+                  id="name"
+                  placeholder="Vendor name"
+                  value={newVendor.name}
+                  onChange={(e) =>
+                    setNewVendor({ ...newVendor, name: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="code">Code (Auto-generated)</Label>
+                <div className="relative">
+                  <Input
+                    id="code"
+                    placeholder={isLoadingCode ? "Loading..." : "VND-MFR-00001"}
+                    value={newVendor.code}
+                    readOnly
+                    disabled
+                    className="bg-muted pr-8 font-mono"
+                  />
+                  <Lock className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="vendor_type">Vendor Type *</Label>
+                <Select
+                  value={newVendor.vendor_type}
+                  onValueChange={handleVendorTypeChange}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="MANUFACTURER">Manufacturer (MFR)</SelectItem>
+                    <SelectItem value="SPARE_PARTS">Spare Parts (SPR)</SelectItem>
+                    <SelectItem value="DISTRIBUTOR">Distributor (DST)</SelectItem>
+                    <SelectItem value="RAW_MATERIAL">Raw Material (RAW)</SelectItem>
+                    <SelectItem value="SERVICE_PROVIDER">Service Provider (SVC)</SelectItem>
+                    <SelectItem value="TRANSPORTER">Transporter (TRN)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="tier">Tier</Label>
+                <Select
+                  value={newVendor.tier}
+                  onValueChange={(value: 'PLATINUM' | 'GOLD' | 'SILVER' | 'BRONZE') =>
+                    setNewVendor({ ...newVendor, tier: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select tier" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="PLATINUM">Platinum</SelectItem>
+                    <SelectItem value="GOLD">Gold</SelectItem>
+                    <SelectItem value="SILVER">Silver</SelectItem>
+                    <SelectItem value="BRONZE">Bronze</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Contact Information */}
+            <div className="text-sm font-medium text-muted-foreground mt-2">Contact Information</div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="contact_person">Contact Person</Label>
+                <Input
+                  id="contact_person"
+                  placeholder="Contact person name"
+                  value={newVendor.contact_person}
+                  onChange={(e) =>
+                    setNewVendor({ ...newVendor, contact_person: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="vendor@example.com"
+                  value={newVendor.email}
+                  onChange={(e) =>
+                    setNewVendor({ ...newVendor, email: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                placeholder="+91 9876543210"
+                value={newVendor.phone}
+                onChange={(e) =>
+                  setNewVendor({ ...newVendor, phone: e.target.value })
+                }
+              />
+            </div>
+
+            {/* Tax Information */}
+            <div className="text-sm font-medium text-muted-foreground mt-2">Tax Information</div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="gst_number">GSTIN (15 characters)</Label>
+                <Input
+                  id="gst_number"
+                  placeholder="22AAAAA0000A1Z5"
+                  maxLength={15}
+                  value={newVendor.gst_number}
+                  onChange={(e) =>
+                    setNewVendor({ ...newVendor, gst_number: e.target.value.toUpperCase() })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pan_number">PAN (10 characters) *</Label>
+                <Input
+                  id="pan_number"
+                  placeholder="AAAAA0000A"
+                  maxLength={10}
+                  value={newVendor.pan_number}
+                  onChange={(e) =>
+                    setNewVendor({ ...newVendor, pan_number: e.target.value.toUpperCase() })
+                  }
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Address Information */}
+            <div className="text-sm font-medium text-muted-foreground mt-2">Address Information</div>
+            <div className="space-y-2">
+              <Label htmlFor="address_line1">Address *</Label>
+              <Input
+                id="address_line1"
+                placeholder="Street address"
+                value={newVendor.address_line1}
+                onChange={(e) =>
+                  setNewVendor({ ...newVendor, address_line1: e.target.value })
+                }
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="city">City *</Label>
+                <Input
+                  id="city"
+                  placeholder="City"
+                  value={newVendor.city}
+                  onChange={(e) =>
+                    setNewVendor({ ...newVendor, city: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="state">State *</Label>
+                <Input
+                  id="state"
+                  placeholder="State"
+                  value={newVendor.state}
+                  onChange={(e) =>
+                    setNewVendor({ ...newVendor, state: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pincode">Pincode *</Label>
+                <Input
+                  id="pincode"
+                  placeholder="110001"
+                  maxLength={6}
+                  value={newVendor.pincode}
+                  onChange={(e) =>
+                    setNewVendor({ ...newVendor, pincode: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            {/* Bank Details */}
+            <div className="text-sm font-medium text-muted-foreground mt-2">Bank Details (for Payment)</div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="bank_name">Bank Name</Label>
+                <Input
+                  id="bank_name"
+                  placeholder="e.g., HDFC Bank"
+                  value={newVendor.bank_name}
+                  onChange={(e) =>
+                    setNewVendor({ ...newVendor, bank_name: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bank_branch">Branch</Label>
+                <Input
+                  id="bank_branch"
+                  placeholder="e.g., Connaught Place"
+                  value={newVendor.bank_branch}
+                  onChange={(e) =>
+                    setNewVendor({ ...newVendor, bank_branch: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="bank_account_number">Account Number</Label>
+                <Input
+                  id="bank_account_number"
+                  placeholder="e.g., 50100123456789"
+                  value={newVendor.bank_account_number}
+                  onChange={(e) =>
+                    setNewVendor({ ...newVendor, bank_account_number: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bank_ifsc">IFSC Code</Label>
+                <Input
+                  id="bank_ifsc"
+                  placeholder="e.g., HDFC0001234"
+                  maxLength={11}
+                  value={newVendor.bank_ifsc}
+                  onChange={(e) =>
+                    setNewVendor({ ...newVendor, bank_ifsc: e.target.value.toUpperCase() })
+                  }
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="bank_account_type">Account Type</Label>
+                <Select
+                  value={newVendor.bank_account_type}
+                  onValueChange={(value: 'SAVINGS' | 'CURRENT' | 'OD') =>
+                    setNewVendor({ ...newVendor, bank_account_type: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select account type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CURRENT">Current Account</SelectItem>
+                    <SelectItem value="SAVINGS">Savings Account</SelectItem>
+                    <SelectItem value="OD">Overdraft (OD)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="beneficiary_name">Beneficiary Name</Label>
+                <Input
+                  id="beneficiary_name"
+                  placeholder="Name as per bank records"
+                  value={newVendor.beneficiary_name}
+                  onChange={(e) =>
+                    setNewVendor({ ...newVendor, beneficiary_name: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreate} disabled={createMutation.isPending}>
+              {createMutation.isPending ? 'Creating...' : 'Create Vendor'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <DataTable
         columns={columns}

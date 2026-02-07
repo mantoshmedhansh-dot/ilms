@@ -25,7 +25,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   Select,
@@ -287,134 +286,133 @@ export default function StockAdjustmentsPage() {
         title="Stock Adjustments"
         description="Adjust inventory levels for damaged, lost, or found items"
         actions={
-          <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setIsDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                New Adjustment
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Create Stock Adjustment</DialogTitle>
-                <DialogDescription>
-                  Adjust inventory levels for a specific product in a warehouse
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label>Warehouse *</Label>
-                  <Select
-                    value={formData.warehouse_id}
-                    onValueChange={(value) => setFormData({ ...formData, warehouse_id: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select warehouse" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {warehouses.map((wh) => (
-                        <SelectItem key={wh.id} value={wh.id}>
-                          {wh.name} ({wh.code})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Product *</Label>
-                  <Select
-                    value={formData.product_id}
-                    onValueChange={(value) => setFormData({ ...formData, product_id: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select product" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {products.map((prod) => (
-                        <SelectItem key={prod.id} value={prod.id}>
-                          {prod.name} ({prod.sku})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Adjustment Type *</Label>
-                    <Select
-                      value={formData.adjustment_type}
-                      onValueChange={(value) => setFormData({ ...formData, adjustment_type: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="DECREASE">
-                          <div className="flex items-center gap-2 text-red-600">
-                            <TrendingDown className="h-4 w-4" />
-                            Decrease
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="INCREASE">
-                          <div className="flex items-center gap-2 text-green-600">
-                            <TrendingUp className="h-4 w-4" />
-                            Increase
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Quantity *</Label>
-                    <Input
-                      type="number"
-                      min="1"
-                      value={formData.quantity}
-                      onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Reason *</Label>
-                  <Select
-                    value={formData.reason}
-                    onValueChange={(value) => setFormData({ ...formData, reason: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select reason" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {adjustmentReasons.map((reason) => (
-                        <SelectItem key={reason.value} value={reason.value}>
-                          {reason.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Notes</Label>
-                  <Textarea
-                    placeholder="Additional notes (optional)"
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    rows={3}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={resetForm}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSubmit} disabled={createMutation.isPending}>
-                  {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Adjustment
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Adjustment
+          </Button>
         }
       />
+
+      <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create Stock Adjustment</DialogTitle>
+            <DialogDescription>
+              Adjust inventory levels for a specific product in a warehouse
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label>Warehouse *</Label>
+              <Select
+                value={formData.warehouse_id}
+                onValueChange={(value) => setFormData({ ...formData, warehouse_id: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select warehouse" />
+                </SelectTrigger>
+                <SelectContent>
+                  {warehouses.map((wh) => (
+                    <SelectItem key={wh.id} value={wh.id}>
+                      {wh.name} ({wh.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Product *</Label>
+              <Select
+                value={formData.product_id}
+                onValueChange={(value) => setFormData({ ...formData, product_id: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select product" />
+                </SelectTrigger>
+                <SelectContent>
+                  {products.map((prod) => (
+                    <SelectItem key={prod.id} value={prod.id}>
+                      {prod.name} ({prod.sku})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Adjustment Type *</Label>
+                <Select
+                  value={formData.adjustment_type}
+                  onValueChange={(value) => setFormData({ ...formData, adjustment_type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="DECREASE">
+                      <div className="flex items-center gap-2 text-red-600">
+                        <TrendingDown className="h-4 w-4" />
+                        Decrease
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="INCREASE">
+                      <div className="flex items-center gap-2 text-green-600">
+                        <TrendingUp className="h-4 w-4" />
+                        Increase
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Quantity *</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={formData.quantity}
+                  onChange={(e) => setFormData({ ...formData, quantity: parseInt(e.target.value) || 1 })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Reason *</Label>
+              <Select
+                value={formData.reason}
+                onValueChange={(value) => setFormData({ ...formData, reason: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select reason" />
+                </SelectTrigger>
+                <SelectContent>
+                  {adjustmentReasons.map((reason) => (
+                    <SelectItem key={reason.value} value={reason.value}>
+                      {reason.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              <Textarea
+                placeholder="Additional notes (optional)"
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={resetForm}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} disabled={createMutation.isPending}>
+              {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Adjustment
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">

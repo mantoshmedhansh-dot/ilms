@@ -21,7 +21,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -391,204 +390,202 @@ export default function ChannelsPage() {
         title="Sales Channels"
         description="Manage D2C, marketplace, and B2B sales channels"
         actions={
-          <>
-            <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
-              <DialogTrigger asChild>
-                <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Channel
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-lg">
-                <DialogHeader>
-                  <DialogTitle>{isEditMode ? 'Edit Sales Channel' : 'Create Sales Channel'}</DialogTitle>
-                  <DialogDescription>
-                    {isEditMode ? 'Update channel settings.' : 'Add a new sales channel for order and inventory management.'}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Channel Name *</Label>
-                      <Input
-                        id="name"
-                        placeholder="e.g., Amazon India"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="code">Code</Label>
-                      <Input
-                        id="code"
-                        placeholder="AMAZON_IN"
-                        value={formData.code}
-                        onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                        disabled={isEditMode}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="type">Channel Type</Label>
-                      <Select
-                        value={formData.channel_type}
-                        onValueChange={(value: 'D2C' | 'MARKETPLACE' | 'B2B' | 'DEALER' | 'OFFLINE') =>
-                          setFormData({ ...formData, channel_type: value })
-                        }
-                        disabled={isEditMode}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="D2C">D2C (Direct to Consumer)</SelectItem>
-                          <SelectItem value="MARKETPLACE">Marketplace</SelectItem>
-                          <SelectItem value="B2B">B2B / GTMT</SelectItem>
-                          <SelectItem value="DEALER">Dealer Portal</SelectItem>
-                          <SelectItem value="OFFLINE">Offline / Retail</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    {formData.channel_type === 'MARKETPLACE' && (
-                      <div className="space-y-2">
-                        <Label htmlFor="marketplace">Marketplace</Label>
-                        <Select
-                          value={formData.marketplace_name}
-                          onValueChange={(value) => setFormData({ ...formData, marketplace_name: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select marketplace" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {marketplaces.map((mp) => (
-                              <SelectItem key={mp} value={mp}>{mp}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="commission">Commission Rate (%)</Label>
-                    <Input
-                      id="commission"
-                      type="number"
-                      step="0.1"
-                      placeholder="e.g., 15"
-                      value={formData.commission_rate}
-                      onChange={(e) => setFormData({ ...formData, commission_rate: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      placeholder="Channel description..."
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="sync_orders"
-                        checked={formData.auto_sync_orders}
-                        onCheckedChange={(checked) => setFormData({ ...formData, auto_sync_orders: checked })}
-                      />
-                      <Label htmlFor="sync_orders">Auto-sync Orders</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="sync_inventory"
-                        checked={formData.auto_sync_inventory}
-                        onCheckedChange={(checked) => setFormData({ ...formData, auto_sync_inventory: checked })}
-                      />
-                      <Label htmlFor="sync_inventory">Auto-sync Inventory</Label>
-                    </div>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={resetForm}>Cancel</Button>
-                  <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
-                    {(createMutation.isPending || updateMutation.isPending) ? 'Saving...' : isEditMode ? 'Update Channel' : 'Create Channel'}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-
-            {/* View Details Dialog */}
-            <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Channel Details</DialogTitle>
-                </DialogHeader>
-                {selectedChannel && (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
-                        <Network className="h-6 w-6 text-muted-foreground" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg">{selectedChannel.name}</h3>
-                        <p className="text-sm text-muted-foreground">{selectedChannel.code}</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">Type:</span>
-                        <span className={`ml-2 px-2 py-0.5 rounded text-xs ${channelTypeColors[selectedChannel.channel_type]}`}>
-                          {selectedChannel.channel_type}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Status:</span>
-                        <StatusBadge status={selectedChannel.is_active ? 'ACTIVE' : 'INACTIVE'} />
-                      </div>
-                      {selectedChannel.marketplace_name && (
-                        <div>
-                          <span className="text-muted-foreground">Marketplace:</span>
-                          <span className="ml-2 font-medium">{selectedChannel.marketplace_name}</span>
-                        </div>
-                      )}
-                      {selectedChannel.commission_rate && (
-                        <div>
-                          <span className="text-muted-foreground">Commission:</span>
-                          <span className="ml-2 font-medium">{selectedChannel.commission_rate}%</span>
-                        </div>
-                      )}
-                      <div>
-                        <span className="text-muted-foreground">Auto-sync Orders:</span>
-                        <span className="ml-2 font-medium">{selectedChannel.auto_sync_orders ? 'Yes' : 'No'}</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Auto-sync Inventory:</span>
-                        <span className="ml-2 font-medium">{selectedChannel.auto_sync_inventory ? 'Yes' : 'No'}</span>
-                      </div>
-                    </div>
-                    {selectedChannel.description && (
-                      <div>
-                        <span className="text-sm text-muted-foreground">Description:</span>
-                        <p className="mt-1 text-sm">{selectedChannel.description}</p>
-                      </div>
-                    )}
-                    <div className="text-xs text-muted-foreground">
-                      Created: {formatDate(selectedChannel.created_at)}
-                    </div>
-                  </div>
-                )}
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>Close</Button>
-                  <Button onClick={() => { setIsViewDialogOpen(false); if (selectedChannel) handleEdit(selectedChannel); }}>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Edit
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </>
+          <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Channel
+          </Button>
         }
       />
+
+      {/* Create/Edit Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{isEditMode ? 'Edit Sales Channel' : 'Create Sales Channel'}</DialogTitle>
+            <DialogDescription>
+              {isEditMode ? 'Update channel settings.' : 'Add a new sales channel for order and inventory management.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Channel Name *</Label>
+                <Input
+                  id="name"
+                  placeholder="e.g., Amazon India"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="code">Code</Label>
+                <Input
+                  id="code"
+                  placeholder="AMAZON_IN"
+                  value={formData.code}
+                  onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                  disabled={isEditMode}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="type">Channel Type</Label>
+                <Select
+                  value={formData.channel_type}
+                  onValueChange={(value: 'D2C' | 'MARKETPLACE' | 'B2B' | 'DEALER' | 'OFFLINE') =>
+                    setFormData({ ...formData, channel_type: value })
+                  }
+                  disabled={isEditMode}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="D2C">D2C (Direct to Consumer)</SelectItem>
+                    <SelectItem value="MARKETPLACE">Marketplace</SelectItem>
+                    <SelectItem value="B2B">B2B / GTMT</SelectItem>
+                    <SelectItem value="DEALER">Dealer Portal</SelectItem>
+                    <SelectItem value="OFFLINE">Offline / Retail</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {formData.channel_type === 'MARKETPLACE' && (
+                <div className="space-y-2">
+                  <Label htmlFor="marketplace">Marketplace</Label>
+                  <Select
+                    value={formData.marketplace_name}
+                    onValueChange={(value) => setFormData({ ...formData, marketplace_name: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select marketplace" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {marketplaces.map((mp) => (
+                        <SelectItem key={mp} value={mp}>{mp}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="commission">Commission Rate (%)</Label>
+              <Input
+                id="commission"
+                type="number"
+                step="0.1"
+                placeholder="e.g., 15"
+                value={formData.commission_rate}
+                onChange={(e) => setFormData({ ...formData, commission_rate: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Channel description..."
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="sync_orders"
+                  checked={formData.auto_sync_orders}
+                  onCheckedChange={(checked) => setFormData({ ...formData, auto_sync_orders: checked })}
+                />
+                <Label htmlFor="sync_orders">Auto-sync Orders</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="sync_inventory"
+                  checked={formData.auto_sync_inventory}
+                  onCheckedChange={(checked) => setFormData({ ...formData, auto_sync_inventory: checked })}
+                />
+                <Label htmlFor="sync_inventory">Auto-sync Inventory</Label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={resetForm}>Cancel</Button>
+            <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
+              {(createMutation.isPending || updateMutation.isPending) ? 'Saving...' : isEditMode ? 'Update Channel' : 'Create Channel'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Details Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Channel Details</DialogTitle>
+          </DialogHeader>
+          {selectedChannel && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
+                  <Network className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg">{selectedChannel.name}</h3>
+                  <p className="text-sm text-muted-foreground">{selectedChannel.code}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Type:</span>
+                  <span className={`ml-2 px-2 py-0.5 rounded text-xs ${channelTypeColors[selectedChannel.channel_type]}`}>
+                    {selectedChannel.channel_type}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Status:</span>
+                  <StatusBadge status={selectedChannel.is_active ? 'ACTIVE' : 'INACTIVE'} />
+                </div>
+                {selectedChannel.marketplace_name && (
+                  <div>
+                    <span className="text-muted-foreground">Marketplace:</span>
+                    <span className="ml-2 font-medium">{selectedChannel.marketplace_name}</span>
+                  </div>
+                )}
+                {selectedChannel.commission_rate && (
+                  <div>
+                    <span className="text-muted-foreground">Commission:</span>
+                    <span className="ml-2 font-medium">{selectedChannel.commission_rate}%</span>
+                  </div>
+                )}
+                <div>
+                  <span className="text-muted-foreground">Auto-sync Orders:</span>
+                  <span className="ml-2 font-medium">{selectedChannel.auto_sync_orders ? 'Yes' : 'No'}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Auto-sync Inventory:</span>
+                  <span className="ml-2 font-medium">{selectedChannel.auto_sync_inventory ? 'Yes' : 'No'}</span>
+                </div>
+              </div>
+              {selectedChannel.description && (
+                <div>
+                  <span className="text-sm text-muted-foreground">Description:</span>
+                  <p className="mt-1 text-sm">{selectedChannel.description}</p>
+                </div>
+              )}
+              <div className="text-xs text-muted-foreground">
+                Created: {formatDate(selectedChannel.created_at)}
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>Close</Button>
+            <Button onClick={() => { setIsViewDialogOpen(false); if (selectedChannel) handleEdit(selectedChannel); }}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Edit
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">

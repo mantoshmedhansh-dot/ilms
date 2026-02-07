@@ -21,7 +21,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   Select,
@@ -345,147 +344,147 @@ export default function ChartOfAccountsPage() {
         title="Chart of Accounts"
         description="Manage accounting structure and ledger accounts"
         actions={
-          <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setIsDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Account
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>{isEditMode ? 'Edit Account' : 'Add New Account'}</DialogTitle>
-                <DialogDescription>
-                  {isEditMode ? 'Update account details' : 'Create a new ledger account'}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Code *</Label>
-                    <Input
-                      placeholder="1001"
-                      value={formData.code}
-                      onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                      disabled={isEditMode}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Type *</Label>
-                    <Select
-                      value={formData.type}
-                      onValueChange={(value) => setFormData({ ...formData, type: value, sub_type: '' })}
-                      disabled={isEditMode}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {accountTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Sub-Type</Label>
-                  <Select
-                    value={formData.sub_type || 'none'}
-                    onValueChange={(value) => setFormData({ ...formData, sub_type: value === 'none' ? '' : value })}
-                    disabled={isEditMode}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select sub-type (optional)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">None</SelectItem>
-                      {(accountSubTypes[formData.type] || []).map((subType) => (
-                        <SelectItem key={subType.value} value={subType.value}>
-                          {subType.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Name *</Label>
-                  <Input
-                    placeholder="Cash in Hand"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Parent Account</Label>
-                  <Select
-                    value={formData.parent_id || 'none'}
-                    onValueChange={(value) => setFormData({ ...formData, parent_id: value === 'none' ? '' : value })}
-                    disabled={isEditMode}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select parent (optional)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">No Parent (Top Level)</SelectItem>
-                      {parentAccounts
-                        .filter((acc: Account) => acc.id && acc.id.trim() !== '')
-                        .map((acc: Account) => (
-                          <SelectItem key={acc.id} value={acc.id}>
-                            {acc.account_code} - {acc.account_name}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-
-                <div className="space-y-2">
-                  <Label>Description</Label>
-                  <Textarea
-                    placeholder="Account description (optional)"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="is_group"
-                      checked={formData.is_group}
-                      onCheckedChange={(checked) => setFormData({ ...formData, is_group: checked })}
-                      disabled={isEditMode}
-                    />
-                    <Label htmlFor="is_group">Group Account</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="is_active"
-                      checked={formData.is_active}
-                      onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-                    />
-                    <Label htmlFor="is_active">Active</Label>
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={resetForm}>Cancel</Button>
-                <Button
-                  onClick={handleSubmit}
-                  disabled={createMutation.isPending || updateMutation.isPending}
-                >
-                  {(createMutation.isPending || updateMutation.isPending) && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  {isEditMode ? 'Update' : 'Create'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Account
+          </Button>
         }
       />
+
+      {/* Create/Edit Account Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{isEditMode ? 'Edit Account' : 'Add New Account'}</DialogTitle>
+            <DialogDescription>
+              {isEditMode ? 'Update account details' : 'Create a new ledger account'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Code *</Label>
+                <Input
+                  placeholder="1001"
+                  value={formData.code}
+                  onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                  disabled={isEditMode}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Type *</Label>
+                <Select
+                  value={formData.type}
+                  onValueChange={(value) => setFormData({ ...formData, type: value, sub_type: '' })}
+                  disabled={isEditMode}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {accountTypes.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Sub-Type</Label>
+              <Select
+                value={formData.sub_type || 'none'}
+                onValueChange={(value) => setFormData({ ...formData, sub_type: value === 'none' ? '' : value })}
+                disabled={isEditMode}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select sub-type (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {(accountSubTypes[formData.type] || []).map((subType) => (
+                    <SelectItem key={subType.value} value={subType.value}>
+                      {subType.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Name *</Label>
+              <Input
+                placeholder="Cash in Hand"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Parent Account</Label>
+              <Select
+                value={formData.parent_id || 'none'}
+                onValueChange={(value) => setFormData({ ...formData, parent_id: value === 'none' ? '' : value })}
+                disabled={isEditMode}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select parent (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Parent (Top Level)</SelectItem>
+                  {parentAccounts
+                    .filter((acc: Account) => acc.id && acc.id.trim() !== '')
+                    .map((acc: Account) => (
+                      <SelectItem key={acc.id} value={acc.id}>
+                        {acc.account_code} - {acc.account_name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea
+                placeholder="Account description (optional)"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="is_group"
+                  checked={formData.is_group}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_group: checked })}
+                  disabled={isEditMode}
+                />
+                <Label htmlFor="is_group">Group Account</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="is_active"
+                  checked={formData.is_active}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                />
+                <Label htmlFor="is_active">Active</Label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={resetForm}>Cancel</Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={createMutation.isPending || updateMutation.isPending}
+            >
+              {(createMutation.isPending || updateMutation.isPending) && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              {isEditMode ? 'Update' : 'Create'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <DataTable
         columns={columns}

@@ -1,12 +1,29 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
-import { Users, Plus, Clock, TrendingUp, Package, Timer, Award } from 'lucide-react';
+import { Users, Plus, Clock, TrendingUp, Package, Timer, Award, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { DataTable } from '@/components/data-table/data-table';
 import { PageHeader, StatusBadge } from '@/components/common';
 import apiClient from '@/lib/api/client';
@@ -32,6 +49,14 @@ interface LaborStats {
   tasks_completed_today: number;
 }
 
+interface NewWorkerForm {
+  employee_id: string;
+  name: string;
+  role: 'PICKER' | 'PACKER' | 'RECEIVER' | 'PUTAWAY' | 'SUPERVISOR';
+  shift: 'MORNING' | 'AFTERNOON' | 'NIGHT';
+  current_zone: string;
+}
+
 const laborApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
@@ -49,7 +74,31 @@ const laborApi = {
       return { total_workers: 0, active_now: 0, avg_productivity: 0, tasks_completed_today: 0 };
     }
   },
+  create: async (workerData: {
+    employee_id: string;
+    name: string;
+    role: 'PICKER' | 'PACKER' | 'RECEIVER' | 'PUTAWAY' | 'SUPERVISOR';
+    shift: 'MORNING' | 'AFTERNOON' | 'NIGHT';
+    current_zone?: string;
+  }) => {
+    const { data } = await apiClient.post('/labor/', workerData);
+    return data;
+  },
 };
+
+const roleOptions = [
+  { label: 'Picker', value: 'PICKER' },
+  { label: 'Packer', value: 'PACKER' },
+  { label: 'Receiver', value: 'RECEIVER' },
+  { label: 'Putaway', value: 'PUTAWAY' },
+  { label: 'Supervisor', value: 'SUPERVISOR' },
+];
+
+const shiftOptions = [
+  { label: 'Morning', value: 'MORNING' },
+  { label: 'Afternoon', value: 'AFTERNOON' },
+  { label: 'Night', value: 'NIGHT' },
+];
 
 const roleColors: Record<string, string> = {
   PICKER: 'bg-blue-100 text-blue-800',
@@ -135,9 +184,21 @@ const columns: ColumnDef<Worker>[] = [
   },
 ];
 
+const initialFormState: NewWorkerForm = {
+  employee_id: '',
+  name: '',
+  role: 'PICKER',
+  shift: 'MORNING',
+  current_zone: '',
+};
+
 export default function LaborPage() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newWorker, setNewWorker] = useState<NewWorkerForm>(initialFormState);
+
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ['wms-labor', page, pageSize],
@@ -149,18 +210,157 @@ export default function LaborPage() {
     queryFn: laborApi.getStats,
   });
 
+  const createMutation = useMutation({
+    mutationFn: laborApi.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wms-labor'] });
+      queryClient.invalidateQueries({ queryKey: ['wms-labor-stats'] });
+      toast.success('Worker added successfully');
+      handleDialogClose();
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to add worker');
+    },
+  });
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+    setNewWorker(initialFormState);
+  };
+
+  const handleSubmit = () => {
+    if (!newWorker.employee_id.trim()) {
+      toast.error('Employee ID is required');
+      return;
+    }
+    if (!newWorker.name.trim()) {
+      toast.error('Worker name is required');
+      return;
+    }
+
+    const workerData = {
+      employee_id: newWorker.employee_id.trim(),
+      name: newWorker.name.trim(),
+      role: newWorker.role,
+      shift: newWorker.shift,
+      current_zone: newWorker.current_zone.trim() || undefined,
+    };
+
+    createMutation.mutate(workerData);
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Labor Management"
         description="Track warehouse workforce productivity and assignments"
         actions={
-          <Button onClick={() => toast.info('Feature coming soon')}>
+          <Button onClick={() => setIsDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Add Worker
           </Button>
         }
       />
+
+      {/* Add Worker Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleDialogClose()}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Worker</DialogTitle>
+            <DialogDescription>
+              Add a new worker to the warehouse labor pool.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="employee_id">Employee ID *</Label>
+                <Input
+                  id="employee_id"
+                  placeholder="e.g., EMP001"
+                  value={newWorker.employee_id}
+                  onChange={(e) =>
+                    setNewWorker({ ...newWorker, employee_id: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="name">Name *</Label>
+                <Input
+                  id="name"
+                  placeholder="Worker name"
+                  value={newWorker.name}
+                  onChange={(e) =>
+                    setNewWorker({ ...newWorker, name: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="role">Role *</Label>
+                <Select
+                  value={newWorker.role}
+                  onValueChange={(value: 'PICKER' | 'PACKER' | 'RECEIVER' | 'PUTAWAY' | 'SUPERVISOR') =>
+                    setNewWorker({ ...newWorker, role: value })
+                  }
+                >
+                  <SelectTrigger id="role">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {roleOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="shift">Shift *</Label>
+                <Select
+                  value={newWorker.shift}
+                  onValueChange={(value: 'MORNING' | 'AFTERNOON' | 'NIGHT') =>
+                    setNewWorker({ ...newWorker, shift: value })
+                  }
+                >
+                  <SelectTrigger id="shift">
+                    <SelectValue placeholder="Select shift" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {shiftOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="current_zone">Current Zone (Optional)</Label>
+              <Input
+                id="current_zone"
+                placeholder="e.g., Zone A, Receiving Bay"
+                value={newWorker.current_zone}
+                onChange={(e) =>
+                  setNewWorker({ ...newWorker, current_zone: e.target.value })
+                }
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleDialogClose}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} disabled={createMutation.isPending}>
+              {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {createMutation.isPending ? 'Adding...' : 'Add Worker'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>

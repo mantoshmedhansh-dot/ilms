@@ -34,7 +34,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -486,249 +485,248 @@ export default function VendorProformasPage() {
         title="Vendor Proformas"
         description="Manage vendor proforma invoices and convert to purchase orders"
         actions={
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Proforma
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Create Vendor Proforma</DialogTitle>
-                <DialogDescription>
-                  Create a new proforma invoice from a vendor
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                {/* Vendor and Proforma Number */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Vendor *</Label>
-                    <Select
-                      value={formData.vendor_id}
-                      onValueChange={(value) => setFormData({ ...formData, vendor_id: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select vendor" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {vendors.map((vendor: Vendor) => (
-                          <SelectItem key={vendor.id} value={vendor.id}>
-                            {vendor.name} ({vendor.code})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Proforma Number *</Label>
-                    <Input
-                      placeholder="PI-2024-001"
-                      value={formData.proforma_number}
-                      onChange={(e) =>
-                        setFormData({ ...formData, proforma_number: e.target.value.toUpperCase() })
-                      }
-                    />
-                  </div>
-                </div>
-
-                {/* Dates */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Proforma Date *</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            'w-full justify-start text-left font-normal',
-                            !formData.proforma_date && 'text-muted-foreground'
-                          )}
-                        >
-                          <Calendar className="mr-2 h-4 w-4" />
-                          {formData.proforma_date
-                            ? format(formData.proforma_date, 'PPP')
-                            : 'Select date'}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <CalendarComponent
-                          mode="single"
-                          selected={formData.proforma_date}
-                          onSelect={(date) =>
-                            date && setFormData({ ...formData, proforma_date: date })
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Due Date *</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            'w-full justify-start text-left font-normal',
-                            !formData.due_date && 'text-muted-foreground'
-                          )}
-                        >
-                          <Calendar className="mr-2 h-4 w-4" />
-                          {formData.due_date ? format(formData.due_date, 'PPP') : 'Select date'}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <CalendarComponent
-                          mode="single"
-                          selected={formData.due_date}
-                          onSelect={(date) => date && setFormData({ ...formData, due_date: date })}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                </div>
-
-                {/* Items */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label>Line Items</Label>
-                    <Button type="button" variant="outline" size="sm" onClick={handleAddItem}>
-                      <Plus className="mr-2 h-3 w-3" />
-                      Add Item
-                    </Button>
-                  </div>
-
-                  {formData.items.length === 0 ? (
-                    <div className="rounded-lg border border-dashed p-8 text-center">
-                      <p className="text-sm text-muted-foreground">
-                        No items added yet. Click "Add Item" to add products.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {formData.items.map((item, index) => (
-                        <div key={index} className="grid grid-cols-12 gap-2 items-end border rounded-lg p-3">
-                          <div className="col-span-4">
-                            <Label className="text-xs">Product</Label>
-                            <Select
-                              value={item.product_id}
-                              onValueChange={(value) => handleItemChange(index, 'product_id', value)}
-                            >
-                              <SelectTrigger className="h-9">
-                                <SelectValue placeholder="Select product" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {products.map((product: Product) => (
-                                  <SelectItem key={product.id} value={product.id}>
-                                    {product.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="col-span-2">
-                            <Label className="text-xs">Quantity</Label>
-                            <Input
-                              type="number"
-                              min="1"
-                              className="h-9"
-                              value={item.quantity}
-                              onChange={(e) =>
-                                handleItemChange(index, 'quantity', parseInt(e.target.value) || 1)
-                              }
-                            />
-                          </div>
-                          <div className="col-span-2">
-                            <Label className="text-xs">Unit Price</Label>
-                            <Input
-                              type="number"
-                              min="0"
-                              step="0.01"
-                              className="h-9"
-                              value={item.unit_price}
-                              onChange={(e) =>
-                                handleItemChange(index, 'unit_price', parseFloat(e.target.value) || 0)
-                              }
-                            />
-                          </div>
-                          <div className="col-span-1">
-                            <Label className="text-xs">GST %</Label>
-                            <Input
-                              type="number"
-                              min="0"
-                              max="100"
-                              className="h-9"
-                              value={item.gst_rate}
-                              onChange={(e) =>
-                                handleItemChange(index, 'gst_rate', parseFloat(e.target.value) || 0)
-                              }
-                            />
-                          </div>
-                          <div className="col-span-2">
-                            <Label className="text-xs">Amount</Label>
-                            <div className="h-9 flex items-center px-3 bg-muted rounded-md text-sm">
-                              {formatCurrency(item.quantity * item.unit_price)}
-                            </div>
-                          </div>
-                          <div className="col-span-1">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="h-9 w-9 text-destructive"
-                              onClick={() => handleRemoveItem(index)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-
-                      {/* Totals */}
-                      <div className="border-t pt-3 mt-3 space-y-1">
-                        <div className="flex justify-between text-sm">
-                          <span>Subtotal:</span>
-                          <span>{formatCurrency(totals.subtotal)}</span>
-                        </div>
-                        <div className="flex justify-between text-sm">
-                          <span>GST:</span>
-                          <span>{formatCurrency(totals.gstAmount)}</span>
-                        </div>
-                        <div className="flex justify-between font-medium">
-                          <span>Total:</span>
-                          <span>{formatCurrency(totals.total)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Notes */}
-                <div className="space-y-2">
-                  <Label>Notes (Optional)</Label>
-                  <Textarea
-                    placeholder="Any additional notes..."
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={resetForm}>
-                  Cancel
-                </Button>
-                <Button onClick={handleCreate} disabled={createMutation.isPending}>
-                  {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Proforma
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => setIsCreateDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Proforma
+          </Button>
         }
       />
+
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create Vendor Proforma</DialogTitle>
+            <DialogDescription>
+              Create a new proforma invoice from a vendor
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {/* Vendor and Proforma Number */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Vendor *</Label>
+                <Select
+                  value={formData.vendor_id}
+                  onValueChange={(value) => setFormData({ ...formData, vendor_id: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select vendor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {vendors.map((vendor: Vendor) => (
+                      <SelectItem key={vendor.id} value={vendor.id}>
+                        {vendor.name} ({vendor.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Proforma Number *</Label>
+                <Input
+                  placeholder="PI-2024-001"
+                  value={formData.proforma_number}
+                  onChange={(e) =>
+                    setFormData({ ...formData, proforma_number: e.target.value.toUpperCase() })
+                  }
+                />
+              </div>
+            </div>
+
+            {/* Dates */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Proforma Date *</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !formData.proforma_date && 'text-muted-foreground'
+                      )}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {formData.proforma_date
+                        ? format(formData.proforma_date, 'PPP')
+                        : 'Select date'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <CalendarComponent
+                      mode="single"
+                      selected={formData.proforma_date}
+                      onSelect={(date) =>
+                        date && setFormData({ ...formData, proforma_date: date })
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="space-y-2">
+                <Label>Due Date *</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !formData.due_date && 'text-muted-foreground'
+                      )}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {formData.due_date ? format(formData.due_date, 'PPP') : 'Select date'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <CalendarComponent
+                      mode="single"
+                      selected={formData.due_date}
+                      onSelect={(date) => date && setFormData({ ...formData, due_date: date })}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            {/* Items */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>Line Items</Label>
+                <Button type="button" variant="outline" size="sm" onClick={handleAddItem}>
+                  <Plus className="mr-2 h-3 w-3" />
+                  Add Item
+                </Button>
+              </div>
+
+              {formData.items.length === 0 ? (
+                <div className="rounded-lg border border-dashed p-8 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    No items added yet. Click "Add Item" to add products.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {formData.items.map((item, index) => (
+                    <div key={index} className="grid grid-cols-12 gap-2 items-end border rounded-lg p-3">
+                      <div className="col-span-4">
+                        <Label className="text-xs">Product</Label>
+                        <Select
+                          value={item.product_id}
+                          onValueChange={(value) => handleItemChange(index, 'product_id', value)}
+                        >
+                          <SelectTrigger className="h-9">
+                            <SelectValue placeholder="Select product" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {products.map((product: Product) => (
+                              <SelectItem key={product.id} value={product.id}>
+                                {product.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="col-span-2">
+                        <Label className="text-xs">Quantity</Label>
+                        <Input
+                          type="number"
+                          min="1"
+                          className="h-9"
+                          value={item.quantity}
+                          onChange={(e) =>
+                            handleItemChange(index, 'quantity', parseInt(e.target.value) || 1)
+                          }
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <Label className="text-xs">Unit Price</Label>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          className="h-9"
+                          value={item.unit_price}
+                          onChange={(e) =>
+                            handleItemChange(index, 'unit_price', parseFloat(e.target.value) || 0)
+                          }
+                        />
+                      </div>
+                      <div className="col-span-1">
+                        <Label className="text-xs">GST %</Label>
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          className="h-9"
+                          value={item.gst_rate}
+                          onChange={(e) =>
+                            handleItemChange(index, 'gst_rate', parseFloat(e.target.value) || 0)
+                          }
+                        />
+                      </div>
+                      <div className="col-span-2">
+                        <Label className="text-xs">Amount</Label>
+                        <div className="h-9 flex items-center px-3 bg-muted rounded-md text-sm">
+                          {formatCurrency(item.quantity * item.unit_price)}
+                        </div>
+                      </div>
+                      <div className="col-span-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-9 w-9 text-destructive"
+                          onClick={() => handleRemoveItem(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Totals */}
+                  <div className="border-t pt-3 mt-3 space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span>Subtotal:</span>
+                      <span>{formatCurrency(totals.subtotal)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>GST:</span>
+                      <span>{formatCurrency(totals.gstAmount)}</span>
+                    </div>
+                    <div className="flex justify-between font-medium">
+                      <span>Total:</span>
+                      <span>{formatCurrency(totals.total)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Notes */}
+            <div className="space-y-2">
+              <Label>Notes (Optional)</Label>
+              <Textarea
+                placeholder="Any additional notes..."
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={resetForm}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreate} disabled={createMutation.isPending}>
+              {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Proforma
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Filters */}
       <div className="flex items-center gap-4">

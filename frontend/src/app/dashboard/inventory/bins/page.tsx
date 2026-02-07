@@ -22,7 +22,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -359,217 +358,214 @@ export default function BinsPage() {
         description="Manage bin locations for precise inventory storage"
         actions={
           <div className="flex gap-2">
-            <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  <Layers className="mr-2 h-4 w-4" />
-                  Bulk Create
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Bulk Create Bins</DialogTitle>
-                  <DialogDescription>
-                    Generate multiple bins based on aisle-rack-level-position structure
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="space-y-2">
-                    <Label>Zone *</Label>
-                    <Select
-                      value={bulkFormData.zone_id}
-                      onValueChange={(value) => setBulkFormData({ ...bulkFormData, zone_id: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select zone" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {zones?.items?.map((zone: Zone) => (
-                          <SelectItem key={zone.id} value={zone.id}>
-                            {zone.name} ({zone.warehouse?.name})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Bin Prefix</Label>
-                    <Input
-                      value={bulkFormData.prefix}
-                      onChange={(e) => setBulkFormData({ ...bulkFormData, prefix: e.target.value })}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Aisles</Label>
-                      <Input
-                        type="number"
-                        min={1}
-                        value={bulkFormData.aisles}
-                        onChange={(e) => setBulkFormData({ ...bulkFormData, aisles: parseInt(e.target.value) || 1 })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Racks per Aisle</Label>
-                      <Input
-                        type="number"
-                        min={1}
-                        value={bulkFormData.racks_per_aisle}
-                        onChange={(e) => setBulkFormData({ ...bulkFormData, racks_per_aisle: parseInt(e.target.value) || 1 })}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Levels per Rack</Label>
-                      <Input
-                        type="number"
-                        min={1}
-                        value={bulkFormData.levels_per_rack}
-                        onChange={(e) => setBulkFormData({ ...bulkFormData, levels_per_rack: parseInt(e.target.value) || 1 })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Positions per Level</Label>
-                      <Input
-                        type="number"
-                        min={1}
-                        value={bulkFormData.positions_per_level}
-                        onChange={(e) => setBulkFormData({ ...bulkFormData, positions_per_level: parseInt(e.target.value) || 1 })}
-                      />
-                    </div>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    This will create {bulkFormData.aisles * bulkFormData.racks_per_aisle * bulkFormData.levels_per_rack * bulkFormData.positions_per_level} bins
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsBulkDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleBulkCreate} disabled={bulkCreateMutation.isPending}>
-                    {bulkCreateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Create Bins
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-
-            <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
-              <DialogTrigger asChild>
-                <Button onClick={() => setIsDialogOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Bin
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-md">
-                <DialogHeader>
-                  <DialogTitle>{isEditMode ? 'Edit Bin' : 'Create New Bin'}</DialogTitle>
-                  <DialogDescription>
-                    {isEditMode ? 'Update bin details' : 'Add a new storage bin'}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="space-y-2">
-                    <Label>Zone *</Label>
-                    <Select
-                      value={formData.zone_id}
-                      onValueChange={(value) => setFormData({ ...formData, zone_id: value })}
-                      disabled={isEditMode}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select zone" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {zones?.items?.map((zone: Zone) => (
-                          <SelectItem key={zone.id} value={zone.id}>
-                            {zone.name} ({zone.warehouse?.name})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Name *</Label>
-                      <Input
-                        placeholder="Bin 1"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Code *</Label>
-                      <Input
-                        placeholder="BIN001"
-                        value={formData.code}
-                        onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    <div className="space-y-2">
-                      <Label>Aisle</Label>
-                      <Input
-                        placeholder="A"
-                        value={formData.aisle}
-                        onChange={(e) => setFormData({ ...formData, aisle: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Rack</Label>
-                      <Input
-                        placeholder="1"
-                        value={formData.rack}
-                        onChange={(e) => setFormData({ ...formData, rack: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Level</Label>
-                      <Input
-                        placeholder="2"
-                        value={formData.level}
-                        onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Position</Label>
-                      <Input
-                        placeholder="3"
-                        value={formData.position}
-                        onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Capacity</Label>
-                    <Input
-                      type="number"
-                      placeholder="Leave empty for unlimited"
-                      value={formData.capacity}
-                      onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      checked={formData.is_active}
-                      onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-                    />
-                    <Label>Active</Label>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={resetForm}>Cancel</Button>
-                  <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
-                    {(createMutation.isPending || updateMutation.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isEditMode ? 'Update' : 'Create'}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <Button variant="outline" onClick={() => setIsBulkDialogOpen(true)}>
+              <Layers className="mr-2 h-4 w-4" />
+              Bulk Create
+            </Button>
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Bin
+            </Button>
           </div>
         }
       />
+
+      <Dialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Bulk Create Bins</DialogTitle>
+            <DialogDescription>
+              Generate multiple bins based on aisle-rack-level-position structure
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label>Zone *</Label>
+              <Select
+                value={bulkFormData.zone_id}
+                onValueChange={(value) => setBulkFormData({ ...bulkFormData, zone_id: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select zone" />
+                </SelectTrigger>
+                <SelectContent>
+                  {zones?.items?.map((zone: Zone) => (
+                    <SelectItem key={zone.id} value={zone.id}>
+                      {zone.name} ({zone.warehouse?.name})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Bin Prefix</Label>
+              <Input
+                value={bulkFormData.prefix}
+                onChange={(e) => setBulkFormData({ ...bulkFormData, prefix: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Aisles</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={bulkFormData.aisles}
+                  onChange={(e) => setBulkFormData({ ...bulkFormData, aisles: parseInt(e.target.value) || 1 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Racks per Aisle</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={bulkFormData.racks_per_aisle}
+                  onChange={(e) => setBulkFormData({ ...bulkFormData, racks_per_aisle: parseInt(e.target.value) || 1 })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Levels per Rack</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={bulkFormData.levels_per_rack}
+                  onChange={(e) => setBulkFormData({ ...bulkFormData, levels_per_rack: parseInt(e.target.value) || 1 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Positions per Level</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={bulkFormData.positions_per_level}
+                  onChange={(e) => setBulkFormData({ ...bulkFormData, positions_per_level: parseInt(e.target.value) || 1 })}
+                />
+              </div>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              This will create {bulkFormData.aisles * bulkFormData.racks_per_aisle * bulkFormData.levels_per_rack * bulkFormData.positions_per_level} bins
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsBulkDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleBulkCreate} disabled={bulkCreateMutation.isPending}>
+              {bulkCreateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Bins
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{isEditMode ? 'Edit Bin' : 'Create New Bin'}</DialogTitle>
+            <DialogDescription>
+              {isEditMode ? 'Update bin details' : 'Add a new storage bin'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label>Zone *</Label>
+              <Select
+                value={formData.zone_id}
+                onValueChange={(value) => setFormData({ ...formData, zone_id: value })}
+                disabled={isEditMode}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select zone" />
+                </SelectTrigger>
+                <SelectContent>
+                  {zones?.items?.map((zone: Zone) => (
+                    <SelectItem key={zone.id} value={zone.id}>
+                      {zone.name} ({zone.warehouse?.name})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Name *</Label>
+                <Input
+                  placeholder="Bin 1"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Code *</Label>
+                <Input
+                  placeholder="BIN001"
+                  value={formData.code}
+                  onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              <div className="space-y-2">
+                <Label>Aisle</Label>
+                <Input
+                  placeholder="A"
+                  value={formData.aisle}
+                  onChange={(e) => setFormData({ ...formData, aisle: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Rack</Label>
+                <Input
+                  placeholder="1"
+                  value={formData.rack}
+                  onChange={(e) => setFormData({ ...formData, rack: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Level</Label>
+                <Input
+                  placeholder="2"
+                  value={formData.level}
+                  onChange={(e) => setFormData({ ...formData, level: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Position</Label>
+                <Input
+                  placeholder="3"
+                  value={formData.position}
+                  onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Capacity</Label>
+              <Input
+                type="number"
+                placeholder="Leave empty for unlimited"
+                value={formData.capacity}
+                onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={formData.is_active}
+                onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+              />
+              <Label>Active</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={resetForm}>Cancel</Button>
+            <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
+              {(createMutation.isPending || updateMutation.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isEditMode ? 'Update' : 'Create'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Filters */}
       <div className="flex items-center gap-4">

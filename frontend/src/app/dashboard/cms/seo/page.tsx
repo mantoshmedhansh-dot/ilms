@@ -20,7 +20,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog';
 import {
@@ -162,169 +161,169 @@ export default function SeoSettingsPage() {
         title="SEO Settings"
         description="Manage meta tags, Open Graph, and search engine settings for your pages"
         actions={
-          <Dialog open={isDialogOpen} onOpenChange={(open) => {
-            if (!open) handleCloseDialog();
-            else setIsDialogOpen(true);
-          }}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add SEO Settings
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingItem ? 'Edit SEO Settings' : 'Add SEO Settings'}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-6 py-4">
-                {/* URL Path */}
-                <div className="space-y-2">
-                  <Label htmlFor="url_path">URL Path *</Label>
-                  <Input
-                    id="url_path"
-                    value={formData.url_path}
-                    onChange={(e) => setFormData({ ...formData, url_path: e.target.value })}
-                    placeholder="/ or /products or /about"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    The URL path this SEO setting applies to (e.g., /, /products, /about)
-                  </p>
-                </div>
-
-                {/* Meta Tags */}
-                <div className="space-y-4">
-                  <h4 className="font-medium flex items-center gap-2">
-                    <Search className="h-4 w-4" />
-                    Meta Tags
-                  </h4>
-                  <div className="space-y-2">
-                    <Label htmlFor="meta_title">Meta Title</Label>
-                    <Input
-                      id="meta_title"
-                      value={formData.meta_title}
-                      onChange={(e) => setFormData({ ...formData, meta_title: e.target.value })}
-                      placeholder="Page title for search engines"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      {(formData.meta_title || '').length}/60 characters recommended
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="meta_description">Meta Description</Label>
-                    <Textarea
-                      id="meta_description"
-                      value={formData.meta_description}
-                      onChange={(e) => setFormData({ ...formData, meta_description: e.target.value })}
-                      placeholder="Brief description for search results"
-                      rows={3}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      {(formData.meta_description || '').length}/160 characters recommended
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="meta_keywords">Meta Keywords</Label>
-                    <Input
-                      id="meta_keywords"
-                      value={formData.meta_keywords}
-                      onChange={(e) => setFormData({ ...formData, meta_keywords: e.target.value })}
-                      placeholder="keyword1, keyword2, keyword3"
-                    />
-                  </div>
-                </div>
-
-                {/* Open Graph */}
-                <div className="space-y-4">
-                  <h4 className="font-medium flex items-center gap-2">
-                    <Globe className="h-4 w-4" />
-                    Open Graph (Social Sharing)
-                  </h4>
-                  <div className="space-y-2">
-                    <Label htmlFor="og_title">OG Title</Label>
-                    <Input
-                      id="og_title"
-                      value={formData.og_title}
-                      onChange={(e) => setFormData({ ...formData, og_title: e.target.value })}
-                      placeholder="Title for social media shares"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="og_description">OG Description</Label>
-                    <Textarea
-                      id="og_description"
-                      value={formData.og_description}
-                      onChange={(e) => setFormData({ ...formData, og_description: e.target.value })}
-                      placeholder="Description for social media shares"
-                      rows={2}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="og_image_url">OG Image URL</Label>
-                    <Input
-                      id="og_image_url"
-                      value={formData.og_image_url}
-                      onChange={(e) => setFormData({ ...formData, og_image_url: e.target.value })}
-                      placeholder="https://example.com/image.jpg"
-                    />
-                  </div>
-                </div>
-
-                {/* Advanced */}
-                <div className="space-y-4">
-                  <h4 className="font-medium flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    Advanced
-                  </h4>
-                  <div className="space-y-2">
-                    <Label htmlFor="canonical_url">Canonical URL</Label>
-                    <Input
-                      id="canonical_url"
-                      value={formData.canonical_url}
-                      onChange={(e) => setFormData({ ...formData, canonical_url: e.target.value })}
-                      placeholder="https://example.com/canonical-page"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label htmlFor="robots_index">Allow Indexing</Label>
-                      <p className="text-xs text-muted-foreground">Let search engines index this page</p>
-                    </div>
-                    <Switch
-                      id="robots_index"
-                      checked={formData.robots_index}
-                      onCheckedChange={(v) => setFormData({ ...formData, robots_index: v })}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label htmlFor="robots_follow">Allow Following Links</Label>
-                      <p className="text-xs text-muted-foreground">Let search engines follow links on this page</p>
-                    </div>
-                    <Switch
-                      id="robots_follow"
-                      checked={formData.robots_follow}
-                      onCheckedChange={(v) => setFormData({ ...formData, robots_follow: v })}
-                    />
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={handleCloseDialog}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleSave}
-                  disabled={createMutation.isPending || updateMutation.isPending}
-                >
-                  {(createMutation.isPending || updateMutation.isPending) ? 'Saving...' : 'Save'}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add SEO Settings
+          </Button>
         }
       />
+
+      {/* Create/Edit Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={(open) => {
+        if (!open) handleCloseDialog();
+        else setIsDialogOpen(true);
+      }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingItem ? 'Edit SEO Settings' : 'Add SEO Settings'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            {/* URL Path */}
+            <div className="space-y-2">
+              <Label htmlFor="url_path">URL Path *</Label>
+              <Input
+                id="url_path"
+                value={formData.url_path}
+                onChange={(e) => setFormData({ ...formData, url_path: e.target.value })}
+                placeholder="/ or /products or /about"
+              />
+              <p className="text-xs text-muted-foreground">
+                The URL path this SEO setting applies to (e.g., /, /products, /about)
+              </p>
+            </div>
+
+            {/* Meta Tags */}
+            <div className="space-y-4">
+              <h4 className="font-medium flex items-center gap-2">
+                <Search className="h-4 w-4" />
+                Meta Tags
+              </h4>
+              <div className="space-y-2">
+                <Label htmlFor="meta_title">Meta Title</Label>
+                <Input
+                  id="meta_title"
+                  value={formData.meta_title}
+                  onChange={(e) => setFormData({ ...formData, meta_title: e.target.value })}
+                  placeholder="Page title for search engines"
+                />
+                <p className="text-xs text-muted-foreground">
+                  {(formData.meta_title || '').length}/60 characters recommended
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="meta_description">Meta Description</Label>
+                <Textarea
+                  id="meta_description"
+                  value={formData.meta_description}
+                  onChange={(e) => setFormData({ ...formData, meta_description: e.target.value })}
+                  placeholder="Brief description for search results"
+                  rows={3}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {(formData.meta_description || '').length}/160 characters recommended
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="meta_keywords">Meta Keywords</Label>
+                <Input
+                  id="meta_keywords"
+                  value={formData.meta_keywords}
+                  onChange={(e) => setFormData({ ...formData, meta_keywords: e.target.value })}
+                  placeholder="keyword1, keyword2, keyword3"
+                />
+              </div>
+            </div>
+
+            {/* Open Graph */}
+            <div className="space-y-4">
+              <h4 className="font-medium flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                Open Graph (Social Sharing)
+              </h4>
+              <div className="space-y-2">
+                <Label htmlFor="og_title">OG Title</Label>
+                <Input
+                  id="og_title"
+                  value={formData.og_title}
+                  onChange={(e) => setFormData({ ...formData, og_title: e.target.value })}
+                  placeholder="Title for social media shares"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="og_description">OG Description</Label>
+                <Textarea
+                  id="og_description"
+                  value={formData.og_description}
+                  onChange={(e) => setFormData({ ...formData, og_description: e.target.value })}
+                  placeholder="Description for social media shares"
+                  rows={2}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="og_image_url">OG Image URL</Label>
+                <Input
+                  id="og_image_url"
+                  value={formData.og_image_url}
+                  onChange={(e) => setFormData({ ...formData, og_image_url: e.target.value })}
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+            </div>
+
+            {/* Advanced */}
+            <div className="space-y-4">
+              <h4 className="font-medium flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Advanced
+              </h4>
+              <div className="space-y-2">
+                <Label htmlFor="canonical_url">Canonical URL</Label>
+                <Input
+                  id="canonical_url"
+                  value={formData.canonical_url}
+                  onChange={(e) => setFormData({ ...formData, canonical_url: e.target.value })}
+                  placeholder="https://example.com/canonical-page"
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="robots_index">Allow Indexing</Label>
+                  <p className="text-xs text-muted-foreground">Let search engines index this page</p>
+                </div>
+                <Switch
+                  id="robots_index"
+                  checked={formData.robots_index}
+                  onCheckedChange={(v) => setFormData({ ...formData, robots_index: v })}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="robots_follow">Allow Following Links</Label>
+                  <p className="text-xs text-muted-foreground">Let search engines follow links on this page</p>
+                </div>
+                <Switch
+                  id="robots_follow"
+                  checked={formData.robots_follow}
+                  onCheckedChange={(v) => setFormData({ ...formData, robots_follow: v })}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseDialog}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={createMutation.isPending || updateMutation.isPending}
+            >
+              {(createMutation.isPending || updateMutation.isPending) ? 'Saving...' : 'Save'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Quick Add Suggestions */}
       {suggestedPages.length > 0 && (

@@ -1,12 +1,30 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
 import { Box, Plus, Package, CheckCircle, Clock, Layers } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { DataTable } from '@/components/data-table/data-table';
 import { PageHeader, StatusBadge } from '@/components/common';
 import apiClient from '@/lib/api/client';
@@ -34,6 +52,14 @@ interface KittingStats {
   pending_components: number;
 }
 
+interface CreateKitOrderData {
+  kit_sku: string;
+  quantity: number;
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  due_date?: string;
+  notes?: string;
+}
+
 const kittingApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
@@ -51,7 +77,18 @@ const kittingApi = {
       return { total_kits: 0, in_progress: 0, completed_today: 0, pending_components: 0 };
     }
   },
+  create: async (orderData: CreateKitOrderData) => {
+    const { data } = await apiClient.post('/kitting/orders', orderData);
+    return data;
+  },
 };
+
+const priorityOptions = [
+  { label: 'Low', value: 'LOW' },
+  { label: 'Medium', value: 'MEDIUM' },
+  { label: 'High', value: 'HIGH' },
+  { label: 'Urgent', value: 'URGENT' },
+];
 
 const priorityColors: Record<string, string> = {
   LOW: 'bg-gray-100 text-gray-800',
@@ -141,6 +178,22 @@ const columns: ColumnDef<KitOrder>[] = [
 export default function KittingPage() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newKitOrder, setNewKitOrder] = useState<{
+    kit_sku: string;
+    quantity: string;
+    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+    due_date: string;
+    notes: string;
+  }>({
+    kit_sku: '',
+    quantity: '',
+    priority: 'MEDIUM',
+    due_date: '',
+    notes: '',
+  });
+
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ['wms-kitting', page, pageSize],
@@ -152,18 +205,153 @@ export default function KittingPage() {
     queryFn: kittingApi.getStats,
   });
 
+  const createMutation = useMutation({
+    mutationFn: kittingApi.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wms-kitting'] });
+      queryClient.invalidateQueries({ queryKey: ['wms-kitting-stats'] });
+      toast.success('Kit order created successfully');
+      handleDialogClose();
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to create kit order');
+    },
+  });
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+    setNewKitOrder({
+      kit_sku: '',
+      quantity: '',
+      priority: 'MEDIUM',
+      due_date: '',
+      notes: '',
+    });
+  };
+
+  const handleSubmit = () => {
+    if (!newKitOrder.kit_sku.trim()) {
+      toast.error('Kit SKU is required');
+      return;
+    }
+    if (!newKitOrder.quantity || parseInt(newKitOrder.quantity) <= 0) {
+      toast.error('Quantity must be greater than 0');
+      return;
+    }
+
+    const orderData: CreateKitOrderData = {
+      kit_sku: newKitOrder.kit_sku.trim(),
+      quantity: parseInt(newKitOrder.quantity),
+      priority: newKitOrder.priority,
+      due_date: newKitOrder.due_date || undefined,
+      notes: newKitOrder.notes.trim() || undefined,
+    };
+
+    createMutation.mutate(orderData);
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Kitting & Assembly"
         description="Manage kit assembly orders and component bundling"
         actions={
-          <Button onClick={() => toast.info('Feature coming soon')}>
+          <Button onClick={() => setIsDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Create Kit Order
           </Button>
         }
       />
+
+      <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleDialogClose()}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create New Kit Order</DialogTitle>
+            <DialogDescription>
+              Create a new kit assembly order for bundling components.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="kit_sku">Kit SKU *</Label>
+              <Input
+                id="kit_sku"
+                placeholder="Enter kit SKU"
+                value={newKitOrder.kit_sku}
+                onChange={(e) =>
+                  setNewKitOrder({ ...newKitOrder, kit_sku: e.target.value })
+                }
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="quantity">Quantity *</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  min="1"
+                  placeholder="Enter quantity"
+                  value={newKitOrder.quantity}
+                  onChange={(e) =>
+                    setNewKitOrder({ ...newKitOrder, quantity: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="priority">Priority</Label>
+                <Select
+                  value={newKitOrder.priority}
+                  onValueChange={(value: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT') =>
+                    setNewKitOrder({ ...newKitOrder, priority: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {priorityOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="due_date">Due Date</Label>
+              <Input
+                id="due_date"
+                type="date"
+                value={newKitOrder.due_date}
+                onChange={(e) =>
+                  setNewKitOrder({ ...newKitOrder, due_date: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea
+                id="notes"
+                placeholder="Additional notes or instructions..."
+                value={newKitOrder.notes}
+                onChange={(e) =>
+                  setNewKitOrder({ ...newKitOrder, notes: e.target.value })
+                }
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleDialogClose}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} disabled={createMutation.isPending}>
+              {createMutation.isPending ? 'Creating...' : 'Create Kit Order'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>

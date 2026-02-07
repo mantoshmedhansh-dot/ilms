@@ -21,7 +21,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   Sheet,
@@ -379,208 +378,207 @@ export default function CreditNotesPage() {
         title="Credit Notes"
         description="Manage credit notes and refunds"
         actions={
-          <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setIsDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Create Credit Note
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Create Credit Note</DialogTitle>
-                <DialogDescription>Issue a credit note for returns or adjustments</DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Customer *</Label>
-                    <Select
-                      value={formData.customer_id || 'select'}
-                      onValueChange={(value) => setFormData({ ...formData, customer_id: value === 'select' ? '' : value, invoice_id: '' })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select customer" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="select" disabled>Select customer</SelectItem>
-                        {customers
-                          .filter((c: Customer) => c.id && c.id.trim() !== '')
-                          .map((c: Customer) => (
-                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Date *</Label>
-                    <Input
-                      type="date"
-                      value={formData.credit_note_date}
-                      onChange={(e) => setFormData({ ...formData, credit_note_date: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                {formData.customer_id && invoices.length > 0 && (
-                  <div className="space-y-2">
-                    <Label>Against Invoice (Optional)</Label>
-                    <Select
-                      value={formData.invoice_id || 'none'}
-                      onValueChange={(value) => setFormData({ ...formData, invoice_id: value === 'none' ? '' : value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select invoice" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">No specific invoice</SelectItem>
-                        {invoices
-                          .filter((inv: Invoice) => inv.id && inv.id.trim() !== '')
-                          .map((inv: Invoice) => (
-                            <SelectItem key={inv.id} value={inv.id}>
-                              {inv.invoice_number} - {formatCurrency(inv.total_amount)}
-                            </SelectItem>
-                          ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Reason *</Label>
-                    <Select
-                      value={formData.reason}
-                      onValueChange={(value) => setFormData({ ...formData, reason: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {creditReasons.map((r) => (
-                          <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {formData.reason === 'OTHER' && (
-                    <div className="space-y-2">
-                      <Label>Specify Reason *</Label>
-                      <Input
-                        placeholder="Enter reason"
-                        value={formData.reason_detail}
-                        onChange={(e) => setFormData({ ...formData, reason_detail: e.target.value })}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <Separator />
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-base font-medium">Line Items</Label>
-                    <Button type="button" variant="outline" size="sm" onClick={addLine}>
-                      <Plus className="mr-1 h-3 w-3" /> Add Line
-                    </Button>
-                  </div>
-
-                  <div className="grid grid-cols-12 gap-2 text-xs font-medium text-muted-foreground px-1">
-                    <div className="col-span-4">Description</div>
-                    <div className="col-span-2 text-right">Qty</div>
-                    <div className="col-span-2 text-right">Unit Price</div>
-                    <div className="col-span-1 text-right">Tax %</div>
-                    <div className="col-span-2 text-right">Amount</div>
-                    <div className="col-span-1"></div>
-                  </div>
-
-                  {formData.lines.map((line, idx) => (
-                    <div key={idx} className="grid grid-cols-12 gap-2 items-center">
-                      <div className="col-span-4">
-                        <Input
-                          className="h-9"
-                          placeholder="Item description"
-                          value={line.description}
-                          onChange={(e) => updateLine(idx, 'description', e.target.value)}
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Input
-                          className="h-9 text-right"
-                          type="number"
-                          min="1"
-                          value={line.quantity}
-                          onChange={(e) => updateLine(idx, 'quantity', parseInt(e.target.value) || 1)}
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <Input
-                          className="h-9 text-right"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          placeholder="0.00"
-                          value={line.unit_price || ''}
-                          onChange={(e) => updateLine(idx, 'unit_price', parseFloat(e.target.value) || 0)}
-                        />
-                      </div>
-                      <div className="col-span-1">
-                        <Input
-                          className="h-9 text-right"
-                          type="number"
-                          min="0"
-                          max="28"
-                          value={line.tax_rate || ''}
-                          onChange={(e) => updateLine(idx, 'tax_rate', parseInt(e.target.value) || 0)}
-                        />
-                      </div>
-                      <div className="col-span-2 text-right font-medium">
-                        {formatCurrency(line.amount + (line.tax_amount || 0))}
-                      </div>
-                      <div className="col-span-1">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => removeLine(idx)}
-                          disabled={formData.lines.length <= 1}
-                        >
-                          <Trash2 className="h-4 w-4 text-muted-foreground" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-
-                  <Separator />
-
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Subtotal:</span>
-                      <span>{formatCurrency(subtotal)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Tax:</span>
-                      <span>{formatCurrency(taxAmount)}</span>
-                    </div>
-                    <div className="flex justify-between font-medium text-base text-red-600">
-                      <span>Total Credit:</span>
-                      <span>-{formatCurrency(total)}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={resetForm}>Cancel</Button>
-                <Button onClick={handleSubmit} disabled={createMutation.isPending}>
-                  {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Credit Note
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Credit Note
+          </Button>
         }
       />
+
+      <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create Credit Note</DialogTitle>
+            <DialogDescription>Issue a credit note for returns or adjustments</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Customer *</Label>
+                <Select
+                  value={formData.customer_id || 'select'}
+                  onValueChange={(value) => setFormData({ ...formData, customer_id: value === 'select' ? '' : value, invoice_id: '' })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select customer" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="select" disabled>Select customer</SelectItem>
+                    {customers
+                      .filter((c: Customer) => c.id && c.id.trim() !== '')
+                      .map((c: Customer) => (
+                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Date *</Label>
+                <Input
+                  type="date"
+                  value={formData.credit_note_date}
+                  onChange={(e) => setFormData({ ...formData, credit_note_date: e.target.value })}
+                />
+              </div>
+            </div>
+
+            {formData.customer_id && invoices.length > 0 && (
+              <div className="space-y-2">
+                <Label>Against Invoice (Optional)</Label>
+                <Select
+                  value={formData.invoice_id || 'none'}
+                  onValueChange={(value) => setFormData({ ...formData, invoice_id: value === 'none' ? '' : value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select invoice" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No specific invoice</SelectItem>
+                    {invoices
+                      .filter((inv: Invoice) => inv.id && inv.id.trim() !== '')
+                      .map((inv: Invoice) => (
+                        <SelectItem key={inv.id} value={inv.id}>
+                          {inv.invoice_number} - {formatCurrency(inv.total_amount)}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Reason *</Label>
+                <Select
+                  value={formData.reason}
+                  onValueChange={(value) => setFormData({ ...formData, reason: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {creditReasons.map((r) => (
+                      <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {formData.reason === 'OTHER' && (
+                <div className="space-y-2">
+                  <Label>Specify Reason *</Label>
+                  <Input
+                    placeholder="Enter reason"
+                    value={formData.reason_detail}
+                    onChange={(e) => setFormData({ ...formData, reason_detail: e.target.value })}
+                  />
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-medium">Line Items</Label>
+                <Button type="button" variant="outline" size="sm" onClick={addLine}>
+                  <Plus className="mr-1 h-3 w-3" /> Add Line
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-12 gap-2 text-xs font-medium text-muted-foreground px-1">
+                <div className="col-span-4">Description</div>
+                <div className="col-span-2 text-right">Qty</div>
+                <div className="col-span-2 text-right">Unit Price</div>
+                <div className="col-span-1 text-right">Tax %</div>
+                <div className="col-span-2 text-right">Amount</div>
+                <div className="col-span-1"></div>
+              </div>
+
+              {formData.lines.map((line, idx) => (
+                <div key={idx} className="grid grid-cols-12 gap-2 items-center">
+                  <div className="col-span-4">
+                    <Input
+                      className="h-9"
+                      placeholder="Item description"
+                      value={line.description}
+                      onChange={(e) => updateLine(idx, 'description', e.target.value)}
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <Input
+                      className="h-9 text-right"
+                      type="number"
+                      min="1"
+                      value={line.quantity}
+                      onChange={(e) => updateLine(idx, 'quantity', parseInt(e.target.value) || 1)}
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <Input
+                      className="h-9 text-right"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={line.unit_price || ''}
+                      onChange={(e) => updateLine(idx, 'unit_price', parseFloat(e.target.value) || 0)}
+                    />
+                  </div>
+                  <div className="col-span-1">
+                    <Input
+                      className="h-9 text-right"
+                      type="number"
+                      min="0"
+                      max="28"
+                      value={line.tax_rate || ''}
+                      onChange={(e) => updateLine(idx, 'tax_rate', parseInt(e.target.value) || 0)}
+                    />
+                  </div>
+                  <div className="col-span-2 text-right font-medium">
+                    {formatCurrency(line.amount + (line.tax_amount || 0))}
+                  </div>
+                  <div className="col-span-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => removeLine(idx)}
+                      disabled={formData.lines.length <= 1}
+                    >
+                      <Trash2 className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+
+              <Separator />
+
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Subtotal:</span>
+                  <span>{formatCurrency(subtotal)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Tax:</span>
+                  <span>{formatCurrency(taxAmount)}</span>
+                </div>
+                <div className="flex justify-between font-medium text-base text-red-600">
+                  <span>Total Credit:</span>
+                  <span>-{formatCurrency(total)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={resetForm}>Cancel</Button>
+            <Button onClick={handleSubmit} disabled={createMutation.isPending}>
+              {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Credit Note
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <DataTable
         columns={columns}

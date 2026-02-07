@@ -16,7 +16,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   DropdownMenu,
@@ -350,65 +349,65 @@ export default function FiscalPeriodsPage() {
         title="Financial Periods"
         description="Manage fiscal years and accounting periods"
         actions={
-          <Dialog open={isCreateYearOpen} onOpenChange={setIsCreateYearOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                New Fiscal Year
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create Fiscal Year</DialogTitle>
-                <DialogDescription>
-                  Create a new fiscal year. Monthly periods will be generated automatically.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Year Name</Label>
-                  <Input
-                    id="name"
-                    placeholder="FY 2025-26"
-                    value={yearForm.name}
-                    onChange={(e) => setYearForm({ ...yearForm, name: e.target.value })}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="start">Start Date</Label>
-                    <Input
-                      id="start"
-                      type="date"
-                      value={yearForm.start_date}
-                      onChange={(e) => setYearForm({ ...yearForm, start_date: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="end">End Date</Label>
-                    <Input
-                      id="end"
-                      type="date"
-                      value={yearForm.end_date}
-                      onChange={(e) => setYearForm({ ...yearForm, end_date: e.target.value })}
-                    />
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreateYearOpen(false)}>Cancel</Button>
-                <Button
-                  onClick={() => createYearMutation.mutate(yearForm)}
-                  disabled={createYearMutation.isPending || !yearForm.name || !yearForm.start_date || !yearForm.end_date}
-                >
-                  {createYearMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Year
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => setIsCreateYearOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Fiscal Year
+          </Button>
         }
       />
+
+      {/* Create Fiscal Year Dialog */}
+      <Dialog open={isCreateYearOpen} onOpenChange={setIsCreateYearOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Fiscal Year</DialogTitle>
+            <DialogDescription>
+              Create a new fiscal year. Monthly periods will be generated automatically.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Year Name</Label>
+              <Input
+                id="name"
+                placeholder="FY 2025-26"
+                value={yearForm.name}
+                onChange={(e) => setYearForm({ ...yearForm, name: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="start">Start Date</Label>
+                <Input
+                  id="start"
+                  type="date"
+                  value={yearForm.start_date}
+                  onChange={(e) => setYearForm({ ...yearForm, start_date: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="end">End Date</Label>
+                <Input
+                  id="end"
+                  type="date"
+                  value={yearForm.end_date}
+                  onChange={(e) => setYearForm({ ...yearForm, end_date: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreateYearOpen(false)}>Cancel</Button>
+            <Button
+              onClick={() => createYearMutation.mutate(yearForm)}
+              disabled={createYearMutation.isPending || !yearForm.name || !yearForm.start_date || !yearForm.end_date}
+            >
+              {createYearMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Year
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Fiscal Years */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

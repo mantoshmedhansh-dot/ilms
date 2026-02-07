@@ -1,12 +1,30 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
 import { Receipt, Plus, DollarSign, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { DataTable } from '@/components/data-table/data-table';
 import { PageHeader, StatusBadge } from '@/components/common';
 import apiClient from '@/lib/api/client';
@@ -36,6 +54,21 @@ interface BillingStats {
   collected_this_month: number;
 }
 
+interface InvoiceFormData {
+  client_name: string;
+  billing_period_start: string;
+  billing_period_end: string;
+  invoice_type: 'STORAGE' | 'HANDLING' | 'COMBINED' | 'CUSTOM';
+  notes: string;
+}
+
+const invoiceTypes = [
+  { label: 'Storage Only', value: 'STORAGE' },
+  { label: 'Handling Only', value: 'HANDLING' },
+  { label: 'Combined (Storage + Handling)', value: 'COMBINED' },
+  { label: 'Custom', value: 'CUSTOM' },
+];
+
 const billingApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
@@ -52,6 +85,10 @@ const billingApi = {
     } catch {
       return { total_billed: 0, pending_amount: 0, overdue_amount: 0, collected_this_month: 0 };
     }
+  },
+  generateInvoice: async (invoiceData: InvoiceFormData) => {
+    const { data } = await apiClient.post('/warehouse-billing/generate', invoiceData);
+    return data;
   },
 };
 
@@ -120,9 +157,21 @@ const columns: ColumnDef<WarehouseBill>[] = [
   },
 ];
 
+const initialFormData: InvoiceFormData = {
+  client_name: '',
+  billing_period_start: '',
+  billing_period_end: '',
+  invoice_type: 'COMBINED',
+  notes: '',
+};
+
 export default function BillingPage() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState<InvoiceFormData>(initialFormData);
+
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ['wms-billing', page, pageSize],
@@ -134,18 +183,145 @@ export default function BillingPage() {
     queryFn: billingApi.getStats,
   });
 
+  const generateInvoiceMutation = useMutation({
+    mutationFn: billingApi.generateInvoice,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['wms-billing'] });
+      queryClient.invalidateQueries({ queryKey: ['wms-billing-stats'] });
+      toast.success('Invoice generated successfully');
+      handleDialogClose();
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to generate invoice');
+    },
+  });
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+    setFormData(initialFormData);
+  };
+
+  const handleSubmit = () => {
+    if (!formData.client_name.trim()) {
+      toast.error('Client name is required');
+      return;
+    }
+    if (!formData.billing_period_start) {
+      toast.error('Billing period start date is required');
+      return;
+    }
+    if (!formData.billing_period_end) {
+      toast.error('Billing period end date is required');
+      return;
+    }
+    if (new Date(formData.billing_period_end) < new Date(formData.billing_period_start)) {
+      toast.error('End date must be after start date');
+      return;
+    }
+
+    generateInvoiceMutation.mutate(formData);
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Warehouse Billing"
         description="Manage 3PL billing, storage fees, and handling charges"
         actions={
-          <Button onClick={() => toast.info('Feature coming soon')}>
+          <Button onClick={() => setIsDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Generate Invoice
           </Button>
         }
       />
+
+      <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleDialogClose()}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Generate Invoice</DialogTitle>
+            <DialogDescription>
+              Create a new invoice for warehouse billing services.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="client_name">Client *</Label>
+              <Input
+                id="client_name"
+                placeholder="Enter client name"
+                value={formData.client_name}
+                onChange={(e) =>
+                  setFormData({ ...formData, client_name: e.target.value })
+                }
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="billing_period_start">Billing Period From *</Label>
+                <Input
+                  id="billing_period_start"
+                  type="date"
+                  value={formData.billing_period_start}
+                  onChange={(e) =>
+                    setFormData({ ...formData, billing_period_start: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="billing_period_end">Billing Period To *</Label>
+                <Input
+                  id="billing_period_end"
+                  type="date"
+                  value={formData.billing_period_end}
+                  onChange={(e) =>
+                    setFormData({ ...formData, billing_period_end: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="invoice_type">Invoice Type</Label>
+              <Select
+                value={formData.invoice_type}
+                onValueChange={(value: 'STORAGE' | 'HANDLING' | 'COMBINED' | 'CUSTOM') =>
+                  setFormData({ ...formData, invoice_type: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select invoice type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {invoiceTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea
+                id="notes"
+                placeholder="Additional notes for this invoice..."
+                value={formData.notes}
+                onChange={(e) =>
+                  setFormData({ ...formData, notes: e.target.value })
+                }
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleDialogClose}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} disabled={generateInvoiceMutation.isPending}>
+              {generateInvoiceMutation.isPending ? 'Generating...' : 'Generate Invoice'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>

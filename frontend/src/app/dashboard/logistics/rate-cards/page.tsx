@@ -25,7 +25,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -452,120 +451,120 @@ export default function RateCardsPage() {
         description="Manage and compare shipping rates across transporters"
         actions={
           <div className="flex gap-2">
-            <Dialog open={isCompareDialogOpen} onOpenChange={setIsCompareDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  <Calculator className="mr-2 h-4 w-4" />
-                  Compare Rates
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>Compare Shipping Rates</DialogTitle>
-                  <DialogDescription>
-                    Compare rates across all transporters for a specific route and weight.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>From Zone</Label>
-                      <Select
-                        value={compareParams.zone_from}
-                        onValueChange={(value) => setCompareParams({ ...compareParams, zone_from: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select zone" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {zones.map((zone) => (
-                            <SelectItem key={zone.value} value={zone.value}>
-                              {zone.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>To Zone</Label>
-                      <Select
-                        value={compareParams.zone_to}
-                        onValueChange={(value) => setCompareParams({ ...compareParams, zone_to: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select zone" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {zones.map((zone) => (
-                            <SelectItem key={zone.value} value={zone.value}>
-                              {zone.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Weight (kg)</Label>
-                      <Input
-                        type="number"
-                        placeholder="e.g., 2.5"
-                        value={compareParams.weight_kg}
-                        onChange={(e) => setCompareParams({ ...compareParams, weight_kg: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-2 flex items-end">
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          id="is_cod"
-                          checked={compareParams.is_cod}
-                          onCheckedChange={(checked) => setCompareParams({ ...compareParams, is_cod: checked })}
-                        />
-                        <Label htmlFor="is_cod">COD Order</Label>
-                      </div>
-                    </div>
-                  </div>
-                  <Button onClick={handleCompare}>Compare Rates</Button>
+            <Button variant="outline" onClick={() => setIsCompareDialogOpen(true)}>
+              <Calculator className="mr-2 h-4 w-4" />
+              Compare Rates
+            </Button>
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Rate Card
+            </Button>
+          </div>
+        }
+      />
 
-                  {/* Comparison Results */}
-                  {comparedRates && (
-                    <Card>
-                      <CardHeader className="py-3">
-                        <CardTitle className="text-sm">Rate Calculation Result</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-2 gap-2 text-sm">
-                          <div>Base Rate:</div>
-                          <div className="font-mono">{formatCurrency(comparedRates.base_rate || 0)}</div>
-                          <div>Weight Charge:</div>
-                          <div className="font-mono">{formatCurrency(comparedRates.weight_charge || 0)}</div>
-                          <div>Fuel Surcharge:</div>
-                          <div className="font-mono">{formatCurrency(comparedRates.fuel_surcharge || 0)}</div>
-                          {compareParams.is_cod && (
-                            <>
-                              <div>COD Charges:</div>
-                              <div className="font-mono">{formatCurrency(comparedRates.cod_charge || 0)}</div>
-                            </>
-                          )}
-                          <div className="font-bold border-t pt-2">Total:</div>
-                          <div className="font-mono font-bold border-t pt-2">{formatCurrency(comparedRates.total || 0)}</div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
+      <Dialog open={isCompareDialogOpen} onOpenChange={setIsCompareDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Compare Shipping Rates</DialogTitle>
+            <DialogDescription>
+              Compare rates across all transporters for a specific route and weight.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>From Zone</Label>
+                <Select
+                  value={compareParams.zone_from}
+                  onValueChange={(value) => setCompareParams({ ...compareParams, zone_from: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select zone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {zones.map((zone) => (
+                      <SelectItem key={zone.value} value={zone.value}>
+                        {zone.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>To Zone</Label>
+                <Select
+                  value={compareParams.zone_to}
+                  onValueChange={(value) => setCompareParams({ ...compareParams, zone_to: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select zone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {zones.map((zone) => (
+                      <SelectItem key={zone.value} value={zone.value}>
+                        {zone.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Weight (kg)</Label>
+                <Input
+                  type="number"
+                  placeholder="e.g., 2.5"
+                  value={compareParams.weight_kg}
+                  onChange={(e) => setCompareParams({ ...compareParams, weight_kg: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2 flex items-end">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="is_cod"
+                    checked={compareParams.is_cod}
+                    onCheckedChange={(checked) => setCompareParams({ ...compareParams, is_cod: checked })}
+                  />
+                  <Label htmlFor="is_cod">COD Order</Label>
                 </div>
-              </DialogContent>
-            </Dialog>
+              </div>
+            </div>
+            <Button onClick={handleCompare}>Compare Rates</Button>
 
-            <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
-              <DialogTrigger asChild>
-                <Button onClick={() => setIsDialogOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Rate Card
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-lg">
+            {/* Comparison Results */}
+            {comparedRates && (
+              <Card>
+                <CardHeader className="py-3">
+                  <CardTitle className="text-sm">Rate Calculation Result</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>Base Rate:</div>
+                    <div className="font-mono">{formatCurrency(comparedRates.base_rate || 0)}</div>
+                    <div>Weight Charge:</div>
+                    <div className="font-mono">{formatCurrency(comparedRates.weight_charge || 0)}</div>
+                    <div>Fuel Surcharge:</div>
+                    <div className="font-mono">{formatCurrency(comparedRates.fuel_surcharge || 0)}</div>
+                    {compareParams.is_cod && (
+                      <>
+                        <div>COD Charges:</div>
+                        <div className="font-mono">{formatCurrency(comparedRates.cod_charge || 0)}</div>
+                      </>
+                    )}
+                    <div className="font-bold border-t pt-2">Total:</div>
+                    <div className="font-mono font-bold border-t pt-2">{formatCurrency(comparedRates.total || 0)}</div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
+        <DialogContent className="max-w-lg">
                 <DialogHeader>
                   <DialogTitle>{isEditMode ? 'Edit Rate Card' : 'Add Rate Card'}</DialogTitle>
                   <DialogDescription>
@@ -798,11 +797,8 @@ export default function RateCardsPage() {
                     {isEditMode ? 'Update' : 'Create'} Rate Card
                   </Button>
                 </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-        }
-      />
+        </DialogContent>
+      </Dialog>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">

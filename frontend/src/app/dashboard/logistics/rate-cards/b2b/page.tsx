@@ -25,7 +25,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertDialog,
@@ -540,14 +539,15 @@ export default function B2BRateCardsPage() {
         title="B2B Rate Cards (LTL/PTL)"
         description="Manage rate cards for Less Than Truckload and Part Truck Load shipments"
         actions={
-          <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setIsDialogOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add B2B Rate Card
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add B2B Rate Card
+          </Button>
+        }
+      />
+
+      <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetForm(); else setIsDialogOpen(true); }}>
+        <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle>{isEditMode ? 'Edit B2B Rate Card' : 'Add B2B Rate Card'}</DialogTitle>
                 <DialogDescription>
@@ -738,10 +738,8 @@ export default function B2BRateCardsPage() {
                   {isEditMode ? 'Update' : 'Create'} Rate Card
                 </Button>
               </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        }
-      />
+        </DialogContent>
+      </Dialog>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
