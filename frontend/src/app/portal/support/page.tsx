@@ -77,7 +77,13 @@ export default function CustomerSupportPage() {
     try {
       setLoading(true);
       const response = await fetch(
-        `/api/v1/portal/service-requests?customer_id=${DEMO_CUSTOMER_ID}`
+        `/api/v1/portal/service-requests?customer_id=${DEMO_CUSTOMER_ID}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}`,
+            'X-Tenant-ID': localStorage.getItem('tenant_id') || '',
+          }
+        }
       );
       if (response.ok) {
         const data = await response.json();
@@ -140,7 +146,11 @@ export default function CustomerSupportPage() {
         `/api/v1/portal/service-requests?customer_id=${DEMO_CUSTOMER_ID}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}`,
+            'X-Tenant-ID': localStorage.getItem('tenant_id') || '',
+          },
           body: JSON.stringify(newRequest),
         }
       );

@@ -53,7 +53,13 @@ export default function CustomerOrdersPage() {
       setLoading(true);
       const statusParam = statusFilter !== "all" ? `&status=${statusFilter}` : "";
       const response = await fetch(
-        `/api/v1/portal/orders?customer_id=${DEMO_CUSTOMER_ID}${statusParam}`
+        `/api/v1/portal/orders?customer_id=${DEMO_CUSTOMER_ID}${statusParam}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}`,
+            'X-Tenant-ID': localStorage.getItem('tenant_id') || '',
+          }
+        }
       );
       if (response.ok) {
         const data = await response.json();

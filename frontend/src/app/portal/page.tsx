@@ -68,7 +68,13 @@ export default function CustomerPortalPage() {
     try {
       setLoading(true);
       const response = await fetch(
-        `/api/v1/portal/dashboard?customer_id=${DEMO_CUSTOMER_ID}`
+        `/api/v1/portal/dashboard?customer_id=${DEMO_CUSTOMER_ID}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}`,
+            'X-Tenant-ID': localStorage.getItem('tenant_id') || '',
+          }
+        }
       );
       if (response.ok) {
         const data = await response.json();
