@@ -56,11 +56,18 @@ async def login(
     )
     await db.commit()
 
+    # Get tenant info from request state (set by tenant middleware)
+    tenant = getattr(request.state, "tenant", None)
+    tenant_id = str(tenant.id) if tenant else ""
+    tenant_subdomain = tenant.subdomain if tenant else ""
+
     return TokenResponse(
         access_token=access_token,
         refresh_token=refresh_token,
         token_type="bearer",
         expires_in=expires_in,
+        tenant_id=tenant_id,
+        tenant_subdomain=tenant_subdomain,
     )
 
 
@@ -86,11 +93,18 @@ async def refresh_token(
 
     access_token, refresh_token, expires_in = result
 
+    # Get tenant info from request state (set by tenant middleware)
+    tenant = getattr(request.state, "tenant", None)
+    tenant_id = str(tenant.id) if tenant else ""
+    tenant_subdomain = tenant.subdomain if tenant else ""
+
     return TokenResponse(
         access_token=access_token,
         refresh_token=refresh_token,
         token_type="bearer",
         expires_in=expires_in,
+        tenant_id=tenant_id,
+        tenant_subdomain=tenant_subdomain,
     )
 
 

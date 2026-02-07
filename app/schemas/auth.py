@@ -21,6 +21,8 @@ class TokenResponse(BaseModel):
     refresh_token: str = Field(..., description="JWT refresh token")
     token_type: str = Field(default="bearer", description="Token type")
     expires_in: int = Field(..., description="Access token expiration in seconds")
+    tenant_id: str = Field(..., description="Tenant ID for API calls")
+    tenant_subdomain: str = Field(..., description="Tenant subdomain")
 
 
 class TokenPayload(BaseModel):

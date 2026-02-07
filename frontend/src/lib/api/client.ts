@@ -114,8 +114,16 @@ apiClient.interceptors.response.use(
             refresh_token: refreshToken,
           });
 
-          const { access_token, refresh_token } = response.data;
+          const { access_token, refresh_token, tenant_id, tenant_subdomain } = response.data;
           setTokens(access_token, refresh_token);
+
+          // Update tenant context from refresh response
+          if (tenant_id) {
+            localStorage.setItem('tenant_id', tenant_id);
+          }
+          if (tenant_subdomain) {
+            localStorage.setItem('tenant_subdomain', tenant_subdomain);
+          }
 
           processQueue(null, access_token);
           originalRequest.headers.Authorization = `Bearer ${access_token}`;
