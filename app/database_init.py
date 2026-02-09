@@ -233,88 +233,57 @@ async def seed_default_modules():
 
             logger.info("Seeding default ERP modules...")
 
-            # Default modules from Phase 1
+            # ILMS.AI 6-Module Structure (Phase 4)
+            # Restructured from 10 modules to 6 for simpler pricing and UX
             default_modules = [
                 {
-                    "code": "system_admin",
-                    "name": "System Administration",
-                    "description": "User management, roles, permissions, audit logs",
+                    "code": "core",
+                    "name": "Core Platform",
+                    "description": "User management, roles, permissions, audit logs, system administration",
                     "category": "core",
-                    "price_monthly": 2999.00,
+                    "price_monthly": 4999.00,
                     "is_base_module": True,
                     "display_order": 1
                 },
                 {
-                    "code": "oms_fulfillment",
-                    "name": "OMS, WMS & Fulfillment",
-                    "description": "Order management, warehouse operations, fulfillment",
+                    "code": "oms_wms",
+                    "name": "OMS & WMS",
+                    "description": "Order management, warehouse operations, fulfillment, procurement, inventory, logistics",
                     "category": "operations",
-                    "price_monthly": 12999.00,
+                    "price_monthly": 19999.00,
                     "display_order": 2
                 },
                 {
-                    "code": "procurement",
-                    "name": "Procurement & Vendor Management",
-                    "description": "Purchase orders, vendor management, GRN",
-                    "category": "operations",
+                    "code": "finance",
+                    "name": "Finance & Compliance",
+                    "description": "GL, invoicing, banking, GST compliance, tax filing, financial reports",
+                    "category": "finance",
                     "price_monthly": 9999.00,
                     "display_order": 3
                 },
                 {
-                    "code": "finance",
-                    "name": "Finance & Accounting",
-                    "description": "GL, invoicing, banking, GST compliance",
-                    "category": "finance",
-                    "price_monthly": 9999.00,
+                    "code": "sales_cx",
+                    "name": "Sales & Customer Experience",
+                    "description": "CRM, service management, D2C storefront, marketing, campaigns, customer support",
+                    "category": "sales",
+                    "price_monthly": 12999.00,
                     "display_order": 4
                 },
                 {
-                    "code": "crm_service",
-                    "name": "CRM & Service Management",
-                    "description": "Customer management, service requests, warranty",
-                    "category": "customer",
-                    "price_monthly": 6999.00,
+                    "code": "ai_insights",
+                    "name": "AI Insights",
+                    "description": "Demand forecasting, S&OP, AI analytics, reorder suggestions, churn analysis",
+                    "category": "analytics",
+                    "price_monthly": 9999.00,
                     "display_order": 5
                 },
                 {
-                    "code": "sales_distribution",
-                    "name": "Sales & Distribution",
-                    "description": "Multi-channel sales, dealer management",
-                    "category": "sales",
-                    "price_monthly": 8999.00,
-                    "display_order": 6
-                },
-                {
                     "code": "hrms",
-                    "name": "HR & Payroll",
-                    "description": "Employee management, attendance, payroll",
+                    "name": "HRMS",
+                    "description": "Employee management, attendance, payroll, leave management, performance",
                     "category": "hr",
-                    "price_monthly": 7999.00,
-                    "display_order": 7
-                },
-                {
-                    "code": "d2c_storefront",
-                    "name": "D2C E-Commerce Storefront",
-                    "description": "Customer-facing online store",
-                    "category": "sales",
-                    "price_monthly": 5999.00,
-                    "display_order": 8
-                },
-                {
-                    "code": "scm_ai",
-                    "name": "Supply Chain & AI Analytics",
-                    "description": "Demand forecasting, S&OP, AI insights",
-                    "category": "analytics",
-                    "price_monthly": 14999.00,
-                    "display_order": 9
-                },
-                {
-                    "code": "marketing",
-                    "name": "Marketing & Campaigns",
-                    "description": "Campaign management, promotions, loyalty",
-                    "category": "marketing",
-                    "price_monthly": 4999.00,
-                    "display_order": 10
+                    "price_monthly": 6999.00,
+                    "display_order": 6
                 }
             ]
 

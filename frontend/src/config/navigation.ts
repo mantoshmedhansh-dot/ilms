@@ -98,7 +98,15 @@ export interface NavItem {
  *
  * Based on Industry Best Practices (SAP, Oracle NetSuite, Zoho, Microsoft Dynamics)
  *
- * Structure:
+ * Module Structure (6 Modules):
+ * - core: Dashboard, Administration
+ * - oms_wms: Sales, Procurement, Inventory, Warehouse, Logistics, Master Data
+ * - finance: Finance & Accounting
+ * - sales_cx: CRM, Service, D2C Content
+ * - ai_insights: Intelligence, Planning (S&OP)
+ * - hrms: Human Resources
+ *
+ * Navigation Sections:
  * 1. Dashboard - Overview & KPIs
  * 2. Intelligence - AI & analytics (prominent placement for AI-first approach)
  * 3. Sales - Order management & sales channels
@@ -123,7 +131,7 @@ export const navigation: NavItem[] = [
     href: '/dashboard',
     icon: LayoutDashboard,
     permissions: [],
-    moduleCode: 'system_admin',
+    moduleCode: 'core',
     section: 1,
   },
 
@@ -133,7 +141,7 @@ export const navigation: NavItem[] = [
     icon: Brain,
     permissions: [],
     badge: 'AI',
-    moduleCode: 'scm_ai',
+    moduleCode: 'ai_insights',
     children: [
       { title: 'AI Hub', href: '/dashboard/ai', icon: Lightbulb, permissions: [] },
       { title: 'Insights Dashboard', href: '/dashboard/insights', icon: TrendingUp, permissions: [] },
@@ -149,7 +157,7 @@ export const navigation: NavItem[] = [
     title: 'Sales',
     icon: ShoppingCart,
     permissions: ['ORDERS_VIEW', 'MARKETING_VIEW'],
-    moduleCode: 'oms_fulfillment',
+    moduleCode: 'oms_wms',
     children: [
       // Orders
       { title: 'All Orders', href: '/dashboard/orders', icon: ShoppingCart, permissions: ['ORDERS_VIEW'] },
@@ -176,7 +184,7 @@ export const navigation: NavItem[] = [
     title: 'CRM',
     icon: UserCircle,
     permissions: ['CRM_VIEW'],
-    moduleCode: 'crm_service',
+    moduleCode: 'sales_cx',
     children: [
       { title: 'Customers', href: '/dashboard/crm/customers', icon: UserCircle, permissions: ['CRM_VIEW'] },
       { title: 'Customer 360', href: '/dashboard/crm/customer-360', icon: Target, permissions: ['CRM_VIEW'] },
@@ -186,31 +194,12 @@ export const navigation: NavItem[] = [
     ],
   },
 
-  // ==================== 4.5 COMMUNITY PARTNERS (Meesho-style) ====================
-  {
-    title: 'Community Partners',
-    icon: Share2,
-    permissions: [],
-    badge: 'NEW',
-    moduleCode: 'sales_distribution',
-    children: [
-      { title: 'Partner Dashboard', href: '/dashboard/partners', icon: BarChart3, permissions: [] },
-      { title: 'All Partners', href: '/dashboard/partners/list', icon: UsersRound, permissions: [] },
-      { title: 'Partner Tiers', href: '/dashboard/partners/tiers', icon: Trophy, permissions: [] },
-      { title: 'Partner Commissions', href: '/dashboard/partners/commissions', icon: Wallet, permissions: [] },
-      { title: 'Payouts', href: '/dashboard/partners/payouts', icon: Banknote, permissions: [] },
-      { title: 'Partner Orders', href: '/dashboard/partners/orders', icon: ShoppingCart, permissions: [] },
-      { title: 'Partner Training', href: '/dashboard/partners/training', icon: GraduationCap, permissions: [] },
-      { title: 'Referrals', href: '/dashboard/partners/referrals', icon: UserPlus, permissions: [] },
-    ],
-  },
-
   // ==================== 5. PROCUREMENT (P2P) ====================
   {
     title: 'Procurement',
     icon: FileInput,
     permissions: ['VENDORS_VIEW', 'PROCUREMENT_VIEW'],
-    moduleCode: 'procurement',
+    moduleCode: 'oms_wms',
     children: [
       { title: 'Vendors', href: '/dashboard/procurement/vendors', icon: Building2, permissions: ['VENDORS_VIEW'] },
       { title: 'Purchase Requisitions', href: '/dashboard/procurement/requisitions', icon: FileText, permissions: ['PROCUREMENT_VIEW'] },
@@ -228,7 +217,7 @@ export const navigation: NavItem[] = [
     title: 'Inventory',
     icon: Boxes,
     permissions: ['INVENTORY_VIEW'],
-    moduleCode: 'oms_fulfillment',
+    moduleCode: 'oms_wms',
     children: [
       { title: 'Stock Summary', href: '/dashboard/inventory', icon: BarChart3, permissions: ['INVENTORY_VIEW'] },
       { title: 'Stock Items', href: '/dashboard/inventory/stock-items', icon: Package, permissions: ['INVENTORY_VIEW'] },
@@ -243,7 +232,7 @@ export const navigation: NavItem[] = [
     title: 'Warehouse (WMS)',
     icon: Grid3X3,
     permissions: ['INVENTORY_VIEW', 'ORDERS_VIEW'],
-    moduleCode: 'oms_fulfillment',
+    moduleCode: 'oms_wms',
     children: [
       { title: 'Warehouses', href: '/dashboard/wms/warehouses', icon: Warehouse, permissions: ['INVENTORY_VIEW'] },
       { title: 'Zones', href: '/dashboard/wms/zones', icon: Layers, permissions: ['INVENTORY_VIEW'] },
@@ -269,7 +258,7 @@ export const navigation: NavItem[] = [
     title: 'Logistics',
     icon: Truck,
     permissions: ['LOGISTICS_VIEW'],
-    moduleCode: 'oms_fulfillment',
+    moduleCode: 'oms_wms',
     children: [
       { title: 'Shipments', href: '/dashboard/logistics/shipments', icon: Truck, permissions: ['LOGISTICS_VIEW'] },
       { title: 'Order Tracking', href: '/dashboard/logistics/tracking', icon: MapPin, permissions: ['LOGISTICS_VIEW'] },
@@ -294,7 +283,7 @@ export const navigation: NavItem[] = [
     icon: Target,
     permissions: ['REPORTS_VIEW', 'INVENTORY_VIEW'],
     badge: 'NEW',
-    moduleCode: 'scm_ai',
+    moduleCode: 'ai_insights',
     children: [
       { title: 'S&OP Dashboard', href: '/dashboard/snop', icon: Target, permissions: ['REPORTS_VIEW'] },
       { title: 'Demand Forecasting', href: '/dashboard/snop/forecasts', icon: LineChart, permissions: ['REPORTS_VIEW'] },
@@ -370,7 +359,7 @@ export const navigation: NavItem[] = [
     title: 'Service',
     icon: Wrench,
     permissions: ['SERVICE_VIEW'],
-    moduleCode: 'crm_service',
+    moduleCode: 'sales_cx',
     children: [
       { title: 'Service Requests', href: '/dashboard/service/requests', icon: Headphones, permissions: ['SERVICE_VIEW'] },
       { title: 'New Request', href: '/dashboard/service/requests/new', icon: FileInput, permissions: ['SERVICE_CREATE'] },
@@ -405,7 +394,7 @@ export const navigation: NavItem[] = [
     title: 'Master Data',
     icon: Package,
     permissions: ['PRODUCTS_VIEW'],
-    moduleCode: 'oms_fulfillment',
+    moduleCode: 'oms_wms',
     children: [
       { title: 'Products', href: '/dashboard/catalog', icon: Package, permissions: ['PRODUCTS_VIEW'] },
       { title: 'New Product', href: '/dashboard/catalog/new', icon: FileInput, permissions: ['PRODUCTS_CREATE'] },
@@ -421,7 +410,7 @@ export const navigation: NavItem[] = [
     title: 'D2C Content',
     icon: Globe,
     permissions: ['CMS_VIEW'],
-    moduleCode: 'd2c_storefront',
+    moduleCode: 'sales_cx',
     children: [
       // Overview
       { title: 'CMS Overview', href: '/dashboard/cms', icon: Globe, permissions: ['CMS_VIEW'] },
@@ -459,7 +448,7 @@ export const navigation: NavItem[] = [
     title: 'Administration',
     icon: Cog,
     permissions: ['ACCESS_CONTROL_VIEW', 'SETTINGS_VIEW'],
-    moduleCode: 'system_admin',
+    moduleCode: 'core',
     children: [
       { title: 'Users', href: '/dashboard/access-control/users', icon: Users, permissions: ['ACCESS_CONTROL_VIEW'] },
       { title: 'Roles', href: '/dashboard/access-control/roles', icon: Shield, permissions: ['ACCESS_CONTROL_VIEW'] },
