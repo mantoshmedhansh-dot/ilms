@@ -18,23 +18,74 @@ interface SidebarProps {
 
 // Zoho/Freshworks-style module colors - vibrant and distinct
 const moduleColors: Record<string, { bg: string; text: string; hover: string; gradient: string }> = {
+  // Top-level modules
+  'Core Platform': {
+    bg: 'bg-violet-100 dark:bg-violet-900/30',
+    text: 'text-violet-600 dark:text-violet-400',
+    hover: 'hover:bg-violet-50 dark:hover:bg-violet-900/20',
+    gradient: 'from-violet-500 to-purple-600'
+  },
+  'OMS & WMS': {
+    bg: 'bg-blue-100 dark:bg-blue-900/30',
+    text: 'text-blue-600 dark:text-blue-400',
+    hover: 'hover:bg-blue-50 dark:hover:bg-blue-900/20',
+    gradient: 'from-blue-500 to-cyan-600'
+  },
+  'Finance': {
+    bg: 'bg-amber-100 dark:bg-amber-900/30',
+    text: 'text-amber-600 dark:text-amber-400',
+    hover: 'hover:bg-amber-50 dark:hover:bg-amber-900/20',
+    gradient: 'from-amber-500 to-yellow-600'
+  },
+  'Sales & CX': {
+    bg: 'bg-pink-100 dark:bg-pink-900/30',
+    text: 'text-pink-600 dark:text-pink-400',
+    hover: 'hover:bg-pink-50 dark:hover:bg-pink-900/20',
+    gradient: 'from-pink-500 to-rose-600'
+  },
+  'AI Insights': {
+    bg: 'bg-fuchsia-100 dark:bg-fuchsia-900/30',
+    text: 'text-fuchsia-600 dark:text-fuchsia-400',
+    hover: 'hover:bg-fuchsia-50 dark:hover:bg-fuchsia-900/20',
+    gradient: 'from-fuchsia-500 to-pink-600'
+  },
+  'S&OP Planning': {
+    bg: 'bg-purple-100 dark:bg-purple-900/30',
+    text: 'text-purple-600 dark:text-purple-400',
+    hover: 'hover:bg-purple-50 dark:hover:bg-purple-900/20',
+    gradient: 'from-purple-500 to-indigo-600'
+  },
+  'HRMS': {
+    bg: 'bg-indigo-100 dark:bg-indigo-900/30',
+    text: 'text-indigo-600 dark:text-indigo-400',
+    hover: 'hover:bg-indigo-50 dark:hover:bg-indigo-900/20',
+    gradient: 'from-indigo-500 to-violet-600'
+  },
+  // Submodules - Core Platform
   'Dashboard': {
     bg: 'bg-violet-100 dark:bg-violet-900/30',
     text: 'text-violet-600 dark:text-violet-400',
     hover: 'hover:bg-violet-50 dark:hover:bg-violet-900/20',
     gradient: 'from-violet-500 to-purple-600'
   },
-  'Sales': {
+  'Administration': {
+    bg: 'bg-slate-100 dark:bg-slate-800/50',
+    text: 'text-slate-600 dark:text-slate-400',
+    hover: 'hover:bg-slate-50 dark:hover:bg-slate-800/30',
+    gradient: 'from-slate-500 to-gray-600'
+  },
+  'Settings': {
+    bg: 'bg-gray-100 dark:bg-gray-800/50',
+    text: 'text-gray-600 dark:text-gray-400',
+    hover: 'hover:bg-gray-50 dark:hover:bg-gray-800/30',
+    gradient: 'from-gray-500 to-slate-600'
+  },
+  // Submodules - OMS & WMS
+  'Orders': {
     bg: 'bg-blue-100 dark:bg-blue-900/30',
     text: 'text-blue-600 dark:text-blue-400',
     hover: 'hover:bg-blue-50 dark:hover:bg-blue-900/20',
     gradient: 'from-blue-500 to-cyan-600'
-  },
-  'CRM': {
-    bg: 'bg-pink-100 dark:bg-pink-900/30',
-    text: 'text-pink-600 dark:text-pink-400',
-    hover: 'hover:bg-pink-50 dark:hover:bg-pink-900/20',
-    gradient: 'from-pink-500 to-rose-600'
   },
   'Procurement': {
     bg: 'bg-orange-100 dark:bg-orange-900/30',
@@ -48,7 +99,7 @@ const moduleColors: Record<string, { bg: string; text: string; hover: string; gr
     hover: 'hover:bg-emerald-50 dark:hover:bg-emerald-900/20',
     gradient: 'from-emerald-500 to-teal-600'
   },
-  'Warehouse (WMS)': {
+  'Warehouse': {
     bg: 'bg-teal-100 dark:bg-teal-900/30',
     text: 'text-teal-600 dark:text-teal-400',
     hover: 'hover:bg-teal-50 dark:hover:bg-teal-900/20',
@@ -60,17 +111,67 @@ const moduleColors: Record<string, { bg: string; text: string; hover: string; gr
     hover: 'hover:bg-sky-50 dark:hover:bg-sky-900/20',
     gradient: 'from-sky-500 to-blue-600'
   },
-  'Planning (S&OP)': {
-    bg: 'bg-purple-100 dark:bg-purple-900/30',
-    text: 'text-purple-600 dark:text-purple-400',
-    hover: 'hover:bg-purple-50 dark:hover:bg-purple-900/20',
-    gradient: 'from-purple-500 to-indigo-600'
+  'Master Data': {
+    bg: 'bg-cyan-100 dark:bg-cyan-900/30',
+    text: 'text-cyan-600 dark:text-cyan-400',
+    hover: 'hover:bg-cyan-50 dark:hover:bg-cyan-900/20',
+    gradient: 'from-cyan-500 to-sky-600'
   },
-  'Finance': {
+  // Submodules - Finance
+  'Receivables': {
+    bg: 'bg-green-100 dark:bg-green-900/30',
+    text: 'text-green-600 dark:text-green-400',
+    hover: 'hover:bg-green-50 dark:hover:bg-green-900/20',
+    gradient: 'from-green-500 to-emerald-600'
+  },
+  'Payables': {
+    bg: 'bg-red-100 dark:bg-red-900/30',
+    text: 'text-red-600 dark:text-red-400',
+    hover: 'hover:bg-red-50 dark:hover:bg-red-900/20',
+    gradient: 'from-red-500 to-rose-600'
+  },
+  'Banking': {
     bg: 'bg-amber-100 dark:bg-amber-900/30',
     text: 'text-amber-600 dark:text-amber-400',
     hover: 'hover:bg-amber-50 dark:hover:bg-amber-900/20',
     gradient: 'from-amber-500 to-yellow-600'
+  },
+  'Accounting': {
+    bg: 'bg-yellow-100 dark:bg-yellow-900/30',
+    text: 'text-yellow-600 dark:text-yellow-400',
+    hover: 'hover:bg-yellow-50 dark:hover:bg-yellow-900/20',
+    gradient: 'from-yellow-500 to-orange-600'
+  },
+  'Reports': {
+    bg: 'bg-lime-100 dark:bg-lime-900/30',
+    text: 'text-lime-600 dark:text-lime-400',
+    hover: 'hover:bg-lime-50 dark:hover:bg-lime-900/20',
+    gradient: 'from-lime-500 to-green-600'
+  },
+  'Tax Compliance': {
+    bg: 'bg-stone-100 dark:bg-stone-900/30',
+    text: 'text-stone-600 dark:text-stone-400',
+    hover: 'hover:bg-stone-50 dark:hover:bg-stone-900/20',
+    gradient: 'from-stone-500 to-gray-600'
+  },
+  // Submodules - Sales & CX
+  'CRM': {
+    bg: 'bg-pink-100 dark:bg-pink-900/30',
+    text: 'text-pink-600 dark:text-pink-400',
+    hover: 'hover:bg-pink-50 dark:hover:bg-pink-900/20',
+    gradient: 'from-pink-500 to-rose-600'
+  },
+  'Sales Channels': {
+    bg: 'bg-indigo-100 dark:bg-indigo-900/30',
+    text: 'text-indigo-600 dark:text-indigo-400',
+    hover: 'hover:bg-indigo-50 dark:hover:bg-indigo-900/20',
+    gradient: 'from-indigo-500 to-violet-600'
+  },
+  'Marketing': {
+    bg: 'bg-fuchsia-100 dark:bg-fuchsia-900/30',
+    text: 'text-fuchsia-600 dark:text-fuchsia-400',
+    hover: 'hover:bg-fuchsia-50 dark:hover:bg-fuchsia-900/20',
+    gradient: 'from-fuchsia-500 to-pink-600'
   },
   'Service': {
     bg: 'bg-rose-100 dark:bg-rose-900/30',
@@ -78,31 +179,7 @@ const moduleColors: Record<string, { bg: string; text: string; hover: string; gr
     hover: 'hover:bg-rose-50 dark:hover:bg-rose-900/20',
     gradient: 'from-rose-500 to-pink-600'
   },
-  'Human Resources': {
-    bg: 'bg-indigo-100 dark:bg-indigo-900/30',
-    text: 'text-indigo-600 dark:text-indigo-400',
-    hover: 'hover:bg-indigo-50 dark:hover:bg-indigo-900/20',
-    gradient: 'from-indigo-500 to-violet-600'
-  },
-  'Master Data': {
-    bg: 'bg-cyan-100 dark:bg-cyan-900/30',
-    text: 'text-cyan-600 dark:text-cyan-400',
-    hover: 'hover:bg-cyan-50 dark:hover:bg-cyan-900/20',
-    gradient: 'from-cyan-500 to-sky-600'
-  },
-  'Intelligence': {
-    bg: 'bg-fuchsia-100 dark:bg-fuchsia-900/30',
-    text: 'text-fuchsia-600 dark:text-fuchsia-400',
-    hover: 'hover:bg-fuchsia-50 dark:hover:bg-fuchsia-900/20',
-    gradient: 'from-fuchsia-500 to-pink-600'
-  },
-  'Administration': {
-    bg: 'bg-slate-100 dark:bg-slate-800/50',
-    text: 'text-slate-600 dark:text-slate-400',
-    hover: 'hover:bg-slate-50 dark:hover:bg-slate-800/30',
-    gradient: 'from-slate-500 to-gray-600'
-  },
-  'D2C Content': {
+  'D2C Storefront': {
     bg: 'bg-lime-100 dark:bg-lime-900/30',
     text: 'text-lime-600 dark:text-lime-400',
     hover: 'hover:bg-lime-50 dark:hover:bg-lime-900/20',
