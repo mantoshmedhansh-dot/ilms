@@ -85,20 +85,20 @@ export interface NavItem {
   permissions?: string[];
   children?: NavItem[];
   badge?: string;
-  moduleCode?: string;  // Module required for access
-  section?: number;     // Section number for module mapping
+  moduleCode?: string;
+  section?: number;
 }
 
 /**
- * ILMS.AI ERP - CONSOLIDATED 6-MODULE NAVIGATION
+ * ILMS.AI ERP - 7-MODULE NAVIGATION STRUCTURE
  *
- * Module Structure:
  * 1. Core Platform - Dashboard, Administration, Settings
  * 2. OMS & WMS - Orders, Procurement, Inventory, Warehouse, Logistics, Master Data
- * 3. Finance - Accounting, Billing, Tax Compliance, Banking
- * 4. Sales & CX - CRM, Service, D2C Storefront, Marketing
- * 5. AI Insights - Intelligence, Forecasting, S&OP Planning
- * 6. HRMS - Employees, Attendance, Payroll, Performance
+ * 3. Finance - Receivables, Payables, Banking, Accounting, Tax, Assets
+ * 4. Sales & CX - CRM, Sales Channels, Marketing, Service, D2C Storefront
+ * 5. AI Insights - AI Hub, Insights, Reorder, Churn, Slow Moving
+ * 6. S&OP Planning - Forecasting, Supply Planning, Scenarios, Optimization
+ * 7. HRMS - Employees, Attendance, Payroll, Performance
  */
 
 export const navigation: NavItem[] = [
@@ -137,27 +137,11 @@ export const navigation: NavItem[] = [
     permissions: ['ORDERS_VIEW', 'INVENTORY_VIEW'],
     moduleCode: 'oms_wms',
     children: [
-      // Orders & Sales
+      // Orders
       { title: '── Orders ──', href: '#', permissions: ['ORDERS_VIEW'] },
       { title: 'All Orders', href: '/dashboard/orders', icon: ShoppingCart, permissions: ['ORDERS_VIEW'] },
       { title: 'New Order', href: '/dashboard/orders/new', icon: FileInput, permissions: ['ORDERS_CREATE'] },
       { title: 'Picklists', href: '/dashboard/orders/picklists', icon: ClipboardList, permissions: ['ORDERS_VIEW'] },
-
-      // Channels & Distribution
-      { title: '── Channels ──', href: '#', permissions: ['ORDERS_VIEW'] },
-      { title: 'Sales Channels', href: '/dashboard/channels', icon: Network, permissions: ['ORDERS_VIEW'] },
-      { title: 'Marketplaces', href: '/dashboard/channels/marketplaces', icon: Store, permissions: ['ORDERS_VIEW'] },
-      { title: 'Channel Pricing', href: '/dashboard/channels/pricing', icon: DollarSign, permissions: ['ORDERS_VIEW'] },
-      { title: 'Omnichannel (BOPIS)', href: '/dashboard/omnichannel', icon: Store, permissions: ['ORDERS_VIEW'] },
-      { title: 'Dealers', href: '/dashboard/distribution/dealers', icon: Handshake, permissions: ['ORDERS_VIEW'] },
-      { title: 'Franchisees', href: '/dashboard/distribution/franchisees', icon: Building2, permissions: ['ORDERS_VIEW'] },
-      { title: 'Pricing Tiers', href: '/dashboard/distribution/pricing-tiers', icon: Layers, permissions: ['ORDERS_VIEW'] },
-
-      // Promotions
-      { title: '── Promotions ──', href: '#', permissions: ['MARKETING_VIEW'] },
-      { title: 'Promotions', href: '/dashboard/marketing/promotions', icon: BadgePercent, permissions: ['MARKETING_VIEW'] },
-      { title: 'Coupons', href: '/dashboard/marketing/coupons', icon: BadgePercent, permissions: ['MARKETING_VIEW'] },
-      { title: 'Sales Commissions', href: '/dashboard/marketing/commissions', icon: Banknote, permissions: ['MARKETING_VIEW'] },
 
       // Procurement
       { title: '── Procurement ──', href: '#', permissions: ['PROCUREMENT_VIEW'] },
@@ -229,22 +213,22 @@ export const navigation: NavItem[] = [
     permissions: ['FINANCE_VIEW', 'ACCOUNTS_VIEW', 'REPORTS_VIEW'],
     moduleCode: 'finance',
     children: [
-      // Receivables (Order-to-Cash)
+      // Receivables
       { title: '── Receivables ──', href: '#', permissions: ['FINANCE_VIEW'] },
       { title: 'Sales Invoices', href: '/dashboard/billing/invoices', icon: Receipt, permissions: ['FINANCE_VIEW'] },
       { title: 'Credit Notes', href: '/dashboard/billing/credit-notes', icon: FileOutput, permissions: ['FINANCE_VIEW'] },
       { title: 'Payment Receipts', href: '/dashboard/billing/receipts', icon: Banknote, permissions: ['FINANCE_VIEW'] },
 
-      // Payables (Procure-to-Pay)
+      // Payables
       { title: '── Payables ──', href: '#', permissions: ['FINANCE_VIEW'] },
       { title: 'Vendor Invoices', href: '/dashboard/procurement/vendor-invoices', icon: FileInput, permissions: ['PROCUREMENT_VIEW'] },
       { title: 'Vendor Payments', href: '/dashboard/finance/vendor-payments', icon: CreditCard, permissions: ['FINANCE_VIEW'] },
 
-      // Banking & Cash
+      // Banking
       { title: '── Banking ──', href: '#', permissions: ['BANK_RECON_VIEW'] },
       { title: 'Bank Reconciliation', href: '/dashboard/finance/bank-reconciliation', icon: Landmark, permissions: ['BANK_RECON_VIEW'] },
 
-      // Core Accounting (Double-Entry)
+      // Accounting
       { title: '── Accounting ──', href: '#', permissions: ['ACCOUNTS_VIEW'] },
       { title: 'Chart of Accounts', href: '/dashboard/finance/chart-of-accounts', icon: FolderTree, permissions: ['ACCOUNTS_VIEW'] },
       { title: 'Journal Entries', href: '/dashboard/finance/journal-entries', icon: FileText, permissions: ['JOURNALS_VIEW'] },
@@ -253,7 +237,7 @@ export const navigation: NavItem[] = [
       { title: 'Cost Centers', href: '/dashboard/finance/cost-centers', icon: Building, permissions: ['COST_CENTERS_VIEW'] },
       { title: 'Financial Periods', href: '/dashboard/finance/periods', icon: Calendar, permissions: ['PERIODS_VIEW'] },
 
-      // Financial Reports
+      // Reports
       { title: '── Reports ──', href: '#', permissions: ['REPORTS_VIEW'] },
       { title: 'Trial Balance', href: '/dashboard/reports/trial-balance', icon: BarChart3, permissions: ['REPORTS_VIEW'] },
       { title: 'Profit & Loss', href: '/dashboard/reports/profit-loss', icon: TrendingUp, permissions: ['REPORTS_VIEW'] },
@@ -261,7 +245,7 @@ export const navigation: NavItem[] = [
       { title: 'Channel P&L', href: '/dashboard/reports/channel-pl', icon: Network, permissions: ['REPORTS_VIEW'] },
       { title: 'Channel Balance Sheet', href: '/dashboard/reports/channel-balance-sheet', icon: Landmark, permissions: ['REPORTS_VIEW'] },
 
-      // Tax Compliance (GST/TDS)
+      // Tax Compliance
       { title: '── Tax Compliance ──', href: '#', permissions: ['GST_VIEW'] },
       { title: 'GST Filing Dashboard', href: '/dashboard/finance/gst-filing', icon: FileCheck, permissions: ['GST_VIEW'] },
       { title: 'GSTR-1 (Outward)', href: '/dashboard/finance/gstr1', icon: FileCheck, permissions: ['GST_VIEW'] },
@@ -293,7 +277,24 @@ export const navigation: NavItem[] = [
       { title: 'Call Center', href: '/dashboard/crm/call-center', icon: Phone, permissions: ['CRM_VIEW'] },
       { title: 'Abandoned Carts', href: '/dashboard/crm/abandoned-carts', icon: ShoppingCart, permissions: ['CRM_VIEW'] },
 
-      // Service & Support
+      // Sales Channels
+      { title: '── Sales Channels ──', href: '#', permissions: ['ORDERS_VIEW'] },
+      { title: 'Sales Channels', href: '/dashboard/channels', icon: Network, permissions: ['ORDERS_VIEW'] },
+      { title: 'Marketplaces', href: '/dashboard/channels/marketplaces', icon: Store, permissions: ['ORDERS_VIEW'] },
+      { title: 'Channel Pricing', href: '/dashboard/channels/pricing', icon: DollarSign, permissions: ['ORDERS_VIEW'] },
+      { title: 'Omnichannel (BOPIS)', href: '/dashboard/omnichannel', icon: Store, permissions: ['ORDERS_VIEW'] },
+      { title: 'Dealers', href: '/dashboard/distribution/dealers', icon: Handshake, permissions: ['ORDERS_VIEW'] },
+      { title: 'Franchisees', href: '/dashboard/distribution/franchisees', icon: Building2, permissions: ['ORDERS_VIEW'] },
+      { title: 'Pricing Tiers', href: '/dashboard/distribution/pricing-tiers', icon: Layers, permissions: ['ORDERS_VIEW'] },
+
+      // Marketing
+      { title: '── Marketing ──', href: '#', permissions: ['MARKETING_VIEW'] },
+      { title: 'Campaigns', href: '/dashboard/marketing/campaigns', icon: Megaphone, permissions: ['MARKETING_VIEW'] },
+      { title: 'Promotions', href: '/dashboard/marketing/promotions', icon: BadgePercent, permissions: ['MARKETING_VIEW'] },
+      { title: 'Coupons', href: '/dashboard/marketing/coupons', icon: BadgePercent, permissions: ['MARKETING_VIEW'] },
+      { title: 'Sales Commissions', href: '/dashboard/marketing/commissions', icon: Banknote, permissions: ['MARKETING_VIEW'] },
+
+      // Service
       { title: '── Service ──', href: '#', permissions: ['SERVICE_VIEW'] },
       { title: 'Service Requests', href: '/dashboard/service/requests', icon: Headphones, permissions: ['SERVICE_VIEW'] },
       { title: 'New Request', href: '/dashboard/service/requests/new', icon: FileInput, permissions: ['SERVICE_CREATE'] },
@@ -303,7 +304,7 @@ export const navigation: NavItem[] = [
       { title: 'Technicians', href: '/dashboard/service/technicians', icon: HardHat, permissions: ['SERVICE_VIEW'] },
       { title: 'Escalations', href: '/dashboard/crm/escalations', icon: AlertTriangle, permissions: ['SERVICE_VIEW'] },
 
-      // D2C Content (CMS)
+      // D2C Storefront
       { title: '── D2C Storefront ──', href: '#', permissions: ['CMS_VIEW'] },
       { title: 'CMS Overview', href: '/dashboard/cms', icon: Globe, permissions: ['CMS_VIEW'] },
       { title: 'Header Navigation', href: '/dashboard/cms/navigation', icon: Menu, permissions: ['CMS_VIEW'] },
@@ -331,17 +332,21 @@ export const navigation: NavItem[] = [
     badge: 'AI',
     moduleCode: 'ai_insights',
     children: [
-      // Intelligence
-      { title: '── Intelligence ──', href: '#', permissions: [] },
       { title: 'AI Hub', href: '/dashboard/ai', icon: Lightbulb, permissions: [] },
       { title: 'Insights Dashboard', href: '/dashboard/insights', icon: TrendingUp, permissions: [] },
       { title: 'Reorder Suggestions', href: '/dashboard/insights/reorder', icon: PackageSearch, permissions: [] },
       { title: 'Churn Risk Analysis', href: '/dashboard/insights/churn-risk', icon: AlertTriangle, permissions: [] },
       { title: 'Slow Moving Stock', href: '/dashboard/insights/slow-moving', icon: Clock, permissions: [] },
-      { title: 'Campaigns', href: '/dashboard/marketing/campaigns', icon: Megaphone, permissions: ['MARKETING_VIEW'] },
+    ],
+  },
 
-      // Planning (S&OP)
-      { title: '── Planning (S&OP) ──', href: '#', permissions: ['REPORTS_VIEW'] },
+  // ==================== 6. S&OP PLANNING ====================
+  {
+    title: 'S&OP Planning',
+    icon: Target,
+    permissions: ['REPORTS_VIEW', 'INVENTORY_VIEW'],
+    moduleCode: 'snop',
+    children: [
       { title: 'S&OP Dashboard', href: '/dashboard/snop', icon: Target, permissions: ['REPORTS_VIEW'] },
       { title: 'Demand Forecasting', href: '/dashboard/snop/forecasts', icon: LineChart, permissions: ['REPORTS_VIEW'] },
       { title: 'Supply Planning', href: '/dashboard/snop/supply-plans', icon: GitBranch, permissions: ['INVENTORY_VIEW'] },
@@ -350,7 +355,7 @@ export const navigation: NavItem[] = [
     ],
   },
 
-  // ==================== 6. HRMS ====================
+  // ==================== 7. HRMS ====================
   {
     title: 'HRMS',
     icon: Briefcase,

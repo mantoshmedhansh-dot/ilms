@@ -233,8 +233,8 @@ async def seed_default_modules():
 
             logger.info("Seeding default ERP modules...")
 
-            # ILMS.AI 6-Module Structure (Phase 4)
-            # Restructured from 10 modules to 6 for simpler pricing and UX
+            # ILMS.AI 7-Module Structure (Phase 4)
+            # Restructured for cleaner separation of concerns
             default_modules = [
                 {
                     "code": "core",
@@ -248,7 +248,7 @@ async def seed_default_modules():
                 {
                     "code": "oms_wms",
                     "name": "OMS & WMS",
-                    "description": "Order management, warehouse operations, fulfillment, procurement, inventory, logistics",
+                    "description": "Order management, procurement, inventory, warehouse operations, logistics",
                     "category": "operations",
                     "price_monthly": 19999.00,
                     "display_order": 2
@@ -264,7 +264,7 @@ async def seed_default_modules():
                 {
                     "code": "sales_cx",
                     "name": "Sales & Customer Experience",
-                    "description": "CRM, service management, D2C storefront, marketing, campaigns, customer support",
+                    "description": "CRM, sales channels, marketing, service management, D2C storefront",
                     "category": "sales",
                     "price_monthly": 12999.00,
                     "display_order": 4
@@ -272,10 +272,18 @@ async def seed_default_modules():
                 {
                     "code": "ai_insights",
                     "name": "AI Insights",
-                    "description": "Demand forecasting, S&OP, AI analytics, reorder suggestions, churn analysis",
+                    "description": "AI analytics, reorder suggestions, churn analysis, slow moving stock insights",
                     "category": "analytics",
-                    "price_monthly": 9999.00,
+                    "price_monthly": 7999.00,
                     "display_order": 5
+                },
+                {
+                    "code": "snop",
+                    "name": "S&OP Planning",
+                    "description": "Demand forecasting, supply planning, scenario analysis, inventory optimization",
+                    "category": "planning",
+                    "price_monthly": 9999.00,
+                    "display_order": 6
                 },
                 {
                     "code": "hrms",
@@ -283,7 +291,7 @@ async def seed_default_modules():
                     "description": "Employee management, attendance, payroll, leave management, performance",
                     "category": "hr",
                     "price_monthly": 6999.00,
-                    "display_order": 6
+                    "display_order": 7
                 }
             ]
 
