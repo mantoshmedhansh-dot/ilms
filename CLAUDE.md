@@ -39,11 +39,11 @@
 - **Account:** mantoshmedhansh-dot
 
 ### Render (Backend API)
-- **Dashboard:** https://dashboard.render.com/web/srv-d611qb7pm1nc73c94ar0
-- **Environment:** https://dashboard.render.com/web/srv-d611qb7pm1nc73c94ar0/env
-- **Service ID:** srv-d611qb7pm1nc73c94ar0
-- **Production URL:** https://ilms-z6dz.onrender.com
-- **API Docs:** https://ilms-z6dz.onrender.com/docs
+- **Dashboard:** https://dashboard.render.com/web/srv-d67llp8boq4c73825ub0
+- **Environment:** https://dashboard.render.com/web/srv-d67llp8boq4c73825ub0/env
+- **Service ID:** srv-d67llp8boq4c73825ub0
+- **Production URL:** https://ilms-api-fq4g.onrender.com
+- **API Docs:** https://ilms-api-fq4g.onrender.com/docs
 - **Region:** Singapore
 
 ### Supabase (Database)
@@ -93,12 +93,12 @@ npx vercel --prod
 ### Deploy Backend (Manual)
 ```bash
 curl -X POST -H "Authorization: Bearer $RENDER_API_KEY" \
-  "https://api.render.com/v1/services/srv-d611qb7pm1nc73c94ar0/deploys"
+  "https://api.render.com/v1/services/srv-d67llp8boq4c73825ub0/deploys"
 ```
 
 ### Check Backend Health
 ```bash
-curl https://ilms-z6dz.onrender.com/health
+curl https://ilms-api-fq4g.onrender.com/health
 ```
 
 ---
@@ -107,7 +107,7 @@ curl https://ilms-z6dz.onrender.com/health
 
 ### Frontend (.env.local)
 ```
-NEXT_PUBLIC_API_URL=https://ilms-z6dz.onrender.com
+NEXT_PUBLIC_API_URL=https://ilms-api-fq4g.onrender.com
 ```
 
 ### Backend (Render Environment)
@@ -133,7 +133,7 @@ NEXT_PUBLIC_API_URL=https://ilms-z6dz.onrender.com
 1. **Run Python syntax check:** `python -m py_compile app/main.py`
 2. **Run tests if available:** `pytest app/tests/`
 3. **Verify imports:** `python -c "from app.main import app"`
-4. **Check API endpoint exists:** `curl -s https://ilms-z6dz.onrender.com/openapi.json | jq '.paths | keys[]' | grep "endpoint-name"`
+4. **Check API endpoint exists:** `curl -s https://ilms-api-fq4g.onrender.com/openapi.json | jq '.paths | keys[]' | grep "endpoint-name"`
 
 ### After Pushing
 1. **Monitor Vercel deployment** - Wait for build to succeed before claiming "done"
@@ -175,3 +175,5 @@ postgresql+psycopg://postgres.dhosrcfdjyuxozcxfbyh:Aquapurite2026@aws-1-ap-south
 # Root directory fix verified: Wed Feb  4 19:33:31 IST 2026
 
 # API URL env var added: Wed Feb  4 20:22:54 IST 2026
+
+# New Render service (ilms-api / srv-d67llp8boq4c73825ub0) created: Fri Feb 13 22:40:00 IST 2026

@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from pydantic import field_validator
+from pydantic import computed_field
 from typing import Optional, Union
 from functools import lru_cache
 import json
@@ -29,16 +29,9 @@ class Settings(BaseSettings):
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = False
 
-    # CORS - accepts JSON string, comma-separated, or list
-    # Reads from CORS_ORIGINS or ALLOWED_ORIGINS env var
-    CORS_ORIGINS: list[str] = [
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://localhost:5173",
-        "https://frontend-ilms.vercel.app",
-        "https://frontend-git-main-ilms.vercel.app",
-        "*",  # Allow all in production (can be restricted via env var)
-    ]
+    # CORS - stored as string to avoid pydantic-settings JSON parsing issues
+    # Accepts JSON array string or comma-separated origins
+    CORS_ORIGINS: str = "*"
 
     # Email/SMTP Settings (Gmail)
     SMTP_HOST: str = "smtp.gmail.com"
@@ -116,15 +109,18 @@ class Settings(BaseSettings):
     TURNSTILE_SECRET_KEY: str = ""  # Cloudflare Turnstile secret key for server verification
     TURNSTILE_ENABLED: bool = True  # Set to False to disable CAPTCHA verification
 
-    @field_validator('CORS_ORIGINS', mode='before')
-    @classmethod
-    def parse_cors_origins(cls, v):
-        if isinstance(v, str):
-            try:
-                return json.loads(v)
-            except json.JSONDecodeError:
-                return [origin.strip() for origin in v.split(',')]
-        return v
+    @computed_field
+    @property
+    def cors_origins_list(self) -> list[str]:
+        """Parse CORS_ORIGINS string into a list. Handles JSON arrays and comma-separated values."""
+        v = self.CORS_ORIGINS
+        try:
+            result = json.loads(v)
+            if isinstance(result, list):
+                return result
+        except (json.JSONDecodeError, TypeError):
+            pass
+        return [origin.strip() for origin in v.split(',') if origin.strip()]
 
     class Config:
         env_file = ".env"

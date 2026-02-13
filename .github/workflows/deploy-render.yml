@@ -14,4 +14,4 @@ jobs:
           curl -X POST \
             -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
             -H "Content-Type: application/json" \
-            "https://api.render.com/v1/services/srv-d611qb7pm1nc73c94ar0/deploys"
+            "https://api.render.com/v1/services/srv-d67llp8boq4c73825ub0/deploys"
