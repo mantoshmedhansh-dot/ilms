@@ -70,7 +70,7 @@ from app.schemas.snop import (
     QuickWhatIfRequest,
     ScenarioCompareAdvancedRequest,
 )
-from app.services.snop import SNOPService, DemandPlannerService, MLForecaster, DemandClassifier, DemandSensor, SupplyOptimizer, ScenarioEngine
+from app.services.snop import SNOPService, DemandPlannerService, MLForecaster, DemandClassifier, DemandSensor, SupplyOptimizer, ScenarioEngine, PlanningAgents
 from app.core.module_decorators import require_module
 
 
@@ -1457,3 +1457,108 @@ async def detect_pos_signals(
             for s in signals
         ],
     }
+
+
+# ==================== AI Planning Agents ====================
+
+@router.get("/agents/status")
+@require_module("scm_ai")
+async def get_agents_status(
+    db: DB,
+    current_user: CurrentUser,
+):
+    """
+    Get status of all AI planning agents.
+
+    Returns each agent's readiness, data sources, and capabilities.
+    """
+    agents = PlanningAgents(db)
+    return await agents.get_agent_status()
+
+
+@router.get("/agents/alert-center")
+@require_module("scm_ai")
+async def get_alert_center(
+    db: DB,
+    current_user: CurrentUser,
+    include_exceptions: bool = Query(True),
+    include_reorder: bool = Query(True),
+    include_bias: bool = Query(True),
+    max_alerts: int = Query(50, ge=1, le=200),
+):
+    """
+    Get aggregated alert center from all AI agents.
+
+    Runs all active agents and returns prioritized, deduplicated alerts
+    with severity scoring and recommended actions.
+    """
+    agents = PlanningAgents(db)
+
+    return await agents.get_alert_center(
+        include_exceptions=include_exceptions,
+        include_reorder=include_reorder,
+        include_bias=include_bias,
+        max_alerts=max_alerts,
+    )
+
+
+@router.post("/agents/run-exceptions")
+@require_module("scm_ai")
+async def run_exception_agent(
+    db: DB,
+    current_user: CurrentUser,
+    safety_stock_threshold: float = Query(1.0, ge=0.5, le=2.0),
+    overstock_days: int = Query(90, ge=30, le=365),
+    gap_pct_threshold: float = Query(10.0, ge=1, le=50),
+):
+    """
+    Run the Exception Detection Agent.
+
+    Scans for stockout risks, overstock situations, and demand-supply gaps.
+    """
+    agents = PlanningAgents(db)
+
+    return await agents.run_exception_agent(
+        safety_stock_threshold=safety_stock_threshold,
+        overstock_days_threshold=overstock_days,
+        gap_pct_threshold=gap_pct_threshold,
+    )
+
+
+@router.post("/agents/run-reorder")
+@require_module("scm_ai")
+async def run_reorder_agent(
+    db: DB,
+    current_user: CurrentUser,
+    lead_time_buffer_pct: float = Query(20.0, ge=0, le=100),
+):
+    """
+    Run the Reorder Agent.
+
+    Auto-generates purchase order suggestions for products below reorder point.
+    """
+    agents = PlanningAgents(db)
+
+    return await agents.run_reorder_agent(
+        lead_time_buffer_pct=lead_time_buffer_pct,
+    )
+
+
+@router.post("/agents/run-bias")
+@require_module("scm_ai")
+async def run_bias_agent(
+    db: DB,
+    current_user: CurrentUser,
+    bias_threshold_pct: float = Query(10.0, ge=1, le=50),
+):
+    """
+    Run the Forecast Bias Agent.
+
+    Analyzes forecast accuracy to detect systematic bias, compare algorithms,
+    and suggest corrections.
+    """
+    agents = PlanningAgents(db)
+
+    return await agents.run_bias_agent(
+        bias_threshold_pct=bias_threshold_pct,
+    )

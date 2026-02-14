@@ -423,6 +423,7 @@ export const navigation: NavItem[] = [
       { title: 'Supply Planning', href: '/dashboard/snop/supply-plans', icon: GitBranch, permissions: ['INVENTORY_VIEW'] },
       { title: 'Scenario Analysis', href: '/dashboard/snop/scenarios', icon: Layers, permissions: ['REPORTS_VIEW'] },
       { title: 'Inventory Optimization', href: '/dashboard/snop/inventory-optimization', icon: TrendingUp, permissions: ['INVENTORY_VIEW'] },
+      { title: 'AI Command Center', href: '/dashboard/snop/ai-agents', icon: Brain, permissions: ['REPORTS_VIEW'] },
     ],
   },
 
