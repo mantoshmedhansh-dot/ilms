@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { setActiveSubdomain, setTenantContext } from '@/lib/api/client';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -33,16 +34,34 @@ export default function TenantLayout({
       }
 
       try {
+        // Set active subdomain for this tab immediately
+        setActiveSubdomain(tenant);
+
         const response = await fetch(
           `${API_BASE_URL}/api/v1/onboarding/tenant-lookup?subdomain=${tenant}`
         );
 
         if (response.ok) {
           const data: TenantInfo = await response.json();
-          // Store tenant context in localStorage
-          localStorage.setItem('tenant_id', data.tenant_id);
-          localStorage.setItem('tenant_subdomain', data.subdomain);
+
+          // Store scoped + generic tenant context
+          setTenantContext(data.tenant_id, data.subdomain);
+          localStorage.setItem(`tenant_name:${data.subdomain}`, data.name);
           localStorage.setItem('tenant_name', data.name);
+
+          // Migrate: if generic tokens exist for this subdomain, copy to scoped keys
+          const existingSubdomain = localStorage.getItem('tenant_subdomain');
+          const existingToken = localStorage.getItem('access_token');
+          if (existingSubdomain === data.subdomain && existingToken) {
+            if (!localStorage.getItem(`access_token:${data.subdomain}`)) {
+              localStorage.setItem(`access_token:${data.subdomain}`, existingToken);
+            }
+            const existingRefresh = localStorage.getItem('refresh_token');
+            if (existingRefresh && !localStorage.getItem(`refresh_token:${data.subdomain}`)) {
+              localStorage.setItem(`refresh_token:${data.subdomain}`, existingRefresh);
+            }
+          }
+
           setIsLoading(false);
         } else {
           const errorData = await response.json();

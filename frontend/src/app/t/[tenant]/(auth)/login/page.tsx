@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { authApi } from '@/lib/api';
-import { setTokens, getAccessToken } from '@/lib/api/client';
+import { setTokens, getAccessToken, getTenantId } from '@/lib/api/client';
 import { useAuth } from '@/providers';
 
 const loginSchema = z.object({
@@ -34,13 +34,13 @@ export default function TenantLoginPage() {
   const hasRedirected = useRef(false);
 
   useEffect(() => {
-    // Get tenant name from localStorage (set by layout)
-    const name = localStorage.getItem('tenant_name');
+    // Get tenant name from localStorage (scoped first, then generic)
+    const name = localStorage.getItem(`tenant_name:${tenant}`) || localStorage.getItem('tenant_name');
     if (name) setTenantName(name);
 
-    // Check if user is already logged in
+    // Check if user is already logged in (using scoped functions)
     const token = getAccessToken();
-    const tenantId = localStorage.getItem('tenant_id');
+    const tenantId = getTenantId();
 
     if (token && tenantId) {
       // User has valid session, redirect to dashboard
@@ -53,7 +53,7 @@ export default function TenantLoginPage() {
     }
 
     setIsCheckingAuth(false);
-  }, []);
+  }, [tenant]);
 
   // Also check auth state from provider
   useEffect(() => {

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { getAccessToken, getTenantId } from '@/lib/api/client';
 
 export interface Module {
   code: string;
@@ -21,8 +22,8 @@ export function useModules() {
       try {
         const response = await fetch('/api/v1/modules/subscriptions', {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-            'X-Tenant-ID': localStorage.getItem('tenant_id') || '',
+            'Authorization': `Bearer ${getAccessToken() || ''}`,
+            'X-Tenant-ID': getTenantId(),
           }
         });
 

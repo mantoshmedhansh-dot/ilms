@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import Link from 'next/link';
-import { Search } from 'lucide-react';
+import { Search, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
@@ -88,13 +89,14 @@ export default function PlatformClientsPage() {
                 <TableHead>Modules</TableHead>
                 <TableHead>Monthly Cost</TableHead>
                 <TableHead>Onboarded</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
-                    {Array.from({ length: 6 }).map((_, j) => (
+                    {Array.from({ length: 7 }).map((_, j) => (
                       <TableCell key={j}>
                         <Skeleton className="h-4 w-20" />
                       </TableCell>
@@ -121,11 +123,29 @@ export default function PlatformClientsPage() {
                     <TableCell className="text-muted-foreground">
                       {format(new Date(tenant.onboarded_at), 'MMM dd, yyyy')}
                     </TableCell>
+                    <TableCell className="text-right">
+                      {(tenant.status === 'active' || tenant.status === 'pending_setup') && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          asChild
+                        >
+                          <a
+                            href={`/t/${tenant.subdomain}/login`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+                            Dashboard
+                          </a>
+                        </Button>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                     No clients found
                   </TableCell>
                 </TableRow>

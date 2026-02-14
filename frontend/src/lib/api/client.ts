@@ -2,9 +2,31 @@ import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'ax
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-// Get tenant ID from localStorage (set by tenant provider from URL path)
+// --- Multi-tenant session support ---
+// Each browser tab tracks its "active subdomain" in sessionStorage (per-tab).
+// Tokens and tenant context are stored in localStorage with subdomain-scoped keys
+// (e.g., access_token:mantosh, tenant_id:aquapurite) so multiple tenant sessions
+// can coexist. Generic (unscoped) keys are also maintained for backward compatibility.
+
+const getActiveSubdomain = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  return sessionStorage.getItem('active_subdomain') || null;
+};
+
+const setActiveSubdomain = (subdomain: string): void => {
+  if (typeof window !== 'undefined') {
+    sessionStorage.setItem('active_subdomain', subdomain);
+  }
+};
+
+// Get tenant ID — scoped by active subdomain, fallback to generic
 const getTenantId = (): string => {
   if (typeof window !== 'undefined') {
+    const subdomain = getActiveSubdomain();
+    if (subdomain) {
+      const scoped = localStorage.getItem(`tenant_id:${subdomain}`);
+      if (scoped) return scoped;
+    }
     return localStorage.getItem('tenant_id') || '';
   }
   return '';
@@ -36,25 +58,64 @@ if (typeof window !== 'undefined') {
   console.log('API Base URL:', API_BASE_URL);
 }
 
-// Token management
+// Token management — scoped by active subdomain
 const getAccessToken = (): string | null => {
   if (typeof window === 'undefined') return null;
+  const subdomain = getActiveSubdomain();
+  if (subdomain) {
+    const scoped = localStorage.getItem(`access_token:${subdomain}`);
+    if (scoped) return scoped;
+  }
   return localStorage.getItem('access_token');
 };
 
 const getRefreshToken = (): string | null => {
   if (typeof window === 'undefined') return null;
+  const subdomain = getActiveSubdomain();
+  if (subdomain) {
+    const scoped = localStorage.getItem(`refresh_token:${subdomain}`);
+    if (scoped) return scoped;
+  }
   return localStorage.getItem('refresh_token');
 };
 
 const setTokens = (accessToken: string, refreshToken: string): void => {
+  const subdomain = getActiveSubdomain();
+  if (subdomain) {
+    localStorage.setItem(`access_token:${subdomain}`, accessToken);
+    localStorage.setItem(`refresh_token:${subdomain}`, refreshToken);
+  }
+  // Also write generic keys for backward compatibility
   localStorage.setItem('access_token', accessToken);
   localStorage.setItem('refresh_token', refreshToken);
 };
 
 const clearTokens = (): void => {
+  const subdomain = getActiveSubdomain();
+  if (subdomain) {
+    localStorage.removeItem(`access_token:${subdomain}`);
+    localStorage.removeItem(`refresh_token:${subdomain}`);
+  }
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
+};
+
+// Store tenant context — scoped + generic
+const setTenantContext = (tenantId: string, subdomain: string): void => {
+  if (typeof window === 'undefined') return;
+  const active = getActiveSubdomain() || subdomain;
+  if (active) {
+    localStorage.setItem(`tenant_id:${active}`, tenantId);
+    localStorage.setItem(`tenant_subdomain:${active}`, subdomain);
+  }
+  localStorage.setItem('tenant_id', tenantId);
+  localStorage.setItem('tenant_subdomain', subdomain);
+};
+
+// Get the subdomain for redirect purposes (prefers sessionStorage, falls back to generic)
+const getRedirectSubdomain = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  return getActiveSubdomain() || localStorage.getItem('tenant_subdomain');
 };
 
 // Request interceptor - add auth token
@@ -118,11 +179,8 @@ apiClient.interceptors.response.use(
           setTokens(access_token, refresh_token);
 
           // Update tenant context from refresh response
-          if (tenant_id) {
-            localStorage.setItem('tenant_id', tenant_id);
-          }
-          if (tenant_subdomain) {
-            localStorage.setItem('tenant_subdomain', tenant_subdomain);
+          if (tenant_id && tenant_subdomain) {
+            setTenantContext(tenant_id, tenant_subdomain);
           }
 
           processQueue(null, access_token);
@@ -135,7 +193,7 @@ apiClient.interceptors.response.use(
 
           // Redirect to tenant-specific login if tenant is known
           if (typeof window !== 'undefined') {
-            const subdomain = localStorage.getItem('tenant_subdomain');
+            const subdomain = getRedirectSubdomain();
             if (subdomain) {
               window.location.href = `/t/${subdomain}/login`;
             } else {
@@ -150,7 +208,7 @@ apiClient.interceptors.response.use(
       } else {
         clearTokens();
         if (typeof window !== 'undefined') {
-          const subdomain = localStorage.getItem('tenant_subdomain');
+          const subdomain = getRedirectSubdomain();
           if (subdomain) {
             window.location.href = `/t/${subdomain}/login`;
           } else {
@@ -164,5 +222,14 @@ apiClient.interceptors.response.use(
   }
 );
 
-export { setTokens, clearTokens, getAccessToken };
+export {
+  setTokens,
+  clearTokens,
+  getAccessToken,
+  getActiveSubdomain,
+  setActiveSubdomain,
+  getTenantId,
+  setTenantContext,
+  getRedirectSubdomain,
+};
 export default apiClient;

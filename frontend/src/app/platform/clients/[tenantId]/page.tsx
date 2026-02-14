@@ -8,6 +8,7 @@ import {
   Shield,
   ShieldOff,
   Loader2,
+  ExternalLink,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -139,6 +140,18 @@ export default function TenantDetailPage() {
           </div>
         </div>
         <div className="flex gap-2">
+          {(tenant.status === 'active' || tenant.status === 'pending_setup') && (
+            <Button variant="outline" size="sm" asChild>
+              <a
+                href={`/t/${tenant.subdomain}/login`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Open Dashboard
+              </a>
+            </Button>
+          )}
           {canActivate && (
             <AlertDialog>
               <AlertDialogTrigger asChild>

@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sidebar, Header } from '@/components/layout';
 import { useAuth } from '@/providers';
-import { getAccessToken } from '@/lib/api/client';
+import { getAccessToken, getRedirectSubdomain } from '@/lib/api/client';
 
 export default function DashboardLayout({
   children,
@@ -29,17 +29,15 @@ export default function DashboardLayout({
 
       // Check if we have tokens but auth still failed (API issue)
       const token = getAccessToken();
-      const tenantId = localStorage.getItem('tenant_id');
 
       console.log('[DashboardLayout] Auth failed', {
         hasToken: !!token,
-        hasTenantId: !!tenantId,
         isAuthenticated,
         isLoading,
       });
 
       // Use full page reload to avoid React state issues
-      const subdomain = localStorage.getItem('tenant_subdomain');
+      const subdomain = getRedirectSubdomain();
       if (subdomain) {
         window.location.href = `/t/${subdomain}/login`;
       } else {

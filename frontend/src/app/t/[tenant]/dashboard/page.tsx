@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-import { getAccessToken } from '@/lib/api/client';
+import { getAccessToken, getTenantId } from '@/lib/api/client';
 
 export default function TenantDashboardRedirect() {
   const params = useParams();
@@ -11,8 +11,9 @@ export default function TenantDashboardRedirect() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // sessionStorage.active_subdomain is already set by the tenant layout
     const token = getAccessToken();
-    const tenantId = localStorage.getItem('tenant_id');
+    const tenantId = getTenantId();
 
     if (!token) {
       // Not logged in, redirect to login using full page reload
@@ -22,13 +23,13 @@ export default function TenantDashboardRedirect() {
 
     if (!tenantId) {
       // Tenant context lost, redirect to tenant login to restore it
-      console.warn('[TenantDashboard] No tenant_id in localStorage, redirecting to login');
+      console.warn('[TenantDashboard] No tenant_id, redirecting to login');
       window.location.href = `/t/${tenant}/login`;
       return;
     }
 
     // Use full page reload to ensure clean auth state
-    // This avoids React state timing issues with client-side navigation
+    // sessionStorage.active_subdomain persists across same-tab navigations
     window.location.href = '/dashboard';
   }, [tenant]);
 

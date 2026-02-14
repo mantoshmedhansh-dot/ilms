@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState, useCallback, ReactNode 
 import { useRouter } from 'next/navigation';
 import { User, UserPermissions, LoginRequest } from '@/types';
 import { authApi } from '@/lib/api';
-import { getAccessToken } from '@/lib/api/client';
+import { getAccessToken, getTenantId, getRedirectSubdomain } from '@/lib/api/client';
 
 interface AuthContextType {
   user: User | null;
@@ -32,8 +32,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUserAndPermissions = useCallback(async () => {
     try {
       const token = getAccessToken();
-      const tenantId = localStorage.getItem('tenant_id');
-      const tenantSubdomain = localStorage.getItem('tenant_subdomain');
+      const tenantId = getTenantId();
+      const tenantSubdomain = getRedirectSubdomain();
 
       console.log('[Auth] Starting auth check', {
         hasToken: !!token,
@@ -137,7 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPermissions(null);
       setIsLoading(false);
       // Redirect to tenant-specific login if tenant is known
-      const subdomain = typeof window !== 'undefined' ? localStorage.getItem('tenant_subdomain') : null;
+      const subdomain = typeof window !== 'undefined' ? getRedirectSubdomain() : null;
       if (subdomain) {
         router.push(`/t/${subdomain}/login`);
       } else {

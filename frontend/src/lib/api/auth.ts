@@ -1,16 +1,13 @@
-import apiClient, { setTokens, clearTokens } from './client';
+import apiClient, { setTokens, clearTokens, setTenantContext } from './client';
 import { LoginRequest, LoginResponse, User, UserPermissions, Role } from '@/types';
 
 export const authApi = {
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
     const { data } = await apiClient.post<LoginResponse>('/auth/login', credentials);
     setTokens(data.access_token, data.refresh_token);
-    // Store tenant context from login response - critical for API calls
-    if (data.tenant_id) {
-      localStorage.setItem('tenant_id', data.tenant_id);
-    }
-    if (data.tenant_subdomain) {
-      localStorage.setItem('tenant_subdomain', data.tenant_subdomain);
+    // Store tenant context (scoped + generic via setTenantContext)
+    if (data.tenant_id && data.tenant_subdomain) {
+      setTenantContext(data.tenant_id, data.tenant_subdomain);
     }
     return data;
   },
@@ -61,12 +58,9 @@ export const authApi = {
       refresh_token: refreshToken,
     });
     setTokens(data.access_token, data.refresh_token);
-    // Update tenant context from refresh response
-    if (data.tenant_id) {
-      localStorage.setItem('tenant_id', data.tenant_id);
-    }
-    if (data.tenant_subdomain) {
-      localStorage.setItem('tenant_subdomain', data.tenant_subdomain);
+    // Update tenant context (scoped + generic)
+    if (data.tenant_id && data.tenant_subdomain) {
+      setTenantContext(data.tenant_id, data.tenant_subdomain);
     }
     return data;
   },
