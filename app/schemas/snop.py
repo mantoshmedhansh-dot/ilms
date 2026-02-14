@@ -717,3 +717,26 @@ class DemandSensingAnalysis(BaseModel):
 
     # Recommendations
     recommendations: List[str]
+
+
+# ==================== SUPPLY OPTIMIZER SCHEMAS ====================
+
+class SupplyOptimizeAdvancedRequest(BaseModel):
+    """Request for constraint-based supply optimization."""
+    forecast_id: uuid.UUID
+    max_production_capacity: float = Field(1000, ge=0)
+    max_budget: float = Field(1_000_000, ge=0)
+    min_order_qty: float = Field(10, ge=0)
+    max_lead_time_days: int = Field(30, ge=1)
+    target_service_level: float = Field(0.95, ge=0.5, le=0.999)
+    holding_cost_per_unit: float = Field(0.5, ge=0)
+    stockout_penalty_per_unit: float = Field(50, ge=0)
+    production_cost_per_unit: float = Field(100, ge=0)
+    procurement_cost_per_unit: float = Field(120, ge=0)
+
+
+class MultiSourceRequest(BaseModel):
+    """Request for multi-source procurement analysis."""
+    product_id: uuid.UUID
+    required_qty: float = Field(..., ge=1)
+    max_lead_time_days: int = Field(30, ge=1)

@@ -62,8 +62,10 @@ from app.schemas.snop import (
     DemandSignalUpdate,
     DemandSignalResponse,
     DemandSensingAnalysis,
+    SupplyOptimizeAdvancedRequest,
+    MultiSourceRequest,
 )
-from app.services.snop import SNOPService, DemandPlannerService, MLForecaster, DemandClassifier, DemandSensor
+from app.services.snop import SNOPService, DemandPlannerService, MLForecaster, DemandClassifier, DemandSensor, SupplyOptimizer
 from app.core.module_decorators import require_module
 
 
@@ -595,6 +597,104 @@ async def optimize_supply_plan(
         }
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.post("/supply-plan/optimize-advanced")
+@require_module("scm_ai")
+async def optimize_supply_advanced(
+    request: SupplyOptimizeAdvancedRequest,
+    db: DB,
+    current_user: CurrentUser,
+):
+    """
+    Run constraint-based supply optimization.
+
+    Uses linear programming (scipy) when available, with fallback to heuristic solver.
+    Constraints: capacity, budget, MOQ, lead time, service level target.
+    Minimizes total cost (production + procurement + holding + stockout penalty).
+    """
+    optimizer = SupplyOptimizer(db)
+
+    try:
+        result = await optimizer.optimize_supply(
+            forecast_id=request.forecast_id,
+            constraints={
+                "max_production_capacity": request.max_production_capacity,
+                "max_budget": request.max_budget,
+                "min_order_qty": request.min_order_qty,
+                "max_lead_time_days": request.max_lead_time_days,
+                "target_service_level": request.target_service_level,
+                "holding_cost_per_unit": request.holding_cost_per_unit,
+                "stockout_penalty_per_unit": request.stockout_penalty_per_unit,
+                "production_cost_per_unit": request.production_cost_per_unit,
+                "procurement_cost_per_unit": request.procurement_cost_per_unit,
+            },
+            user_id=current_user.id,
+        )
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.get("/supply-plan/capacity-analysis")
+@require_module("scm_ai")
+async def get_capacity_analysis(
+    db: DB,
+    current_user: CurrentUser,
+    forecast_id: Optional[UUID] = Query(None),
+    horizon_days: int = Query(90, ge=7, le=365),
+    daily_capacity: float = Query(1000, ge=1),
+):
+    """
+    Analyze production capacity utilization against demand.
+
+    Returns capacity timeline, bottleneck detection, and recommendations.
+    """
+    optimizer = SupplyOptimizer(db)
+
+    return await optimizer.analyze_capacity(
+        forecast_id=forecast_id,
+        horizon_days=horizon_days,
+        daily_capacity=daily_capacity,
+    )
+
+
+@router.get("/supply-plan/ddmrp-buffers")
+@require_module("scm_ai")
+async def get_ddmrp_buffers(
+    db: DB,
+    current_user: CurrentUser,
+    lookback_days: int = Query(90, ge=30, le=365),
+):
+    """
+    Calculate DDMRP buffer zones for all products.
+
+    Returns Red/Yellow/Green zones, net flow position, and action needed indicators.
+    """
+    optimizer = SupplyOptimizer(db)
+
+    return await optimizer.calculate_ddmrp_buffers(lookback_days=lookback_days)
+
+
+@router.post("/supply-plan/multi-source")
+@require_module("scm_ai")
+async def analyze_multi_source(
+    request: MultiSourceRequest,
+    db: DB,
+    current_user: CurrentUser,
+):
+    """
+    Analyze and score multiple vendors for procurement.
+
+    Scoring: Cost (40%), Lead Time (25%), Reliability (20%), MOQ Flexibility (15%).
+    """
+    optimizer = SupplyOptimizer(db)
+
+    return await optimizer.multi_source_analysis(
+        product_id=request.product_id,
+        required_qty=request.required_qty,
+        max_lead_time_days=request.max_lead_time_days,
+    )
 
 
 # ==================== Inventory Optimization ====================

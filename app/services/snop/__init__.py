@@ -14,6 +14,7 @@ from app.services.snop.demand_planner import DemandPlannerService
 from app.services.snop.ensemble_forecaster import EnsembleForecaster
 from app.services.snop.ml_forecaster import MLForecaster, DemandClassifier
 from app.services.snop.demand_sensor import DemandSensor
+from app.services.snop.supply_optimizer import SupplyOptimizer
 from app.services.snop.snop_service import SNOPService
 
 __all__ = [
@@ -22,5 +23,6 @@ __all__ = [
     "MLForecaster",
     "DemandClassifier",
     "DemandSensor",
+    "SupplyOptimizer",
     "SNOPService",
 ]
