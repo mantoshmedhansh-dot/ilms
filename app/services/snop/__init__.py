@@ -10,6 +10,7 @@ Provides comprehensive demand forecasting, supply planning, and inventory optimi
 - SNOPService: Main orchestration service (supply planning, inventory optimization, scenarios)
 - ScenarioEngine: Advanced scenario planning (Monte Carlo, P&L, sensitivity, comparison)
 - PlanningAgents: Autonomous AI agents (exception detection, reorder, forecast bias, alert center)
+- NLPlanner: Natural language planning interface (conversational S&OP queries)
 """
 
 from app.services.snop.demand_planner import DemandPlannerService
@@ -19,6 +20,7 @@ from app.services.snop.demand_sensor import DemandSensor
 from app.services.snop.supply_optimizer import SupplyOptimizer
 from app.services.snop.scenario_engine import ScenarioEngine
 from app.services.snop.planning_agents import PlanningAgents
+from app.services.snop.nl_planner import NLPlanner
 from app.services.snop.snop_service import SNOPService
 
 __all__ = [
@@ -30,5 +32,6 @@ __all__ = [
     "SupplyOptimizer",
     "ScenarioEngine",
     "PlanningAgents",
+    "NLPlanner",
     "SNOPService",
 ]

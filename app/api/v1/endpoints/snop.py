@@ -14,6 +14,7 @@ from typing import Optional, List
 from uuid import UUID
 from datetime import date, datetime, timedelta
 
+from pydantic import BaseModel, Field
 from fastapi import APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -70,7 +71,7 @@ from app.schemas.snop import (
     QuickWhatIfRequest,
     ScenarioCompareAdvancedRequest,
 )
-from app.services.snop import SNOPService, DemandPlannerService, MLForecaster, DemandClassifier, DemandSensor, SupplyOptimizer, ScenarioEngine, PlanningAgents
+from app.services.snop import SNOPService, DemandPlannerService, MLForecaster, DemandClassifier, DemandSensor, SupplyOptimizer, ScenarioEngine, PlanningAgents, NLPlanner
 from app.core.module_decorators import require_module
 
 
@@ -1561,4 +1562,38 @@ async def run_bias_agent(
 
     return await agents.run_bias_agent(
         bias_threshold_pct=bias_threshold_pct,
+    )
+
+
+# ==================== Natural Language Planning ====================
+
+class ChatRequest(BaseModel):
+    """Natural language chat request."""
+    query: str = Field(..., min_length=1, max_length=500)
+
+
+@router.post("/chat")
+@require_module("scm_ai")
+async def chat_with_planner(
+    request: ChatRequest,
+    db: DB,
+    current_user: CurrentUser,
+):
+    """
+    Natural language S&OP planning assistant.
+
+    Accepts conversational queries and returns structured responses
+    with data, narrative, suggested follow-ups, and quick actions.
+
+    Examples:
+    - "What's the demand forecast for next quarter?"
+    - "Show me stockout risks"
+    - "Compare our scenarios"
+    - "Any alerts from the AI agents?"
+    """
+    planner = NLPlanner(db)
+
+    return await planner.process_query(
+        query=request.query,
+        user_id=current_user.id,
     )

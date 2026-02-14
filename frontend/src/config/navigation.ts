@@ -424,6 +424,7 @@ export const navigation: NavItem[] = [
       { title: 'Scenario Analysis', href: '/dashboard/snop/scenarios', icon: Layers, permissions: ['REPORTS_VIEW'] },
       { title: 'Inventory Optimization', href: '/dashboard/snop/inventory-optimization', icon: TrendingUp, permissions: ['INVENTORY_VIEW'] },
       { title: 'AI Command Center', href: '/dashboard/snop/ai-agents', icon: Brain, permissions: ['REPORTS_VIEW'] },
+      { title: 'AI Chat', href: '/dashboard/snop/chat', icon: MessageSquare, permissions: ['REPORTS_VIEW'] },
     ],
   },
 
