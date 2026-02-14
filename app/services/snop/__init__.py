@@ -8,6 +8,7 @@ Provides comprehensive demand forecasting, supply planning, and inventory optimi
 - DemandClassifier: ABC-XYZ demand classification for strategy selection
 - DemandSensor: Real-time demand sensing and signal processing
 - SNOPService: Main orchestration service (supply planning, inventory optimization, scenarios)
+- ScenarioEngine: Advanced scenario planning (Monte Carlo, P&L, sensitivity, comparison)
 """
 
 from app.services.snop.demand_planner import DemandPlannerService
@@ -15,6 +16,7 @@ from app.services.snop.ensemble_forecaster import EnsembleForecaster
 from app.services.snop.ml_forecaster import MLForecaster, DemandClassifier
 from app.services.snop.demand_sensor import DemandSensor
 from app.services.snop.supply_optimizer import SupplyOptimizer
+from app.services.snop.scenario_engine import ScenarioEngine
 from app.services.snop.snop_service import SNOPService
 
 __all__ = [
@@ -24,5 +26,6 @@ __all__ = [
     "DemandClassifier",
     "DemandSensor",
     "SupplyOptimizer",
+    "ScenarioEngine",
     "SNOPService",
 ]

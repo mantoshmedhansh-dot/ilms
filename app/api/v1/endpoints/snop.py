@@ -64,8 +64,13 @@ from app.schemas.snop import (
     DemandSensingAnalysis,
     SupplyOptimizeAdvancedRequest,
     MultiSourceRequest,
+    MonteCarloRequest,
+    FinancialPLRequest,
+    SensitivityRequest,
+    QuickWhatIfRequest,
+    ScenarioCompareAdvancedRequest,
 )
-from app.services.snop import SNOPService, DemandPlannerService, MLForecaster, DemandClassifier, DemandSensor, SupplyOptimizer
+from app.services.snop import SNOPService, DemandPlannerService, MLForecaster, DemandClassifier, DemandSensor, SupplyOptimizer, ScenarioEngine
 from app.core.module_decorators import require_module
 
 
@@ -902,6 +907,143 @@ async def compare_scenarios(
         "comparison_table": comparison,
         "recommendation": recommendation
     }
+
+
+# ==================== Advanced Scenario Engine ====================
+
+@router.post("/scenario/monte-carlo")
+@require_module("scm_ai")
+async def run_monte_carlo_simulation(
+    request: MonteCarloRequest,
+    db: DB,
+    current_user: CurrentUser,
+):
+    """
+    Run Monte Carlo simulation for a scenario.
+
+    Performs N random simulations varying demand, supply, lead time, and price
+    using statistical distributions. Returns percentile-based confidence intervals,
+    revenue distribution histogram, and risk metrics.
+    """
+    engine = ScenarioEngine(db)
+
+    try:
+        result = await engine.run_monte_carlo(
+            scenario_id=request.scenario_id,
+            num_simulations=request.num_simulations,
+            demand_cv=request.demand_cv,
+            supply_cv=request.supply_cv,
+            lead_time_cv=request.lead_time_cv,
+            price_cv=request.price_cv,
+        )
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.post("/scenario/financial-pl")
+@require_module("scm_ai")
+async def project_financial_pl(
+    request: FinancialPLRequest,
+    db: DB,
+    current_user: CurrentUser,
+):
+    """
+    Generate financial P&L projection for a scenario.
+
+    Returns monthly breakdown with Revenue, COGS, Gross Margin,
+    Operating Expenses, EBITDA, Tax, Net Income, and waterfall chart data.
+    """
+    engine = ScenarioEngine(db)
+
+    try:
+        result = await engine.project_financial_pl(
+            scenario_id=request.scenario_id,
+            avg_unit_price=request.avg_unit_price,
+            cogs_pct=request.cogs_pct,
+            operating_expense_pct=request.operating_expense_pct,
+            tax_rate_pct=request.tax_rate_pct,
+            working_capital_days=request.working_capital_days,
+        )
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.post("/scenario/sensitivity")
+@require_module("scm_ai")
+async def run_sensitivity_analysis(
+    request: SensitivityRequest,
+    db: DB,
+    current_user: CurrentUser,
+):
+    """
+    Run sensitivity analysis for tornado chart visualization.
+
+    Varies each parameter independently by +/- variation_pct while holding
+    all others constant. Shows which parameters have the biggest impact on
+    revenue and net income.
+    """
+    engine = ScenarioEngine(db)
+
+    try:
+        result = await engine.sensitivity_analysis(
+            scenario_id=request.scenario_id,
+            parameters=request.parameters,
+            variation_pct=request.variation_pct,
+        )
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+
+@router.post("/scenario/what-if")
+@require_module("scm_ai")
+async def quick_what_if_analysis(
+    request: QuickWhatIfRequest,
+    db: DB,
+    current_user: CurrentUser,
+):
+    """
+    Quick what-if analysis without creating a scenario record.
+
+    Instantly shows the financial impact of parameter changes
+    (demand, price, supply, lead time, COGS) on a 90-day projection.
+    """
+    engine = ScenarioEngine(db)
+
+    return await engine.quick_what_if(
+        demand_change_pct=request.demand_change_pct,
+        price_change_pct=request.price_change_pct,
+        supply_change_pct=request.supply_change_pct,
+        lead_time_change_pct=request.lead_time_change_pct,
+        cogs_change_pct=request.cogs_change_pct,
+    )
+
+
+@router.post("/scenarios/compare-advanced")
+@require_module("scm_ai")
+async def compare_scenarios_advanced(
+    request: ScenarioCompareAdvancedRequest,
+    db: DB,
+    current_user: CurrentUser,
+):
+    """
+    Advanced scenario comparison with weighted scoring and ranking.
+
+    Ranks scenarios across: Revenue (30%), Net Income (25%),
+    Service Level (20%), Risk Score (15%), Efficiency (10%).
+    Custom weights can be provided.
+    """
+    engine = ScenarioEngine(db)
+
+    try:
+        return await engine.compare_scenarios_advanced(
+            scenario_ids=request.scenario_ids,
+            ranking_weights=request.ranking_weights,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 # ==================== Historical Data ====================

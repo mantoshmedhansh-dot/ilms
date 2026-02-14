@@ -740,3 +740,53 @@ class MultiSourceRequest(BaseModel):
     product_id: uuid.UUID
     required_qty: float = Field(..., ge=1)
     max_lead_time_days: int = Field(30, ge=1)
+
+
+# ==================== ADVANCED SCENARIO SCHEMAS ====================
+
+class MonteCarloRequest(BaseModel):
+    """Request for Monte Carlo simulation."""
+    scenario_id: uuid.UUID
+    num_simulations: int = Field(1000, ge=100, le=10000)
+    demand_cv: float = Field(0.15, ge=0.01, le=0.5, description="Demand coefficient of variation")
+    supply_cv: float = Field(0.10, ge=0.01, le=0.5, description="Supply coefficient of variation")
+    lead_time_cv: float = Field(0.20, ge=0.01, le=0.5, description="Lead time coefficient of variation")
+    price_cv: float = Field(0.05, ge=0.01, le=0.3, description="Price coefficient of variation")
+
+
+class FinancialPLRequest(BaseModel):
+    """Request for financial P&L projection."""
+    scenario_id: uuid.UUID
+    avg_unit_price: float = Field(1000.0, ge=1)
+    cogs_pct: float = Field(60.0, ge=10, le=95, description="COGS as % of revenue")
+    operating_expense_pct: float = Field(15.0, ge=1, le=50, description="OpEx as % of revenue")
+    tax_rate_pct: float = Field(25.0, ge=0, le=50)
+    working_capital_days: int = Field(45, ge=0, le=180)
+
+
+class SensitivityRequest(BaseModel):
+    """Request for sensitivity analysis (tornado chart)."""
+    scenario_id: uuid.UUID
+    parameters: Optional[List[str]] = Field(
+        None,
+        description="Parameters to analyze. Default: demand, price, cogs, supply_capacity, lead_time, operating_expenses, holding_cost"
+    )
+    variation_pct: float = Field(20.0, ge=5, le=50, description="% variation to test (+/-)")
+
+
+class QuickWhatIfRequest(BaseModel):
+    """Request for quick what-if analysis without saving."""
+    demand_change_pct: float = Field(0, ge=-100, le=500)
+    price_change_pct: float = Field(0, ge=-50, le=200)
+    supply_change_pct: float = Field(0, ge=-100, le=500)
+    lead_time_change_pct: float = Field(0, ge=-50, le=200)
+    cogs_change_pct: float = Field(0, ge=-50, le=100)
+
+
+class ScenarioCompareAdvancedRequest(BaseModel):
+    """Request for advanced scenario comparison with ranking."""
+    scenario_ids: List[uuid.UUID] = Field(..., min_length=2, max_length=10)
+    ranking_weights: Optional[Dict[str, float]] = Field(
+        None,
+        description="Custom weights for ranking (revenue, net_income, service_level, risk_score, efficiency)"
+    )
