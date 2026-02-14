@@ -12,9 +12,10 @@ Comprehensive demand forecasting and supply planning:
 
 from typing import Optional, List
 from uuid import UUID
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from fastapi import APIRouter, Depends, Query, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -56,7 +57,7 @@ from app.schemas.snop import (
     ForecastAccuracyReport,
     DemandSupplyGapAnalysis,
 )
-from app.services.snop import SNOPService, DemandPlannerService
+from app.services.snop import SNOPService, DemandPlannerService, MLForecaster, DemandClassifier
 from app.core.module_decorators import require_module
 
 
@@ -161,6 +162,118 @@ async def generate_forecasts(
             }
             for f in forecasts
         ]
+    }
+
+
+@router.post("/forecast/compare-models")
+@require_module("scm_ai")
+async def compare_forecast_models(
+    db: DB,
+    current_user: CurrentUser,
+    product_id: Optional[UUID] = Query(None),
+    category_id: Optional[UUID] = Query(None),
+    granularity: ForecastGranularity = Query(ForecastGranularity.WEEKLY),
+    lookback_days: int = Query(365, ge=90, le=1095),
+    forecast_horizon_days: int = Query(30, ge=7, le=365),
+):
+    """
+    Compare all ML forecasting models for a product/category.
+
+    Returns accuracy metrics for each model (Prophet, XGBoost, ARIMA, Holt-Winters, Ensemble)
+    along with the auto-selected best model and demand classification (ABC-XYZ).
+    """
+    ml_forecaster = MLForecaster(db)
+
+    periods = forecast_horizon_days if granularity == ForecastGranularity.DAILY else (forecast_horizon_days // 7)
+
+    result = await ml_forecaster.auto_forecast(
+        product_id=product_id,
+        category_id=category_id,
+        lookback_days=lookback_days,
+        forecast_periods=max(1, periods),
+        granularity=granularity,
+    )
+
+    return {
+        "winning_model": result["accuracy_metrics"].get("winning_model", "ensemble"),
+        "winning_mape": result["accuracy_metrics"].get("mape", 100),
+        "model_comparison": result["accuracy_metrics"].get("model_comparison", {}),
+        "demand_classification": result.get("demand_classification", {}),
+        "forecast_data": result["forecasts"],
+        "ml_libraries": {
+            "prophet": ml_forecaster.has_prophet,
+            "xgboost": ml_forecaster.has_xgboost,
+            "statsmodels": ml_forecaster.has_statsmodels,
+            "sklearn": ml_forecaster.has_sklearn,
+        },
+    }
+
+
+@router.get("/demand-classification")
+@require_module("scm_ai")
+async def get_demand_classification(
+    db: DB,
+    current_user: CurrentUser,
+    lookback_days: int = Query(365, ge=90, le=1095),
+    granularity: ForecastGranularity = Query(ForecastGranularity.WEEKLY),
+):
+    """
+    Classify all products using ABC-XYZ demand analysis.
+
+    Returns each product's classification, coefficient of variation,
+    and recommended forecasting algorithm.
+    """
+    from app.models.product import Product
+
+    demand_planner = DemandPlannerService(db)
+    end_date = date.today()
+    start_date = end_date - timedelta(days=lookback_days)
+
+    # Get all active products
+    result = await db.execute(
+        select(Product).where(Product.is_active == True).limit(200)
+    )
+    products = list(result.scalars().all())
+
+    classifications = []
+    for product in products:
+        historical = await demand_planner.get_historical_demand(
+            product_id=product.id,
+            start_date=start_date,
+            end_date=end_date,
+            granularity=granularity,
+        )
+
+        data = [float(h["quantity"]) for h in historical] if historical else []
+        classification = DemandClassifier.classify_demand(data)
+
+        classifications.append({
+            "product_id": str(product.id),
+            "product_name": product.name,
+            "sku": getattr(product, 'sku', None),
+            "abc_class": classification["abc_class"],
+            "xyz_class": classification["xyz_class"],
+            "combined_class": classification["combined_class"],
+            "cv": classification["cv"],
+            "mean_demand": classification.get("mean_demand", 0),
+            "recommended_algorithm": classification["recommended_algorithm"].value,
+            "data_points": len(data),
+        })
+
+    # Sort by ABC class (A first) then by CV
+    classifications.sort(key=lambda x: (x["abc_class"], x["cv"]))
+
+    return {
+        "total_products": len(classifications),
+        "summary": {
+            "A": len([c for c in classifications if c["abc_class"] == "A"]),
+            "B": len([c for c in classifications if c["abc_class"] == "B"]),
+            "C": len([c for c in classifications if c["abc_class"] == "C"]),
+            "X": len([c for c in classifications if c["xyz_class"] == "X"]),
+            "Y": len([c for c in classifications if c["xyz_class"] == "Y"]),
+            "Z": len([c for c in classifications if c["xyz_class"] == "Z"]),
+        },
+        "classifications": classifications,
     }
 
 

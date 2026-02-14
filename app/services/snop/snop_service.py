@@ -41,6 +41,7 @@ from app.models.vendor import Vendor
 from app.models.warehouse import Warehouse
 from app.services.snop.demand_planner import DemandPlannerService
 from app.services.snop.ensemble_forecaster import EnsembleForecaster
+from app.services.snop.ml_forecaster import MLForecaster
 
 
 class SNOPService:
@@ -48,7 +49,7 @@ class SNOPService:
     Main S&OP orchestration service.
 
     Provides unified interface for:
-    - Generating multi-level forecasts
+    - Generating multi-level forecasts (using ML-powered models)
     - Creating supply plans
     - Optimizing inventory
     - Running scenario simulations
@@ -59,6 +60,7 @@ class SNOPService:
         self.db = db
         self.demand_planner = DemandPlannerService(db)
         self.forecaster = EnsembleForecaster(db)
+        self.ml_forecaster = MLForecaster(db)
 
     # ==================== Forecast Generation ====================
 
@@ -99,23 +101,26 @@ class SNOPService:
             products = list(result.scalars().all())
 
             for product in products:
-                # Generate forecast for each product
+                # Generate forecast using ML-powered forecaster
+                periods = forecast_horizon_days if granularity == ForecastGranularity.DAILY else (forecast_horizon_days // 7)
+
                 if algorithm == ForecastAlgorithm.ENSEMBLE:
-                    forecast_result = await self.forecaster.ensemble_forecast(
+                    # Auto model selection — runs all models and picks best
+                    forecast_result = await self.ml_forecaster.auto_forecast(
                         product_id=product.id,
                         start_date=forecast_start_date,
                         lookback_days=lookback_days,
-                        forecast_periods=forecast_horizon_days if granularity == ForecastGranularity.DAILY else (forecast_horizon_days // 7),
-                        granularity=granularity
+                        forecast_periods=periods,
+                        granularity=granularity,
                     )
                 else:
-                    forecast_result = await self.forecaster.single_algorithm_forecast(
+                    forecast_result = await self.ml_forecaster.single_algorithm_forecast(
                         algorithm=algorithm,
                         product_id=product.id,
                         start_date=forecast_start_date,
                         lookback_days=lookback_days,
-                        forecast_periods=forecast_horizon_days if granularity == ForecastGranularity.DAILY else (forecast_horizon_days // 7),
-                        granularity=granularity
+                        forecast_periods=periods,
+                        granularity=granularity,
                     )
 
                 # Create forecast record
@@ -146,12 +151,12 @@ class SNOPService:
             categories = list(result.scalars().all())
 
             for category in categories:
-                forecast_result = await self.forecaster.ensemble_forecast(
+                forecast_result = await self.ml_forecaster.auto_forecast(
                     category_id=category.id,
                     start_date=forecast_start_date,
                     lookback_days=lookback_days,
                     forecast_periods=forecast_horizon_days // 7,  # Weekly for categories
-                    granularity=ForecastGranularity.WEEKLY
+                    granularity=ForecastGranularity.WEEKLY,
                 )
 
                 forecast = await self.demand_planner.create_demand_forecast(
