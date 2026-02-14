@@ -79,13 +79,28 @@ export default function TenantLoginPage() {
   const onSubmit = async (data: LoginForm) => {
     setIsLoading(true);
     try {
+      console.log('[Login] Submitting login for', data.email);
       const response = await authApi.login(data);
+      console.log('[Login] Login successful', {
+        hasAccessToken: !!response.access_token,
+        tenantId: response.tenant_id,
+        tenantSubdomain: response.tenant_subdomain,
+      });
       setTokens(response.access_token, response.refresh_token);
+
+      // Verify tokens were stored correctly
+      const storedToken = getAccessToken();
+      const storedTenantId = getTenantId();
+      console.log('[Login] Stored tokens verified', {
+        hasStoredToken: !!storedToken,
+        storedTenantId,
+        sessionSubdomain: sessionStorage.getItem('active_subdomain'),
+      });
+
       toast.success('Welcome back!');
-      // Use full page reload to ensure auth state is fresh
-      // This avoids React state timing issues with client-side navigation
       window.location.href = '/dashboard';
-    } catch {
+    } catch (err) {
+      console.error('[Login] Login failed:', err);
       toast.error('Invalid email or password');
     } finally {
       setIsLoading(false);

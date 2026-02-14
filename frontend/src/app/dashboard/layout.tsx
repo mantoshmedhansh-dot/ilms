@@ -34,6 +34,8 @@ export default function DashboardLayout({
         hasToken: !!token,
         isAuthenticated,
         isLoading,
+        sessionSubdomain: typeof window !== 'undefined' ? sessionStorage.getItem('active_subdomain') : null,
+        redirectSubdomain: getRedirectSubdomain(),
       });
 
       // Use full page reload to avoid React state issues
