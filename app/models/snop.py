@@ -103,6 +103,31 @@ class ExternalFactorType(str, Enum):
     SUPPLY_DISRUPTION = "SUPPLY_DISRUPTION"  # Supply chain issues
 
 
+class DemandSignalType(str, Enum):
+    """Types of demand signals for demand sensing."""
+    POS_SPIKE = "POS_SPIKE"                 # Point-of-sale spike detected
+    POS_DROP = "POS_DROP"                   # Point-of-sale drop detected
+    STOCKOUT_ALERT = "STOCKOUT_ALERT"       # Imminent stockout signal
+    PROMOTION_LAUNCH = "PROMOTION_LAUNCH"   # Promotion going live
+    PROMOTION_END = "PROMOTION_END"         # Promotion ending
+    WEATHER_EVENT = "WEATHER_EVENT"         # Extreme weather impact
+    FESTIVAL_SEASON = "FESTIVAL_SEASON"     # Festival/holiday demand lift
+    COMPETITOR_PRICE = "COMPETITOR_PRICE"   # Competitor price change
+    MARKET_TREND = "MARKET_TREND"           # Market trend shift
+    NEW_CHANNEL = "NEW_CHANNEL"             # New sales channel activated
+    RETURNS_SPIKE = "RETURNS_SPIKE"         # Spike in product returns
+    SOCIAL_BUZZ = "SOCIAL_BUZZ"             # Social media driven demand
+
+
+class DemandSignalStatus(str, Enum):
+    """Status of a demand signal."""
+    ACTIVE = "ACTIVE"
+    ACKNOWLEDGED = "ACKNOWLEDGED"
+    APPLIED = "APPLIED"             # Impact applied to forecast
+    EXPIRED = "EXPIRED"
+    DISMISSED = "DISMISSED"
+
+
 # ==================== Main Models ====================
 
 class DemandForecast(Base):
@@ -709,5 +734,142 @@ class SNOPMeeting(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
-    # Relationships
+    # Relationships (SNOPMeeting)
     created_by: Mapped[Optional["User"]] = relationship("User")
+
+
+class DemandSignal(Base):
+    """
+    Real-time demand signals for demand sensing.
+
+    Captures short-term demand indicators that adjust forecasts:
+    - POS spikes/drops from sales channels
+    - Promotional events going live
+    - Weather events impacting demand
+    - Competitor actions and market trends
+    - Social media buzz
+
+    Each signal has a strength (0-1), decay rate, and directional impact.
+    """
+    __tablename__ = "demand_signals"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4
+    )
+
+    # Signal identification
+    signal_code: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+    signal_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    signal_type: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False,
+        comment="POS_SPIKE, POS_DROP, STOCKOUT_ALERT, PROMOTION_LAUNCH, etc."
+    )
+
+    # Scope (which products/categories this signal affects)
+    product_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("products.id"),
+        nullable=True
+    )
+    category_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("categories.id"),
+        nullable=True
+    )
+    region_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("regions.id"),
+        nullable=True
+    )
+    channel: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    applies_to_all: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # Signal characteristics
+    signal_strength: Mapped[float] = mapped_column(
+        Float, default=0.5,
+        comment="0.0 to 1.0 — strength of the signal"
+    )
+    impact_direction: Mapped[str] = mapped_column(
+        String(10), default="UP",
+        comment="UP or DOWN — direction of demand impact"
+    )
+    impact_pct: Mapped[float] = mapped_column(
+        Float, default=0.0,
+        comment="Percentage impact on forecast (e.g., +15.0 or -10.0)"
+    )
+    confidence: Mapped[float] = mapped_column(
+        Float, default=0.7,
+        comment="Confidence in this signal (0.0 to 1.0)"
+    )
+
+    # Decay and timing
+    detected_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+    effective_start: Mapped[date] = mapped_column(Date, nullable=False)
+    effective_end: Mapped[date] = mapped_column(Date, nullable=False)
+    decay_rate: Mapped[float] = mapped_column(
+        Float, default=0.1,
+        comment="Daily decay rate of signal strength (0.0 to 1.0)"
+    )
+
+    # Source information
+    source: Mapped[str] = mapped_column(
+        String(100), default="MANUAL",
+        comment="MANUAL, POS_SYSTEM, WEATHER_API, MARKET_INTEL, SOCIAL_MEDIA"
+    )
+    source_data: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
+
+    # Impact tracking
+    forecast_ids_affected: Mapped[Optional[dict]] = mapped_column(
+        JSONB, nullable=True, default=list,
+        comment="List of forecast IDs this signal adjusted"
+    )
+    actual_impact: Mapped[Optional[float]] = mapped_column(
+        Float, nullable=True,
+        comment="Post-event measured actual impact %"
+    )
+
+    # Status
+    status: Mapped[str] = mapped_column(
+        String(50),
+        default="ACTIVE",
+        comment="ACTIVE, ACKNOWLEDGED, APPLIED, EXPIRED, DISMISSED"
+    )
+
+    # Audit
+    created_by_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=True
+    )
+    acknowledged_by_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc)
+    )
+
+    notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Relationships
+    product: Mapped[Optional["Product"]] = relationship("Product")
+    category: Mapped[Optional["Category"]] = relationship("Category")
+    region: Mapped[Optional["Region"]] = relationship("Region")
+    created_by: Mapped[Optional["User"]] = relationship("User", foreign_keys=[created_by_id])
+    acknowledged_by: Mapped[Optional["User"]] = relationship("User", foreign_keys=[acknowledged_by_id])
+
+    __table_args__ = (
+        Index("ix_demand_signals_type_status", "signal_type", "status"),
+        Index("ix_demand_signals_effective", "effective_start", "effective_end"),
+        Index("ix_demand_signals_product", "product_id"),
+    )

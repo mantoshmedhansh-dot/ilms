@@ -25,6 +25,8 @@ from app.models.snop import (
     SupplyPlanStatus,
     ScenarioStatus,
     ExternalFactorType,
+    DemandSignalType,
+    DemandSignalStatus,
 )
 
 
@@ -603,6 +605,115 @@ class DemandSupplyGapAnalysis(BaseModel):
 
     # By period
     gaps_by_period: List[Dict[str, Any]]
+
+    # Recommendations
+    recommendations: List[str]
+
+
+# ==================== DEMAND SIGNAL SCHEMAS ====================
+
+class DemandSignalCreate(BaseModel):
+    """Create a demand signal."""
+    signal_name: str = Field(..., min_length=1, max_length=200)
+    signal_type: DemandSignalType
+
+    # Scope
+    product_id: Optional[uuid.UUID] = None
+    category_id: Optional[uuid.UUID] = None
+    region_id: Optional[uuid.UUID] = None
+    channel: Optional[str] = None
+    applies_to_all: bool = False
+
+    # Signal characteristics
+    signal_strength: float = Field(0.5, ge=0.0, le=1.0)
+    impact_direction: str = Field("UP", pattern="^(UP|DOWN)$")
+    impact_pct: float = Field(0.0, ge=-100, le=500)
+    confidence: float = Field(0.7, ge=0.0, le=1.0)
+
+    # Timing
+    effective_start: date
+    effective_end: date
+    decay_rate: float = Field(0.1, ge=0.0, le=1.0)
+
+    # Source
+    source: str = Field("MANUAL", max_length=100)
+    source_data: Optional[Dict[str, Any]] = None
+
+    notes: Optional[str] = None
+
+
+class DemandSignalUpdate(BaseModel):
+    """Update a demand signal."""
+    signal_strength: Optional[float] = Field(None, ge=0.0, le=1.0)
+    impact_pct: Optional[float] = Field(None, ge=-100, le=500)
+    confidence: Optional[float] = Field(None, ge=0.0, le=1.0)
+    effective_end: Optional[date] = None
+    status: Optional[DemandSignalStatus] = None
+    actual_impact: Optional[float] = None
+    notes: Optional[str] = None
+
+
+class DemandSignalResponse(BaseModel):
+    """Demand signal response."""
+    id: uuid.UUID
+    signal_code: str
+    signal_name: str
+    signal_type: str
+
+    # Scope
+    product_id: Optional[uuid.UUID] = None
+    product_name: Optional[str] = None
+    category_id: Optional[uuid.UUID] = None
+    category_name: Optional[str] = None
+    region_id: Optional[uuid.UUID] = None
+    channel: Optional[str] = None
+    applies_to_all: bool
+
+    # Signal characteristics
+    signal_strength: float
+    current_strength: float  # After decay
+    impact_direction: str
+    impact_pct: float
+    confidence: float
+
+    # Timing
+    detected_at: datetime
+    effective_start: date
+    effective_end: date
+    decay_rate: float
+    days_active: int
+    days_remaining: int
+
+    # Source & tracking
+    source: str
+    forecast_ids_affected: Optional[List[str]] = None
+    actual_impact: Optional[float] = None
+
+    # Status
+    status: str
+
+    created_at: datetime
+    notes: Optional[str] = None
+
+
+class DemandSensingAnalysis(BaseModel):
+    """Result of demand sensing analysis."""
+    analysis_date: date
+    active_signals_count: int
+    total_signals_count: int
+
+    # Net impact by signal type
+    impact_by_type: Dict[str, float]
+
+    # Aggregate forecast adjustment
+    net_forecast_adjustment_pct: float
+    weighted_confidence: float
+
+    # Signal timeline
+    signal_timeline: List[Dict[str, Any]]
+
+    # Top signals by strength
+    top_signals: List[Dict[str, Any]]
 
     # Recommendations
     recommendations: List[str]

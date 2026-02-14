@@ -28,6 +28,8 @@ from app.models.snop import (
     SupplyPlanStatus,
     ScenarioStatus,
     ExternalFactorType,
+    DemandSignalType,
+    DemandSignalStatus,
 )
 from app.schemas.snop import (
     DemandForecastCreate,
@@ -56,8 +58,12 @@ from app.schemas.snop import (
     SNOPDashboardSummary,
     ForecastAccuracyReport,
     DemandSupplyGapAnalysis,
+    DemandSignalCreate,
+    DemandSignalUpdate,
+    DemandSignalResponse,
+    DemandSensingAnalysis,
 )
-from app.services.snop import SNOPService, DemandPlannerService, MLForecaster, DemandClassifier
+from app.services.snop import SNOPService, DemandPlannerService, MLForecaster, DemandClassifier, DemandSensor
 from app.core.module_decorators import require_module
 
 
@@ -937,3 +943,275 @@ async def get_demand_statistics(
     )
 
     return stats
+
+
+# ==================== Demand Sensing ====================
+
+@router.post("/demand-signals")
+@require_module("scm_ai")
+async def create_demand_signal(
+    request: DemandSignalCreate,
+    db: DB,
+    current_user: CurrentUser,
+):
+    """
+    Create a new demand signal.
+
+    Signals represent real-time demand indicators from various sources:
+    POS data, promotions, weather, market intelligence, social media, etc.
+    """
+    sensor = DemandSensor(db)
+
+    signal = await sensor.create_signal(
+        signal_name=request.signal_name,
+        signal_type=request.signal_type,
+        effective_start=request.effective_start,
+        effective_end=request.effective_end,
+        impact_direction=request.impact_direction,
+        impact_pct=request.impact_pct,
+        signal_strength=request.signal_strength,
+        confidence=request.confidence,
+        decay_rate=request.decay_rate,
+        product_id=request.product_id,
+        category_id=request.category_id,
+        region_id=request.region_id,
+        channel=request.channel,
+        applies_to_all=request.applies_to_all,
+        source=request.source,
+        source_data=request.source_data,
+        user_id=current_user.id,
+        notes=request.notes,
+    )
+
+    info = sensor.compute_signal_info(signal)
+
+    return {
+        "message": "Demand signal created",
+        "signal": {
+            "id": str(signal.id),
+            "code": signal.signal_code,
+            "name": signal.signal_name,
+            "type": signal.signal_type,
+            "strength": signal.signal_strength,
+            "current_strength": info["current_strength"],
+            "impact_direction": signal.impact_direction,
+            "impact_pct": signal.impact_pct,
+            "effective_start": signal.effective_start.isoformat(),
+            "effective_end": signal.effective_end.isoformat(),
+            "status": signal.status,
+        },
+    }
+
+
+@router.get("/demand-signals")
+@require_module("scm_ai")
+async def list_demand_signals(
+    db: DB,
+    current_user: CurrentUser,
+    status: Optional[DemandSignalStatus] = Query(None),
+    signal_type: Optional[DemandSignalType] = Query(None),
+    product_id: Optional[UUID] = Query(None),
+    active_only: bool = Query(False),
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+):
+    """
+    List demand signals with filters.
+    """
+    sensor = DemandSensor(db)
+
+    signals, total = await sensor.list_signals(
+        status=status,
+        signal_type=signal_type,
+        product_id=product_id,
+        active_only=active_only,
+        limit=limit,
+        offset=offset,
+    )
+
+    return {
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "signals": [
+            {
+                "id": str(s.id),
+                "code": s.signal_code,
+                "name": s.signal_name,
+                "type": s.signal_type,
+                "product_id": str(s.product_id) if s.product_id else None,
+                "category_id": str(s.category_id) if s.category_id else None,
+                "channel": s.channel,
+                "applies_to_all": s.applies_to_all,
+                "strength": s.signal_strength,
+                "current_strength": sensor.compute_signal_info(s)["current_strength"],
+                "impact_direction": s.impact_direction,
+                "impact_pct": s.impact_pct,
+                "confidence": s.confidence,
+                "detected_at": s.detected_at.isoformat() if s.detected_at else None,
+                "effective_start": s.effective_start.isoformat(),
+                "effective_end": s.effective_end.isoformat(),
+                "days_active": sensor.compute_signal_info(s)["days_active"],
+                "days_remaining": sensor.compute_signal_info(s)["days_remaining"],
+                "decay_rate": s.decay_rate,
+                "source": s.source,
+                "status": s.status,
+                "actual_impact": s.actual_impact,
+                "created_at": s.created_at.isoformat(),
+                "notes": s.notes,
+            }
+            for s in signals
+        ],
+    }
+
+
+@router.put("/demand-signals/{signal_id}")
+@require_module("scm_ai")
+async def update_demand_signal(
+    signal_id: UUID,
+    request: DemandSignalUpdate,
+    db: DB,
+    current_user: CurrentUser,
+):
+    """
+    Update a demand signal.
+    """
+    sensor = DemandSensor(db)
+
+    signal = await sensor.update_signal(
+        signal_id=signal_id,
+        signal_strength=request.signal_strength,
+        impact_pct=request.impact_pct,
+        confidence=request.confidence,
+        effective_end=request.effective_end,
+        status=request.status,
+        actual_impact=request.actual_impact,
+        notes=request.notes,
+        user_id=current_user.id,
+    )
+
+    if not signal:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Demand signal {signal_id} not found",
+        )
+
+    return {
+        "message": "Demand signal updated",
+        "signal_id": str(signal.id),
+        "status": signal.status,
+    }
+
+
+@router.post("/demand-signals/{signal_id}/dismiss")
+@require_module("scm_ai")
+async def dismiss_demand_signal(
+    signal_id: UUID,
+    db: DB,
+    current_user: CurrentUser,
+):
+    """
+    Dismiss a demand signal as irrelevant.
+    """
+    sensor = DemandSensor(db)
+    signal = await sensor.dismiss_signal(signal_id, current_user.id)
+
+    if not signal:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Demand signal {signal_id} not found",
+        )
+
+    return {"message": "Signal dismissed", "signal_id": str(signal.id)}
+
+
+@router.post("/demand-signals/analyze")
+@require_module("scm_ai")
+async def analyze_demand_signals(
+    db: DB,
+    current_user: CurrentUser,
+    product_id: Optional[UUID] = Query(None),
+    category_id: Optional[UUID] = Query(None),
+    horizon_days: int = Query(30, ge=7, le=180),
+):
+    """
+    Run demand sensing analysis.
+
+    Aggregates all active signals, computes net forecast adjustment,
+    and generates actionable recommendations.
+    """
+    sensor = DemandSensor(db)
+
+    analysis = await sensor.analyze_demand_signals(
+        product_id=product_id,
+        category_id=category_id,
+        horizon_days=horizon_days,
+    )
+
+    return analysis
+
+
+@router.post("/demand-signals/apply-to-forecast/{forecast_id}")
+@require_module("scm_ai")
+async def apply_signals_to_forecast(
+    forecast_id: UUID,
+    db: DB,
+    current_user: CurrentUser,
+):
+    """
+    Apply active demand signals to adjust a forecast.
+
+    This modifies the forecast data points based on the net signal impact.
+    """
+    sensor = DemandSensor(db)
+
+    try:
+        result = await sensor.apply_signals_to_forecast(forecast_id)
+        return result
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
+
+
+@router.post("/demand-signals/detect-pos")
+@require_module("scm_ai")
+async def detect_pos_signals(
+    db: DB,
+    current_user: CurrentUser,
+    lookback_days: int = Query(7, ge=3, le=30),
+    spike_threshold: float = Query(1.5, ge=1.1, le=3.0),
+    drop_threshold: float = Query(0.5, ge=0.1, le=0.9),
+):
+    """
+    Auto-detect demand signals from recent POS/order data.
+
+    Compares recent daily demand to historical average and creates
+    signals when thresholds are exceeded.
+    """
+    sensor = DemandSensor(db)
+
+    signals = await sensor.detect_pos_signals(
+        lookback_days=lookback_days,
+        spike_threshold=spike_threshold,
+        drop_threshold=drop_threshold,
+    )
+
+    return {
+        "message": f"Detected {len(signals)} POS signals",
+        "signals": [
+            {
+                "id": str(s.id),
+                "code": s.signal_code,
+                "name": s.signal_name,
+                "type": s.signal_type,
+                "product_id": str(s.product_id) if s.product_id else None,
+                "impact_direction": s.impact_direction,
+                "impact_pct": s.impact_pct,
+                "strength": s.signal_strength,
+                "source_data": s.source_data,
+            }
+            for s in signals
+        ],
+    }

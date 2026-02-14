@@ -15,6 +15,14 @@ import {
   BarChart3,
   Trophy,
   Zap,
+  Radio,
+  ArrowUp,
+  ArrowDown,
+  Signal,
+  ShieldAlert,
+  Sparkles,
+  XCircle,
+  Scan,
 } from 'lucide-react';
 import {
   LineChart as RechartsLineChart,
@@ -63,9 +71,12 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { snopApi } from '@/lib/api';
 import { toast } from 'sonner';
 import { getAccessToken, getTenantId } from '@/lib/api/client';
+import { apiClient } from '@/lib/api/client';
 
 const statusColors: Record<string, string> = {
   DRAFT: 'bg-gray-100 text-gray-800',
@@ -104,6 +115,42 @@ const classColors: Record<string, string> = {
   Y: 'bg-orange-100 text-orange-800 border-orange-300',
   Z: 'bg-red-100 text-red-800 border-red-300',
 };
+
+const signalTypeLabels: Record<string, string> = {
+  POS_SPIKE: 'POS Spike',
+  POS_DROP: 'POS Drop',
+  STOCKOUT_ALERT: 'Stockout Alert',
+  PROMOTION_LAUNCH: 'Promotion Launch',
+  PROMOTION_END: 'Promotion End',
+  WEATHER_EVENT: 'Weather Event',
+  FESTIVAL_SEASON: 'Festival Season',
+  COMPETITOR_PRICE: 'Competitor Price',
+  MARKET_TREND: 'Market Trend',
+  NEW_CHANNEL: 'New Channel',
+  RETURNS_SPIKE: 'Returns Spike',
+  SOCIAL_BUZZ: 'Social Buzz',
+};
+
+const signalTypeColors: Record<string, string> = {
+  POS_SPIKE: 'bg-green-100 text-green-800',
+  POS_DROP: 'bg-red-100 text-red-800',
+  STOCKOUT_ALERT: 'bg-red-100 text-red-800',
+  PROMOTION_LAUNCH: 'bg-purple-100 text-purple-800',
+  PROMOTION_END: 'bg-gray-100 text-gray-800',
+  WEATHER_EVENT: 'bg-sky-100 text-sky-800',
+  FESTIVAL_SEASON: 'bg-amber-100 text-amber-800',
+  COMPETITOR_PRICE: 'bg-orange-100 text-orange-800',
+  MARKET_TREND: 'bg-blue-100 text-blue-800',
+  NEW_CHANNEL: 'bg-indigo-100 text-indigo-800',
+  RETURNS_SPIKE: 'bg-rose-100 text-rose-800',
+  SOCIAL_BUZZ: 'bg-pink-100 text-pink-800',
+};
+
+const signalTypeOptions = [
+  'POS_SPIKE', 'POS_DROP', 'STOCKOUT_ALERT', 'PROMOTION_LAUNCH', 'PROMOTION_END',
+  'WEATHER_EVENT', 'FESTIVAL_SEASON', 'COMPETITOR_PRICE', 'MARKET_TREND',
+  'NEW_CHANNEL', 'RETURNS_SPIKE', 'SOCIAL_BUZZ',
+];
 
 export default function DemandForecastsPage() {
   const queryClient = useQueryClient();
@@ -147,6 +194,86 @@ export default function DemandForecastsPage() {
       return res.json();
     },
     enabled: activeTab === 'classification',
+  });
+
+  // Demand signals query
+  const { data: signalsData, isLoading: isLoadingSignals, refetch: refetchSignals } = useQuery({
+    queryKey: ['snop-demand-signals'],
+    queryFn: async () => {
+      const res = await apiClient.get('/api/v1/snop/demand-signals?limit=100');
+      return res.data;
+    },
+    enabled: activeTab === 'sensing',
+  });
+
+  // Demand sensing analysis
+  const { data: sensingAnalysis, isLoading: isAnalyzing, refetch: refetchAnalysis } = useQuery({
+    queryKey: ['snop-sensing-analysis'],
+    queryFn: async () => {
+      const res = await apiClient.post('/api/v1/snop/demand-signals/analyze?horizon_days=30');
+      return res.data;
+    },
+    enabled: activeTab === 'sensing',
+  });
+
+  // Create signal state
+  const [showCreateSignal, setShowCreateSignal] = useState(false);
+  const [newSignal, setNewSignal] = useState({
+    signal_name: '',
+    signal_type: 'PROMOTION_LAUNCH',
+    impact_direction: 'UP',
+    impact_pct: 10,
+    signal_strength: 0.7,
+    confidence: 0.8,
+    effective_start: new Date().toISOString().split('T')[0],
+    effective_end: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
+    decay_rate: 0.1,
+    applies_to_all: true,
+    source: 'MANUAL',
+    notes: '',
+  });
+
+  const createSignalMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiClient.post('/api/v1/snop/demand-signals', newSignal);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success('Demand signal created');
+      setShowCreateSignal(false);
+      queryClient.invalidateQueries({ queryKey: ['snop-demand-signals'] });
+      queryClient.invalidateQueries({ queryKey: ['snop-sensing-analysis'] });
+    },
+    onError: () => {
+      toast.error('Failed to create signal');
+    },
+  });
+
+  const detectPosMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiClient.post('/api/v1/snop/demand-signals/detect-pos?lookback_days=7');
+      return res.data;
+    },
+    onSuccess: (data) => {
+      toast.success(`Detected ${data.signals?.length || 0} POS signals`);
+      queryClient.invalidateQueries({ queryKey: ['snop-demand-signals'] });
+      queryClient.invalidateQueries({ queryKey: ['snop-sensing-analysis'] });
+    },
+    onError: () => {
+      toast.error('Failed to detect POS signals');
+    },
+  });
+
+  const dismissSignalMutation = useMutation({
+    mutationFn: async (signalId: string) => {
+      const res = await apiClient.post(`/api/v1/snop/demand-signals/${signalId}/dismiss`);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success('Signal dismissed');
+      queryClient.invalidateQueries({ queryKey: ['snop-demand-signals'] });
+      queryClient.invalidateQueries({ queryKey: ['snop-sensing-analysis'] });
+    },
   });
 
   const generateMutation = useMutation({
@@ -260,6 +387,10 @@ export default function DemandForecastsPage() {
           <TabsTrigger value="classification">
             <BarChart3 className="h-4 w-4 mr-1.5" />
             ABC-XYZ Classification
+          </TabsTrigger>
+          <TabsTrigger value="sensing">
+            <Radio className="h-4 w-4 mr-1.5" />
+            Demand Sensing
           </TabsTrigger>
         </TabsList>
 
@@ -701,6 +832,387 @@ export default function DemandForecastsPage() {
                 No classification data available.
               </CardContent>
             </Card>
+          )}
+        </TabsContent>
+
+        {/* Demand Sensing Tab */}
+        <TabsContent value="sensing" className="space-y-4">
+          {isLoadingSignals || isAnalyzing ? (
+            <div className="grid gap-4 md:grid-cols-2">
+              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-40" />)}
+            </div>
+          ) : (
+            <>
+              {/* Sensing Overview Cards */}
+              <div className="grid gap-4 md:grid-cols-4">
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      <Signal className="h-4 w-4 text-green-600" />
+                      <span className="text-sm text-muted-foreground">Active Signals</span>
+                    </div>
+                    <p className="text-2xl font-bold mt-2">
+                      {sensingAnalysis?.active_signals_count || 0}
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      {(sensingAnalysis?.net_forecast_adjustment_pct || 0) >= 0 ? (
+                        <ArrowUp className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <ArrowDown className="h-4 w-4 text-red-600" />
+                      )}
+                      <span className="text-sm text-muted-foreground">Net Forecast Adj.</span>
+                    </div>
+                    <p className={`text-2xl font-bold mt-2 ${
+                      (sensingAnalysis?.net_forecast_adjustment_pct || 0) >= 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {(sensingAnalysis?.net_forecast_adjustment_pct || 0) >= 0 ? '+' : ''}
+                      {sensingAnalysis?.net_forecast_adjustment_pct?.toFixed(1) || '0.0'}%
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-purple-600" />
+                      <span className="text-sm text-muted-foreground">Confidence</span>
+                    </div>
+                    <p className="text-2xl font-bold mt-2">
+                      {((sensingAnalysis?.weighted_confidence || 0) * 100).toFixed(0)}%
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      <Radio className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm text-muted-foreground">Total Signals</span>
+                    </div>
+                    <p className="text-2xl font-bold mt-2">
+                      {sensingAnalysis?.total_signals_count || signalsData?.total || 0}
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Actions Row */}
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => setShowCreateSignal(true)}
+                  size="sm"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Signal
+                </Button>
+                <Button
+                  onClick={() => detectPosMutation.mutate()}
+                  disabled={detectPosMutation.isPending}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Scan className="h-4 w-4 mr-2" />
+                  {detectPosMutation.isPending ? 'Scanning...' : 'Auto-Detect POS Signals'}
+                </Button>
+                <Button
+                  onClick={() => { refetchSignals(); refetchAnalysis(); }}
+                  variant="outline"
+                  size="sm"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Refresh
+                </Button>
+              </div>
+
+              {/* Create Signal Dialog */}
+              <Dialog open={showCreateSignal} onOpenChange={setShowCreateSignal}>
+                <DialogContent className="max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Create Demand Signal</DialogTitle>
+                    <DialogDescription>
+                      Add a manual demand signal (promotion, weather event, market trend, etc.)
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label>Signal Name</Label>
+                      <Input
+                        value={newSignal.signal_name}
+                        onChange={(e) => setNewSignal({ ...newSignal, signal_name: e.target.value })}
+                        placeholder="e.g., Diwali Sale 2026"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Signal Type</Label>
+                        <Select
+                          value={newSignal.signal_type}
+                          onValueChange={(v) => setNewSignal({ ...newSignal, signal_type: v })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {signalTypeOptions.map((t) => (
+                              <SelectItem key={t} value={t}>
+                                {signalTypeLabels[t] || t}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Direction</Label>
+                        <Select
+                          value={newSignal.impact_direction}
+                          onValueChange={(v) => setNewSignal({ ...newSignal, impact_direction: v })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="UP">Demand UP</SelectItem>
+                            <SelectItem value="DOWN">Demand DOWN</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div>
+                        <Label>Impact %</Label>
+                        <Input
+                          type="number"
+                          value={newSignal.impact_pct}
+                          onChange={(e) => setNewSignal({ ...newSignal, impact_pct: Number(e.target.value) })}
+                        />
+                      </div>
+                      <div>
+                        <Label>Strength (0-1)</Label>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          max="1"
+                          value={newSignal.signal_strength}
+                          onChange={(e) => setNewSignal({ ...newSignal, signal_strength: Number(e.target.value) })}
+                        />
+                      </div>
+                      <div>
+                        <Label>Confidence</Label>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          max="1"
+                          value={newSignal.confidence}
+                          onChange={(e) => setNewSignal({ ...newSignal, confidence: Number(e.target.value) })}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Start Date</Label>
+                        <Input
+                          type="date"
+                          value={newSignal.effective_start}
+                          onChange={(e) => setNewSignal({ ...newSignal, effective_start: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label>End Date</Label>
+                        <Input
+                          type="date"
+                          value={newSignal.effective_end}
+                          onChange={(e) => setNewSignal({ ...newSignal, effective_end: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Notes (optional)</Label>
+                      <Input
+                        value={newSignal.notes}
+                        onChange={(e) => setNewSignal({ ...newSignal, notes: e.target.value })}
+                        placeholder="Additional context..."
+                      />
+                    </div>
+                    <Button
+                      onClick={() => createSignalMutation.mutate()}
+                      disabled={createSignalMutation.isPending || !newSignal.signal_name}
+                      className="w-full"
+                    >
+                      {createSignalMutation.isPending ? 'Creating...' : 'Create Signal'}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              {/* Recommendations */}
+              {sensingAnalysis?.recommendations && sensingAnalysis.recommendations.length > 0 && (
+                <Card className="border-blue-200 bg-blue-50/30">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-blue-600" />
+                      AI Recommendations
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-2">
+                      {sensingAnalysis.recommendations.map((rec: string, i: number) => (
+                        <li key={i} className="text-sm flex items-start gap-2">
+                          <span className="text-blue-500 mt-0.5">&#8226;</span>
+                          {rec}
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Impact by Signal Type */}
+              {sensingAnalysis?.impact_by_type && Object.keys(sensingAnalysis.impact_by_type).length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Impact by Signal Type</CardTitle>
+                    <CardDescription>Weighted impact contribution from each signal category</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-56">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={Object.entries(sensingAnalysis.impact_by_type).map(([type, impact]) => ({
+                            type: signalTypeLabels[type] || type.replace('EXT_', ''),
+                            impact: Number(impact),
+                            fill: Number(impact) >= 0 ? '#22C55E' : '#EF4444',
+                          }))}
+                          layout="vertical"
+                        >
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis type="number" unit="%" />
+                          <YAxis type="category" dataKey="type" width={130} />
+                          <Tooltip formatter={(value) => [`${Number(value).toFixed(1)}%`, 'Impact']} />
+                          <Bar dataKey="impact" radius={[0, 4, 4, 0]}>
+                            {Object.entries(sensingAnalysis.impact_by_type).map(([type, impact], index) => (
+                              <Cell key={index} fill={Number(impact) >= 0 ? '#22C55E' : '#EF4444'} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Active Signals Feed */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Signal Feed</CardTitle>
+                  <CardDescription>
+                    {signalsData?.total || 0} total signals | Showing active and recent signals
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Signal</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Direction</TableHead>
+                        <TableHead>Impact</TableHead>
+                        <TableHead>Strength</TableHead>
+                        <TableHead>Active</TableHead>
+                        <TableHead>Remaining</TableHead>
+                        <TableHead>Source</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {signalsData?.signals?.length > 0 ? (
+                        signalsData.signals.map((signal: any) => (
+                          <TableRow key={signal.id}>
+                            <TableCell className="font-medium max-w-[180px] truncate">
+                              {signal.name}
+                            </TableCell>
+                            <TableCell>
+                              <Badge className={signalTypeColors[signal.type] || 'bg-gray-100 text-gray-800'}>
+                                {signalTypeLabels[signal.type] || signal.type}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {signal.impact_direction === 'UP' ? (
+                                <ArrowUp className="h-4 w-4 text-green-600" />
+                              ) : (
+                                <ArrowDown className="h-4 w-4 text-red-600" />
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <span className={signal.impact_direction === 'UP' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
+                                {signal.impact_direction === 'UP' ? '+' : '-'}{signal.impact_pct?.toFixed(1)}%
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full bg-blue-500 rounded-full"
+                                    style={{ width: `${(signal.current_strength || 0) * 100}%` }}
+                                  />
+                                </div>
+                                <span className="text-xs text-muted-foreground">
+                                  {((signal.current_strength || 0) * 100).toFixed(0)}%
+                                </span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-muted-foreground text-sm">
+                              {signal.days_active}d
+                            </TableCell>
+                            <TableCell className="text-muted-foreground text-sm">
+                              {signal.days_remaining}d
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="text-xs">
+                                {signal.source}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge className={
+                                signal.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
+                                signal.status === 'APPLIED' ? 'bg-blue-100 text-blue-800' :
+                                signal.status === 'EXPIRED' ? 'bg-gray-100 text-gray-600' :
+                                signal.status === 'DISMISSED' ? 'bg-red-100 text-red-600' :
+                                'bg-yellow-100 text-yellow-800'
+                              }>
+                                {signal.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {signal.status === 'ACTIVE' && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => dismissSignalMutation.mutate(signal.id)}
+                                  title="Dismiss signal"
+                                >
+                                  <XCircle className="h-4 w-4 text-muted-foreground" />
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
+                            No demand signals yet. Create one manually or use Auto-Detect to scan POS data.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </>
           )}
         </TabsContent>
       </Tabs>
