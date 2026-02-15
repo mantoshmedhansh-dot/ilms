@@ -1,11 +1,17 @@
 """
 Tenant middleware for multi-tenant request handling
 """
+import contextvars
 from fastapi import Request, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models.tenant import Tenant
 import logging
+
+# Context variable for current tenant (accessible from decorators without Request)
+current_tenant_var: contextvars.ContextVar[Tenant | None] = contextvars.ContextVar(
+    'current_tenant', default=None
+)
 
 logger = logging.getLogger(__name__)
 
@@ -151,10 +157,11 @@ async def tenant_middleware(request: Request, call_next):
         # Get tenant from request (HTTPException raised here will propagate naturally)
         tenant = await get_tenant_from_request(request, db)
 
-        # Inject tenant into request state
+        # Inject tenant into request state and context variable
         request.state.tenant = tenant
         request.state.tenant_id = str(tenant.id)
         request.state.schema = tenant.database_schema
+        current_tenant_var.set(tenant)
 
         logger.info(
             f"Request for tenant: {tenant.name} ({tenant.subdomain}) "

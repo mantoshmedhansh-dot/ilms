@@ -60,31 +60,32 @@ def require_module(module_code: str):
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
-            # Extract request from args
-            request = None
-            for arg in args:
-                if isinstance(arg, Request):
-                    request = arg
-                    break
+            # Get tenant from context variable (set by tenant middleware)
+            from app.middleware.tenant import current_tenant_var
 
-            # Also check kwargs
-            if not request and "request" in kwargs:
-                request = kwargs["request"]
+            tenant = current_tenant_var.get()
 
-            if not request:
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Request object not found in decorator"
-                )
+            # Fallback: try to find Request in args/kwargs
+            if tenant is None:
+                request = None
+                for arg in args:
+                    if isinstance(arg, Request):
+                        request = arg
+                        break
+                if not request:
+                    for val in kwargs.values():
+                        if isinstance(val, Request):
+                            request = val
+                            break
+                if request and hasattr(request, 'state') and hasattr(request.state, 'tenant'):
+                    tenant = request.state.tenant
 
-            # Get tenant from request state
-            if not hasattr(request.state, "tenant"):
+            if tenant is None:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Tenant context not found. Please login."
                 )
 
-            tenant = request.state.tenant
             tenant_id = tenant.id
 
             # Check cache first (to reduce database queries)
