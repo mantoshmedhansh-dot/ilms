@@ -406,7 +406,7 @@ class NLPlanner:
 
         result = await self.db.execute(
             select(InventorySummary)
-            .where(InventorySummary.available_quantity <= InventorySummary.safety_stock)
+            .where(InventorySummary.available_quantity <= InventorySummary.minimum_stock)
         )
         at_risk = list(result.scalars().all())
 
@@ -434,7 +434,7 @@ class NLPlanner:
                         "product_id": str(i.product_id),
                         "warehouse_id": str(i.warehouse_id),
                         "available": float(i.available_quantity or 0),
-                        "safety_stock": float(i.safety_stock or 0),
+                        "safety_stock": float(i.minimum_stock or 0),
                     }
                     for i in at_risk[:10]
                 ],
@@ -599,7 +599,7 @@ class NLPlanner:
 
         below_safety = await self.db.execute(
             select(func.count(InventorySummary.id))
-            .where(InventorySummary.available_quantity <= InventorySummary.safety_stock)
+            .where(InventorySummary.available_quantity <= InventorySummary.minimum_stock)
         )
         below = below_safety.scalar() or 0
 

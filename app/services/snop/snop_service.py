@@ -443,8 +443,8 @@ class SNOPService:
         )
         inv = inv_result.scalar_one_or_none()
         if inv:
-            current_safety_stock = Decimal(str(inv.safety_stock or 0))
-            current_reorder_point = Decimal(str(inv.reorder_point or 0))
+            current_safety_stock = Decimal(str(inv.minimum_stock or 0))
+            current_reorder_point = Decimal(str(inv.reorder_level or 0))
 
         # Calculate expected outcomes
         avg_inventory = Decimal(str(calc["economic_order_qty"])) / 2 + Decimal(str(calc["safety_stock"]))

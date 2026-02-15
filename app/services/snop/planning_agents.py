@@ -123,14 +123,14 @@ class PlanningAgents:
 
         result = await self.db.execute(
             select(InventorySummary)
-            .where(InventorySummary.available_quantity <= InventorySummary.safety_stock * Decimal(str(threshold)))
+            .where(InventorySummary.available_quantity <= InventorySummary.minimum_stock * Decimal(str(threshold)))
         )
         low_stock = list(result.scalars().all())
 
         for inv in low_stock:
             available = float(inv.available_quantity or 0)
-            safety = float(inv.safety_stock or 0)
-            reorder_point = float(inv.reorder_point or 0)
+            safety = float(inv.minimum_stock or 0)
+            reorder_point = float(inv.reorder_level or 0)
 
             if available <= 0:
                 severity = AlertSeverity.CRITICAL.value
@@ -300,7 +300,7 @@ class PlanningAgents:
             select(InventorySummary)
             .where(
                 and_(
-                    InventorySummary.available_quantity <= InventorySummary.reorder_point,
+                    InventorySummary.available_quantity <= InventorySummary.reorder_level,
                     InventorySummary.available_quantity >= 0,
                 )
             )
@@ -309,8 +309,8 @@ class PlanningAgents:
 
         for inv in below_reorder:
             available = float(inv.available_quantity or 0)
-            reorder_point = float(inv.reorder_point or 0)
-            safety_stock = float(inv.safety_stock or 0)
+            reorder_point = float(inv.reorder_level or 0)
+            safety_stock = float(inv.minimum_stock or 0)
 
             # Target stock = 2x reorder point (simplified EOQ)
             target_stock = reorder_point * 2
