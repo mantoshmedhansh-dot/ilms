@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Boxes,
   RefreshCw,
@@ -25,6 +25,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { snopApi } from '@/lib/api';
+import { toast } from 'sonner';
 
 function formatNumber(value: number | string | null | undefined): string {
   const num = Number(value) || 0;
@@ -34,6 +35,17 @@ function formatNumber(value: number | string | null | undefined): string {
 }
 
 export default function InventoryOptimizationPage() {
+  const queryClient = useQueryClient();
+
+  const runOptimization = useMutation({
+    mutationFn: () => snopApi.runOptimization(),
+    onSuccess: () => {
+      toast.success('Optimization completed');
+      queryClient.invalidateQueries({ queryKey: ['snop-inventory-optimizations'] });
+    },
+    onError: () => toast.error('Optimization failed'),
+  });
+
   const { data: optimizations, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['snop-inventory-optimizations'],
     queryFn: async () => {
@@ -77,9 +89,9 @@ export default function InventoryOptimizationPage() {
             <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
-          <Button>
+          <Button onClick={() => runOptimization.mutate()} disabled={runOptimization.isPending}>
             <Calculator className="h-4 w-4 mr-2" />
-            Run Optimization
+            {runOptimization.isPending ? 'Optimizing...' : 'Run Optimization'}
           </Button>
         </div>
       </div>

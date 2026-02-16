@@ -70,7 +70,7 @@ export default function SupplyPlansPage() {
   const { data: capacity, isLoading: isLoadingCapacity } = useQuery({
     queryKey: ['snop-capacity-analysis'],
     queryFn: async () => {
-      const res = await apiClient.get('/api/v1/snop/supply-plan/capacity-analysis?horizon_days=90&daily_capacity=1000');
+      const res = await apiClient.get('/snop/supply-plan/capacity-analysis?horizon_days=90&daily_capacity=1000');
       return res.data;
     },
     enabled: activeTab === 'capacity',
@@ -80,7 +80,7 @@ export default function SupplyPlansPage() {
   const { data: ddmrp, isLoading: isLoadingDdmrp } = useQuery({
     queryKey: ['snop-ddmrp-buffers'],
     queryFn: async () => {
-      const res = await apiClient.get('/api/v1/snop/supply-plan/ddmrp-buffers?lookback_days=90');
+      const res = await apiClient.get('/snop/supply-plan/ddmrp-buffers?lookback_days=90');
       return res.data;
     },
     enabled: activeTab === 'ddmrp',

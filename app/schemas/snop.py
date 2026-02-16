@@ -450,8 +450,8 @@ class InventoryOptimizationRequest(BaseModel):
     ordering_cost: Decimal = Field(default=Decimal("100"), ge=0)
 
     # Analysis period
-    analysis_start_date: date
-    analysis_end_date: date
+    analysis_start_date: Optional[date] = None
+    analysis_end_date: Optional[date] = None
 
 
 class InventoryOptimizationResponse(BaseResponseSchema):

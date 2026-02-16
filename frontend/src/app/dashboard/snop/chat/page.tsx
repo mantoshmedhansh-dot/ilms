@@ -134,63 +134,101 @@ export default function SNOPChatPage() {
       if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
       return value.toFixed(value % 1 === 0 ? 0 : 2);
     }
+    if (Array.isArray(value)) return `${value.length} items`;
+    if (typeof value === 'object' && value !== null) return JSON.stringify(value);
     return String(value);
+  };
+
+  const renderArrayTable = (key: string, items: any[]) => {
+    if (!items.length) return null;
+    const cols = Object.keys(items[0]).filter(k => k !== 'id');
+    return (
+      <div key={key} className="mt-3">
+        <p className="text-sm font-medium capitalize mb-2">{key.replace(/_/g, ' ')}</p>
+        <div className="overflow-x-auto rounded-lg border">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/50">
+              <tr>
+                {cols.map(col => (
+                  <th key={col} className="px-3 py-2 text-left font-medium capitalize text-muted-foreground">
+                    {col.replace(/_/g, ' ')}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {items.slice(0, 10).map((item, i) => (
+                <tr key={i} className="border-t">
+                  {cols.map(col => (
+                    <td key={col} className="px-3 py-1.5">{formatDataValue(item[col])}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
   };
 
   const renderData = (data: Record<string, any>) => {
     if (!data || Object.keys(data).length === 0) return null;
 
-    // If data has nested objects, render as cards
-    const hasNested = Object.values(data).some(
-      (v) => typeof v === 'object' && v !== null && !Array.isArray(v)
+    const arrayEntries = Object.entries(data).filter(
+      ([, v]) => Array.isArray(v) && v.length > 0 && typeof v[0] === 'object'
+    );
+    const objectEntries = Object.entries(data).filter(
+      ([, v]) => typeof v === 'object' && v !== null && !Array.isArray(v)
+    );
+    const flatEntries = Object.entries(data).filter(
+      ([, v]) => !Array.isArray(v) && (typeof v !== 'object' || v === null)
     );
 
-    if (hasNested) {
-      return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-          {Object.entries(data).map(([key, value]) => {
-            if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-              return (
-                <Card key={key} className="bg-muted/50">
-                  <CardHeader className="pb-2 pt-3 px-4">
-                    <CardTitle className="text-sm font-medium capitalize">
-                      {key.replace(/_/g, ' ')}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="px-4 pb-3">
-                    <div className="space-y-1">
-                      {Object.entries(value as Record<string, any>).map(([k, v]) => (
-                        <div key={k} className="flex justify-between text-sm">
-                          <span className="text-muted-foreground capitalize">
-                            {k.replace(/_/g, ' ')}
-                          </span>
-                          <span className="font-medium">{formatDataValue(v)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            }
-            return null;
-          })}
-        </div>
-      );
-    }
-
-    // Flat data — render as a simple list
     return (
-      <div className="bg-muted/50 rounded-lg p-3 mt-3">
-        <div className="grid grid-cols-2 gap-2">
-          {Object.entries(data).map(([key, value]) => (
-            <div key={key} className="flex justify-between text-sm">
-              <span className="text-muted-foreground capitalize">
-                {key.replace(/_/g, ' ')}
-              </span>
-              <span className="font-medium">{formatDataValue(value)}</span>
+      <div className="mt-3 space-y-3">
+        {/* Flat key-value pairs */}
+        {flatEntries.length > 0 && (
+          <div className="bg-muted/50 rounded-lg p-3">
+            <div className="grid grid-cols-2 gap-2">
+              {flatEntries.map(([key, value]) => (
+                <div key={key} className="flex justify-between text-sm">
+                  <span className="text-muted-foreground capitalize">
+                    {key.replace(/_/g, ' ')}
+                  </span>
+                  <span className="font-medium">{formatDataValue(value)}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        )}
+        {/* Nested object cards */}
+        {objectEntries.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {objectEntries.map(([key, value]) => (
+              <Card key={key} className="bg-muted/50">
+                <CardHeader className="pb-2 pt-3 px-4">
+                  <CardTitle className="text-sm font-medium capitalize">
+                    {key.replace(/_/g, ' ')}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-3">
+                  <div className="space-y-1">
+                    {Object.entries(value as Record<string, any>).map(([k, v]) => (
+                      <div key={k} className="flex justify-between text-sm">
+                        <span className="text-muted-foreground capitalize">
+                          {k.replace(/_/g, ' ')}
+                        </span>
+                        <span className="font-medium">{formatDataValue(v)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+        {/* Array tables */}
+        {arrayEntries.map(([key, value]) => renderArrayTable(key, value as any[]))}
       </div>
     );
   };

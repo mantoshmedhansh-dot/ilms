@@ -953,9 +953,23 @@ async def calculate_inventory_optimization(
     product_ids = request.product_ids or []
     warehouse_ids = request.warehouse_ids or []
 
+    # Auto-populate with all active products/warehouses if not specified
+    if not product_ids:
+        from app.models.product import Product
+        result = await db.execute(
+            select(Product.id).where(Product.is_active == True)
+        )
+        product_ids = [row[0] for row in result.fetchall()]
+    if not warehouse_ids:
+        from app.models.warehouse import Warehouse
+        result = await db.execute(
+            select(Warehouse.id).where(Warehouse.is_active == True)
+        )
+        warehouse_ids = [row[0] for row in result.fetchall()]
+
     if not product_ids or not warehouse_ids:
         return {
-            "message": "Please specify at least one product and warehouse",
+            "message": "No active products or warehouses found",
             "optimizations": []
         }
 

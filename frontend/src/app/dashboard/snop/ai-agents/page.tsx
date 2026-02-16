@@ -65,7 +65,7 @@ export default function AIAgentsPage() {
   const { data: alertCenter, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['snop-alert-center'],
     queryFn: async () => {
-      const res = await apiClient.get('/api/v1/snop/agents/alert-center');
+      const res = await apiClient.get('/snop/agents/alert-center');
       return res.data;
     },
   });
@@ -73,7 +73,7 @@ export default function AIAgentsPage() {
   const { data: agentStatus } = useQuery({
     queryKey: ['snop-agent-status'],
     queryFn: async () => {
-      const res = await apiClient.get('/api/v1/snop/agents/status');
+      const res = await apiClient.get('/snop/agents/status');
       return res.data;
     },
     enabled: activeTab === 'agents',
@@ -82,7 +82,7 @@ export default function AIAgentsPage() {
   // ---- Individual agent mutations ----
   const runExceptions = useMutation({
     mutationFn: async () => {
-      const res = await apiClient.post('/api/v1/snop/agents/run-exceptions');
+      const res = await apiClient.post('/snop/agents/run-exceptions');
       return res.data;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['snop-alert-center'] }),
@@ -90,14 +90,14 @@ export default function AIAgentsPage() {
 
   const runReorder = useMutation({
     mutationFn: async () => {
-      const res = await apiClient.post('/api/v1/snop/agents/run-reorder');
+      const res = await apiClient.post('/snop/agents/run-reorder');
       return res.data;
     },
   });
 
   const runBias = useMutation({
     mutationFn: async () => {
-      const res = await apiClient.post('/api/v1/snop/agents/run-bias');
+      const res = await apiClient.post('/snop/agents/run-bias');
       return res.data;
     },
   });
