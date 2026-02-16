@@ -81,7 +81,7 @@ class DemandPlannerService:
         # Build base query for delivered orders
         query = (
             select(
-                Order.created_at,
+                func.min(Order.created_at).label("order_date"),
                 func.sum(OrderItem.quantity).label("quantity"),
                 func.sum(OrderItem.total_amount).label("revenue")
             )
@@ -110,7 +110,7 @@ class DemandPlannerService:
 
         # Group by granularity
         if granularity == ForecastGranularity.DAILY:
-            query = query.group_by(Order.created_at).order_by(Order.created_at)
+            query = query.group_by(func.date_trunc('day', Order.created_at)).order_by(func.date_trunc('day', Order.created_at))
         elif granularity == ForecastGranularity.WEEKLY:
             # Group by ISO week
             query = query.group_by(
@@ -135,18 +135,11 @@ class DemandPlannerService:
         # Convert to standardized format
         demand_data = []
         for row in rows:
-            if granularity == ForecastGranularity.DAILY:
-                demand_data.append({
-                    "date": row.order_date,
-                    "quantity": Decimal(str(row.quantity or 0)),
-                    "revenue": Decimal(str(row.revenue or 0))
-                })
-            else:
-                # For weekly/monthly, we need to reconstruct the date
-                demand_data.append({
-                    "date": row.order_date if hasattr(row, 'order_date') else start_date,
-                    "quantity": Decimal(str(row.quantity or 0)),
-                    "revenue": Decimal(str(row.revenue or 0))
+            row_date = row.order_date if hasattr(row, 'order_date') else start_date
+            demand_data.append({
+                "date": row_date,
+                "quantity": Decimal(str(row.quantity or 0)),
+                "revenue": Decimal(str(row.revenue or 0))
                 })
 
         return demand_data
