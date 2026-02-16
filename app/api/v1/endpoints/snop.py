@@ -300,44 +300,90 @@ async def list_forecasts(
     category_id: Optional[UUID] = Query(None),
     status: Optional[ForecastStatus] = Query(None),
     forecast_level: Optional[ForecastLevel] = Query(None),
+    level: Optional[ForecastLevel] = Query(None),
+    granularity: Optional[ForecastGranularity] = Query(None),
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0)
 ):
     """
     List demand forecasts with filters.
-    """
-    demand_planner = DemandPlannerService(db)
 
-    forecasts, total = await demand_planner.list_forecasts(
-        product_id=product_id,
-        category_id=category_id,
-        status=status,
-        forecast_level=forecast_level,
-        limit=limit,
-        offset=offset
+    Accepts both 'level' and 'forecast_level' params (frontend sends 'level').
+    Returns 'items' array with computed 'accuracy' (100 - mape) and 'avg_accuracy'.
+    """
+    from app.models.snop import DemandForecast
+    from sqlalchemy.orm import selectinload
+    from sqlalchemy import func as sa_func
+
+    # Accept both 'level' and 'forecast_level' params
+    effective_level = forecast_level or level
+
+    query = select(DemandForecast).where(DemandForecast.is_active == True)
+    count_query = select(sa_func.count(DemandForecast.id)).where(DemandForecast.is_active == True)
+
+    if product_id:
+        query = query.where(DemandForecast.product_id == product_id)
+        count_query = count_query.where(DemandForecast.product_id == product_id)
+    if category_id:
+        query = query.where(DemandForecast.category_id == category_id)
+        count_query = count_query.where(DemandForecast.category_id == category_id)
+    if status:
+        query = query.where(DemandForecast.status == status.value)
+        count_query = count_query.where(DemandForecast.status == status.value)
+    if effective_level:
+        query = query.where(DemandForecast.forecast_level == effective_level.value)
+        count_query = count_query.where(DemandForecast.forecast_level == effective_level.value)
+    if granularity:
+        query = query.where(DemandForecast.granularity == granularity.value)
+        count_query = count_query.where(DemandForecast.granularity == granularity.value)
+
+    # Eager load product/category relationships for display names
+    query = query.options(
+        selectinload(DemandForecast.product),
+        selectinload(DemandForecast.category),
     )
+
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+
+    query = query.order_by(DemandForecast.created_at.desc()).offset(offset).limit(limit)
+    result = await db.execute(query)
+    forecasts = list(result.scalars().all())
+
+    items = []
+    mape_values = []
+    for f in forecasts:
+        mape_val = float(f.mape) if f.mape is not None else None
+        accuracy = round(max(0, 100 - mape_val), 1) if mape_val is not None else None
+        if mape_val is not None:
+            mape_values.append(mape_val)
+
+        items.append({
+            "id": str(f.id),
+            "code": f.forecast_code,
+            "name": f.forecast_name,
+            "product_name": f.product.name if f.product else None,
+            "category_name": f.category.name if f.category else None,
+            "level": f.forecast_level,
+            "granularity": f.granularity,
+            "start_date": f.forecast_start_date.isoformat(),
+            "end_date": f.forecast_end_date.isoformat(),
+            "total_qty": float(f.total_forecasted_qty),
+            "algorithm": f.algorithm_used,
+            "mape": mape_val,
+            "accuracy": accuracy,
+            "status": f.status,
+            "created_at": f.created_at.isoformat(),
+        })
+
+    avg_accuracy = round(100 - (sum(mape_values) / len(mape_values)), 1) if mape_values else None
 
     return {
         "total": total,
         "limit": limit,
         "offset": offset,
-        "forecasts": [
-            {
-                "id": str(f.id),
-                "code": f.forecast_code,
-                "name": f.forecast_name,
-                "level": f.forecast_level,
-                "granularity": f.granularity,
-                "start_date": f.forecast_start_date.isoformat(),
-                "end_date": f.forecast_end_date.isoformat(),
-                "total_qty": float(f.total_forecasted_qty),
-                "algorithm": f.algorithm_used,
-                "mape": f.mape,
-                "status": f.status,
-                "created_at": f.created_at.isoformat()
-            }
-            for f in forecasts
-        ]
+        "avg_accuracy": avg_accuracy,
+        "items": items,
     }
 
 
@@ -546,6 +592,62 @@ async def approve_adjustment(
 
 # ==================== Supply Planning ====================
 
+@router.get("/supply-plans")
+@require_module("scm_ai")
+async def list_supply_plans(
+    db: TenantDB,
+    current_user: CurrentUser,
+    status: Optional[str] = Query(None),
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0)
+):
+    """
+    List supply plans with summary stats.
+
+    Returns 'items' array. Each item includes a computed 'plan_type'
+    (PRODUCTION or PROCUREMENT) based on which quantity is larger.
+    """
+    from app.models.snop import SupplyPlan
+    from sqlalchemy import func as sa_func
+
+    query = select(SupplyPlan)
+    count_query = select(sa_func.count(SupplyPlan.id))
+
+    if status:
+        query = query.where(SupplyPlan.status == status)
+        count_query = count_query.where(SupplyPlan.status == status)
+
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+
+    query = query.order_by(SupplyPlan.created_at.desc()).offset(offset).limit(limit)
+    result = await db.execute(query)
+    plans = list(result.scalars().all())
+
+    items = []
+    for p in plans:
+        prod_qty = float(p.planned_production_qty or 0)
+        proc_qty = float(p.planned_procurement_qty or 0)
+        plan_type = "PRODUCTION" if prod_qty >= proc_qty else "PROCUREMENT"
+
+        items.append({
+            "id": str(p.id),
+            "plan_code": p.plan_code,
+            "plan_name": p.plan_name,
+            "plan_type": plan_type,
+            "start_date": p.plan_start_date.isoformat(),
+            "end_date": p.plan_end_date.isoformat(),
+            "total_quantity": prod_qty + proc_qty,
+            "planned_production_qty": prod_qty,
+            "planned_procurement_qty": proc_qty,
+            "capacity_utilization": float(p.capacity_utilization_pct or 0),
+            "status": p.status,
+            "created_at": p.created_at.isoformat(),
+        })
+
+    return {"items": items, "total": total}
+
+
 @router.post("/supply-plan", response_model=SupplyPlanResponse)
 @require_module("scm_ai")
 async def create_supply_plan(
@@ -725,6 +827,110 @@ async def analyze_multi_source(
 
 # ==================== Inventory Optimization ====================
 
+@router.get("/inventory/optimizations")
+@require_module("scm_ai")
+async def list_inventory_optimizations(
+    db: TenantDB,
+    current_user: CurrentUser,
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0)
+):
+    """
+    List inventory optimization recommendations.
+
+    Returns 'items' array with product details, current stock, and
+    recommended safety stock / reorder point / EOQ per product-warehouse.
+    """
+    from app.models.snop import InventoryOptimization
+    from app.models.product import Product
+    from app.models.warehouse import Warehouse
+    from app.models.inventory import InventorySummary
+    from sqlalchemy import func as sa_func, and_
+
+    count_query = select(sa_func.count(InventoryOptimization.id))
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+
+    query = (
+        select(InventoryOptimization)
+        .order_by(InventoryOptimization.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+    )
+    result = await db.execute(query)
+    optimizations = list(result.scalars().all())
+
+    if not optimizations:
+        return {"items": [], "total": total, "potential_savings": 0}
+
+    # Batch fetch product and warehouse names
+    product_ids = list({o.product_id for o in optimizations})
+    warehouse_ids = list({o.warehouse_id for o in optimizations})
+
+    prod_result = await db.execute(
+        select(Product.id, Product.name, Product.sku).where(Product.id.in_(product_ids))
+    )
+    product_map = {str(r[0]): {"name": r[1], "sku": r[2]} for r in prod_result.all()}
+
+    wh_result = await db.execute(
+        select(Warehouse.id, Warehouse.name).where(Warehouse.id.in_(warehouse_ids))
+    )
+    warehouse_map = {str(r[0]): r[1] for r in wh_result.all()}
+
+    # Batch fetch current stock levels
+    stock_map = {}
+    for o in optimizations:
+        inv_result = await db.execute(
+            select(sa_func.coalesce(sa_func.sum(InventorySummary.quantity_on_hand), 0))
+            .where(
+                and_(
+                    InventorySummary.product_id == o.product_id,
+                    InventorySummary.warehouse_id == o.warehouse_id,
+                )
+            )
+        )
+        stock_map[(str(o.product_id), str(o.warehouse_id))] = float(inv_result.scalar() or 0)
+
+    items = []
+    potential_savings = 0.0
+    for o in optimizations:
+        pid_str = str(o.product_id)
+        wid_str = str(o.warehouse_id)
+        prod_info = product_map.get(pid_str, {"name": "Unknown", "sku": None})
+        wh_name = warehouse_map.get(wid_str, "Unknown")
+        current_stock = stock_map.get((pid_str, wid_str), 0)
+
+        rec_safety = float(o.recommended_safety_stock)
+        rec_reorder = float(o.recommended_reorder_point)
+        rec_eoq = float(o.recommended_order_qty)
+
+        items.append({
+            "id": str(o.id),
+            "product_name": prod_info["name"],
+            "sku": prod_info["sku"],
+            "warehouse_name": wh_name,
+            "current_stock": current_stock,
+            "recommended_safety_stock": rec_safety,
+            "recommended_reorder_point": rec_reorder,
+            "recommended_eoq": rec_eoq,
+            "current_safety_stock": float(o.current_safety_stock),
+            "expected_stockout_rate": float(o.expected_stockout_rate),
+            "expected_inventory_turns": float(o.expected_inventory_turns),
+            "is_applied": o.is_applied,
+        })
+
+        # Estimate savings from excess stock
+        if current_stock > rec_reorder * 1.5:
+            excess = current_stock - rec_reorder
+            potential_savings += excess * float(o.holding_cost_pct) * 100
+
+    return {
+        "items": items,
+        "total": total,
+        "potential_savings": round(potential_savings, 0),
+    }
+
+
 @router.post("/inventory/optimize")
 @require_module("scm_ai")
 async def calculate_inventory_optimization(
@@ -816,6 +1022,55 @@ async def get_safety_stock_recommendation(
 
 
 # ==================== Scenario Analysis ====================
+
+@router.get("/scenarios")
+@require_module("scm_ai")
+async def list_scenarios(
+    db: TenantDB,
+    current_user: CurrentUser,
+    status: Optional[str] = Query(None),
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0)
+):
+    """
+    List S&OP scenarios.
+
+    Returns 'items' array with scenario details and simulation results.
+    """
+    from app.models.snop import SNOPScenario
+    from sqlalchemy import func as sa_func
+
+    query = select(SNOPScenario).where(SNOPScenario.is_active == True)
+    count_query = select(sa_func.count(SNOPScenario.id)).where(SNOPScenario.is_active == True)
+
+    if status:
+        query = query.where(SNOPScenario.status == status)
+        count_query = count_query.where(SNOPScenario.status == status)
+
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+
+    query = query.order_by(SNOPScenario.created_at.desc()).offset(offset).limit(limit)
+    result = await db.execute(query)
+    scenarios = list(result.scalars().all())
+
+    items = []
+    for s in scenarios:
+        items.append({
+            "id": str(s.id),
+            "scenario_code": s.scenario_code,
+            "name": s.scenario_name,
+            "scenario_name": s.scenario_name,
+            "description": s.description,
+            "status": s.status,
+            "results": s.results,
+            "simulation_start_date": s.simulation_start_date.isoformat(),
+            "simulation_end_date": s.simulation_end_date.isoformat(),
+            "created_at": s.created_at.isoformat(),
+        })
+
+    return {"items": items, "total": total}
+
 
 @router.post("/scenario", response_model=SNOPScenarioResponse)
 @require_module("scm_ai")

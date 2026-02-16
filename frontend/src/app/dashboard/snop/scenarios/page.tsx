@@ -62,11 +62,12 @@ const statusColors: Record<string, string> = {
   ARCHIVED: 'bg-purple-100 text-purple-800',
 };
 
-function formatCurrency(val: number) {
-  if (val >= 10000000) return `${(val / 10000000).toFixed(2)} Cr`;
-  if (val >= 100000) return `${(val / 100000).toFixed(2)} L`;
-  if (val >= 1000) return `${(val / 1000).toFixed(1)} K`;
-  return val.toFixed(0);
+function formatCurrency(val: number | string | null | undefined) {
+  const num = Number(val) || 0;
+  if (num >= 10000000) return `${(num / 10000000).toFixed(2)} Cr`;
+  if (num >= 100000) return `${(num / 100000).toFixed(2)} L`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)} K`;
+  return num.toFixed(0);
 }
 
 export default function ScenariosPage() {

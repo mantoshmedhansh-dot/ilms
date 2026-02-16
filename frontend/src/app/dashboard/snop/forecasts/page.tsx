@@ -154,14 +154,17 @@ const signalTypeOptions = [
 
 export default function DemandForecastsPage() {
   const queryClient = useQueryClient();
-  const [granularity, setGranularity] = useState<string>('MONTHLY');
-  const [level, setLevel] = useState<string>('SKU');
+  const [granularity, setGranularity] = useState<string>('');
+  const [level, setLevel] = useState<string>('');
   const [selectedForecast, setSelectedForecast] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<string>('forecasts');
 
   const { data: forecasts, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['snop-forecasts', granularity, level],
-    queryFn: () => snopApi.getForecasts({ granularity, level }),
+    queryFn: () => snopApi.getForecasts({
+      ...(granularity ? { granularity } : {}),
+      ...(level ? { level } : {}),
+    }),
   });
 
   // Model comparison query
@@ -346,22 +349,24 @@ export default function DemandForecastsPage() {
         <CardContent className="p-4">
           <div className="flex items-center gap-4">
             <Filter className="h-4 w-4 text-muted-foreground" />
-            <Select value={granularity} onValueChange={setGranularity}>
+            <Select value={granularity} onValueChange={(v) => setGranularity(v === 'ALL' ? '' : v)}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Granularity" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="ALL">All</SelectItem>
                 <SelectItem value="DAILY">Daily</SelectItem>
                 <SelectItem value="WEEKLY">Weekly</SelectItem>
                 <SelectItem value="MONTHLY">Monthly</SelectItem>
                 <SelectItem value="QUARTERLY">Quarterly</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={level} onValueChange={setLevel}>
+            <Select value={level} onValueChange={(v) => setLevel(v === 'ALL' ? '' : v)}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Level" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="ALL">All Levels</SelectItem>
                 <SelectItem value="SKU">By SKU</SelectItem>
                 <SelectItem value="CATEGORY">By Category</SelectItem>
                 <SelectItem value="REGION">By Region</SelectItem>
@@ -405,7 +410,7 @@ export default function DemandForecastsPage() {
                   <span className="text-sm text-muted-foreground">Pending Review</span>
                 </div>
                 <p className="text-2xl font-bold mt-2">
-                  {forecasts?.items?.filter((f: any) => f.status === 'PENDING_REVIEW').length || 0}
+                  {forecasts?.items?.filter((f: any) => f.status === 'PENDING_REVIEW').length ?? 0}
                 </p>
               </CardContent>
             </Card>
@@ -416,7 +421,7 @@ export default function DemandForecastsPage() {
                   <span className="text-sm text-muted-foreground">Approved</span>
                 </div>
                 <p className="text-2xl font-bold mt-2">
-                  {forecasts?.items?.filter((f: any) => f.status === 'APPROVED').length || 0}
+                  {forecasts?.items?.filter((f: any) => f.status === 'APPROVED').length ?? 0}
                 </p>
               </CardContent>
             </Card>
@@ -427,7 +432,7 @@ export default function DemandForecastsPage() {
                   <span className="text-sm text-muted-foreground">Avg Accuracy</span>
                 </div>
                 <p className="text-2xl font-bold mt-2">
-                  {forecasts?.avg_accuracy?.toFixed(1) || 85}%
+                  {Number(forecasts?.avg_accuracy || 85).toFixed(1)}%
                 </p>
               </CardContent>
             </Card>
@@ -486,8 +491,8 @@ export default function DemandForecastsPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <span className={forecast.accuracy >= 80 ? 'text-green-600 font-semibold' : forecast.accuracy >= 60 ? 'text-amber-600' : 'text-red-600'}>
-                            {forecast.accuracy?.toFixed(1) || '-'}%
+                          <span className={Number(forecast.accuracy) >= 80 ? 'text-green-600 font-semibold' : Number(forecast.accuracy) >= 60 ? 'text-amber-600' : 'text-red-600'}>
+                            {forecast.accuracy != null ? Number(forecast.accuracy).toFixed(1) : '-'}%
                           </span>
                         </TableCell>
                         <TableCell>

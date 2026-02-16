@@ -229,10 +229,10 @@ export default function SupplyPlansPage() {
                           {new Date(plan.start_date).toLocaleDateString()} -{' '}
                           {new Date(plan.end_date).toLocaleDateString()}
                         </TableCell>
-                        <TableCell>{plan.total_quantity?.toLocaleString() || '-'}</TableCell>
+                        <TableCell>{Number(plan.total_quantity || 0).toLocaleString() || '-'}</TableCell>
                         <TableCell>
-                          <span className={plan.capacity_utilization >= 90 ? 'text-red-600' : 'text-green-600'}>
-                            {plan.capacity_utilization?.toFixed(1) || '-'}%
+                          <span className={Number(plan.capacity_utilization) >= 90 ? 'text-red-600' : 'text-green-600'}>
+                            {plan.capacity_utilization != null ? Number(plan.capacity_utilization).toFixed(1) : '-'}%
                           </span>
                         </TableCell>
                         <TableCell>

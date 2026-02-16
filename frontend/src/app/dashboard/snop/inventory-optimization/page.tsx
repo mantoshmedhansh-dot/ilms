@@ -26,10 +26,11 @@ import {
 } from '@/components/ui/table';
 import { snopApi } from '@/lib/api';
 
-function formatNumber(value: number): string {
-  if (value >= 100000) return `${(value / 100000).toFixed(1)}L`;
-  if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
-  return value.toFixed(0);
+function formatNumber(value: number | string | null | undefined): string {
+  const num = Number(value) || 0;
+  if (num >= 100000) return `${(num / 100000).toFixed(1)}L`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+  return num.toFixed(0);
 }
 
 export default function InventoryOptimizationPage() {
