@@ -327,7 +327,8 @@ class PicklistService:
         if notes:
             picklist.notes = (picklist.notes or "") + "\n" + notes
 
-        # Update order statuses
+        # Update order statuses and auto-create shipments
+        picked_orders = []
         for item in picklist.items:
             if item.is_picked and not item.is_short:
                 stmt = select(Order).where(Order.id == item.order_id)
@@ -336,8 +337,21 @@ class PicklistService:
                 if order:
                     order.status = OrderStatus.PICKED.value
                     order.picked_at = datetime.now(timezone.utc)
+                    if order.id not in [o.id for o in picked_orders]:
+                        picked_orders.append(order)
 
         await self.db.commit()
+
+        # GAP C: Auto-create shipment for each fully-picked order
+        for order in picked_orders:
+            try:
+                await self._auto_create_shipment(order, picklist.warehouse_id, picklist.created_by)
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(
+                    f"Auto-shipment creation failed for order {order.order_number}: {e}"
+                )
+
         await self.db.refresh(picklist)
         return picklist
 
@@ -369,3 +383,47 @@ class PicklistService:
         await self.db.commit()
         await self.db.refresh(picklist)
         return picklist
+
+    async def _auto_create_shipment(
+        self,
+        order: Order,
+        warehouse_id: uuid.UUID,
+        created_by: Optional[uuid.UUID] = None,
+    ) -> None:
+        """
+        GAP C: Auto-create shipment when picklist is completed for an order.
+        """
+        import logging
+        log = logging.getLogger(__name__)
+
+        from app.services.shipment_service import ShipmentService
+        from app.schemas.shipment import ShipmentCreate
+        from app.models.shipment import PaymentMode, PackagingType
+
+        shipping = order.shipping_address or {}
+        ship_to_name = shipping.get("name") or shipping.get("contact_name") or "Customer"
+        ship_to_phone = shipping.get("phone") or shipping.get("mobile") or ""
+        ship_to_address = shipping if isinstance(shipping, dict) else {}
+        ship_to_pincode = shipping.get("pincode") or shipping.get("zip") or ""
+
+        payment_mode = PaymentMode.COD if (order.payment_method or "").upper() == "COD" else PaymentMode.PREPAID
+
+        data = ShipmentCreate(
+            order_id=order.id,
+            warehouse_id=warehouse_id,
+            payment_mode=payment_mode,
+            cod_amount=float(order.total_amount) if payment_mode == PaymentMode.COD else None,
+            packaging_type=PackagingType.BOX,
+            no_of_boxes=1,
+            weight_kg=0.5,  # Default, recalculated in create_shipment from product master
+            ship_to_name=ship_to_name,
+            ship_to_phone=ship_to_phone,
+            ship_to_address=ship_to_address,
+            ship_to_pincode=ship_to_pincode,
+            ship_to_city=shipping.get("city"),
+            ship_to_state=shipping.get("state"),
+        )
+
+        svc = ShipmentService(self.db)
+        shipment = await svc.create_shipment(data, created_by=created_by)
+        log.info(f"Auto-created shipment {shipment.shipment_number} for order {order.order_number}")

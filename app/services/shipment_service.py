@@ -448,6 +448,35 @@ class ShipmentService:
             order.delivered_at = now
 
         await self.db.commit()
+
+        # GAP E: Auto-post revenue journal on delivery (DR AR, CR Revenue)
+        if order:
+            try:
+                from app.services.auto_journal_service import AutoJournalService
+                journal_svc = AutoJournalService(self.db)
+                # Generate invoice first if not already generated, then post journal
+                from app.models.order import Invoice
+                inv_result = await self.db.execute(
+                    select(Invoice).where(Invoice.order_id == order.id)
+                )
+                invoice = inv_result.scalar_one_or_none()
+                if invoice:
+                    await journal_svc.generate_for_sales_invoice(
+                        invoice_id=invoice.id,
+                        user_id=shipment.created_by,
+                        auto_post=True,
+                    )
+                    await self.db.commit()
+                    import logging
+                    logging.getLogger(__name__).info(
+                        f"Revenue journal auto-posted for delivered order {order.order_number}"
+                    )
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(
+                    f"Revenue journal failed for order {getattr(order, 'order_number', '')}: {e}"
+                )
+
         await self.db.refresh(shipment)
         return shipment
 

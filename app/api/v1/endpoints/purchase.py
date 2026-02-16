@@ -2261,6 +2261,36 @@ async def approve_purchase_order(
     await db.commit()
     print(f"=== PO APPROVE === Commit successful")
 
+    # GAP H: Auto-notify vendor on PO approval
+    if request.action == "APPROVE":
+        try:
+            from app.models.notifications import Notification, NotificationType
+            notification = Notification(
+                user_id=current_user.id,
+                notification_type=NotificationType.ALERT.value,
+                priority="HIGH",
+                title=f"PO {po.po_number} Approved - Send to Vendor",
+                message=(
+                    f"Purchase Order {po.po_number} for vendor {po.vendor_name} "
+                    f"has been approved (₹{po.grand_total:,.2f}). "
+                    f"Please send the PO document to the vendor."
+                ),
+                entity_type="purchase_order",
+                entity_id=po.id,
+                extra_data={
+                    "type": "PO_APPROVED",
+                    "po_number": po.po_number,
+                    "vendor_name": po.vendor_name,
+                    "vendor_id": str(po.vendor_id),
+                    "grand_total": float(po.grand_total),
+                },
+                is_read=False,
+            )
+            db.add(notification)
+            await db.commit()
+        except Exception as e:
+            logging.warning(f"Vendor notification failed for PO {po.po_number}: {e}")
+
     # Now check for serial generation AFTER commit (in a clean transaction state)
     # This way, if serial check fails, the approval is already committed
     should_generate_serials = False

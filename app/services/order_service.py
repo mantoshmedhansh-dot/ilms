@@ -510,6 +510,8 @@ class OrderService:
         # Update timestamps based on status
         if new_status == OrderStatus.CONFIRMED:
             order.confirmed_at = datetime.now(timezone.utc)
+            # GAP B: Auto-generate picklist on order confirmation
+            await self._auto_generate_picklist(order, changed_by)
         elif new_status == OrderStatus.DELIVERED:
             order.delivered_at = datetime.now(timezone.utc)
             # Calculate partner commission on delivery
@@ -1097,3 +1099,25 @@ class OrderService:
                 customer.credit_used = (customer.credit_used or Decimal("0")) + amount
         except Exception as e:
             logger.warning(f"Failed to update credit_used for order {order.order_number}: {e}")
+
+    async def _auto_generate_picklist(self, order: Order, created_by: Optional[uuid.UUID] = None) -> None:
+        """
+        GAP B: Auto-generate picklist when order is confirmed.
+        """
+        try:
+            if not order.warehouse_id:
+                logger.warning(f"No warehouse assigned to order {order.order_number}, skipping auto-picklist")
+                return
+
+            from app.services.picklist_service import PicklistService
+            from app.schemas.picklist import PicklistGenerateRequest
+
+            picklist_svc = PicklistService(self.db)
+            request = PicklistGenerateRequest(
+                order_ids=[order.id],
+                warehouse_id=order.warehouse_id,
+            )
+            picklist = await picklist_svc.generate_picklist(request, created_by=created_by)
+            logger.info(f"Auto-generated picklist {picklist.picklist_number} for order {order.order_number}")
+        except Exception as e:
+            logger.warning(f"Auto-picklist generation failed for order {order.order_number}: {e}")
