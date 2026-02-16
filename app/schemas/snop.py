@@ -546,28 +546,37 @@ class SNOPMeetingResponse(BaseResponseSchema):
 
 class SNOPDashboardSummary(BaseModel):
     """S&OP dashboard summary."""
-    # Forecast metrics
-    total_forecasts: int
-    pending_approval_count: int
+    # Forecast metrics (field names match frontend expectations)
+    total_forecasts: int = 0
+    active_forecasts: int = 0
+    pending_review: int = 0
+    pending_approval_count: int = 0
+    forecast_accuracy: Optional[float] = None
     forecast_accuracy_avg: Optional[float] = None
+    mape: Optional[float] = None
 
     # Demand vs Supply
-    total_forecasted_demand: Decimal
-    total_planned_supply: Decimal
-    demand_supply_gap: Decimal
-    demand_supply_gap_pct: float
+    total_forecasted_demand: Decimal = Decimal("0")
+    total_planned_supply: Decimal = Decimal("0")
+    demand_supply_gap: Decimal = Decimal("0")
+    demand_supply_gap_pct: float = 0
 
     # Inventory health
-    products_below_safety_stock: int
-    products_above_reorder_point: int
-    avg_inventory_turns: float
+    inventory_health_score: Optional[float] = None
+    items_below_safety: int = 0
+    products_below_safety_stock: int = 0
+    products_above_reorder_point: int = 0
+    avg_inventory_turns: float = 0
 
     # Top risks
-    stockout_risk_products: List[Dict[str, Any]]
-    overstock_risk_products: List[Dict[str, Any]]
+    stockout_risk_products: List[Dict[str, Any]] = []
+    overstock_risk_products: List[Dict[str, Any]] = []
+
+    # Recent activity
+    recent_forecasts: List[Dict[str, Any]] = []
 
     # Upcoming meetings
-    upcoming_meetings: List[Dict[str, Any]]
+    upcoming_meetings: List[Dict[str, Any]] = []
 
 
 class ForecastAccuracyReport(BaseModel):
@@ -596,19 +605,21 @@ class DemandSupplyGapAnalysis(BaseModel):
     horizon_days: int
 
     # Overall summary
-    total_demand: Decimal
-    total_supply: Decimal
-    net_gap: Decimal
-    gap_pct: float
+    total_demand: Decimal = Decimal("0")
+    total_supply: Decimal = Decimal("0")
+    net_gap: Decimal = Decimal("0")
+    total_gap_units: Decimal = Decimal("0")
+    gap_pct: float = 0
 
-    # By product
-    gaps_by_product: List[Dict[str, Any]]
+    # By product - "gaps" for frontend, "gaps_by_product" for backward compat
+    gaps: List[Dict[str, Any]] = []
+    gaps_by_product: List[Dict[str, Any]] = []
 
     # By period
-    gaps_by_period: List[Dict[str, Any]]
+    gaps_by_period: List[Dict[str, Any]] = []
 
     # Recommendations
-    recommendations: List[str]
+    recommendations: List[str] = []
 
 
 # ==================== DEMAND SIGNAL SCHEMAS ====================
