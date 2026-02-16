@@ -194,7 +194,7 @@ export default function DemandForecastsPage() {
   const { data: signalsData, isLoading: isLoadingSignals, refetch: refetchSignals } = useQuery({
     queryKey: ['snop-demand-signals'],
     queryFn: async () => {
-      const res = await apiClient.get('/api/v1/snop/demand-signals?limit=100');
+      const res = await apiClient.get('/snop/demand-signals?limit=100');
       return res.data;
     },
     enabled: activeTab === 'sensing',
@@ -204,7 +204,7 @@ export default function DemandForecastsPage() {
   const { data: sensingAnalysis, isLoading: isAnalyzing, refetch: refetchAnalysis } = useQuery({
     queryKey: ['snop-sensing-analysis'],
     queryFn: async () => {
-      const res = await apiClient.post('/api/v1/snop/demand-signals/analyze?horizon_days=30');
+      const res = await apiClient.post('/snop/demand-signals/analyze?horizon_days=30');
       return res.data;
     },
     enabled: activeTab === 'sensing',
@@ -229,7 +229,7 @@ export default function DemandForecastsPage() {
 
   const createSignalMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiClient.post('/api/v1/snop/demand-signals', newSignal);
+      const res = await apiClient.post('/snop/demand-signals', newSignal);
       return res.data;
     },
     onSuccess: () => {
@@ -245,7 +245,7 @@ export default function DemandForecastsPage() {
 
   const detectPosMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiClient.post('/api/v1/snop/demand-signals/detect-pos?lookback_days=7');
+      const res = await apiClient.post('/snop/demand-signals/detect-pos?lookback_days=7');
       return res.data;
     },
     onSuccess: (data) => {
@@ -260,7 +260,7 @@ export default function DemandForecastsPage() {
 
   const dismissSignalMutation = useMutation({
     mutationFn: async (signalId: string) => {
-      const res = await apiClient.post(`/api/v1/snop/demand-signals/${signalId}/dismiss`);
+      const res = await apiClient.post(`/snop/demand-signals/${signalId}/dismiss`);
       return res.data;
     },
     onSuccess: () => {
