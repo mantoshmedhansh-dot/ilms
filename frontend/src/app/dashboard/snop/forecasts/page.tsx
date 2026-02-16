@@ -75,7 +75,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { snopApi } from '@/lib/api';
 import { toast } from 'sonner';
-import { getAccessToken, getTenantId } from '@/lib/api/client';
 import { apiClient } from '@/lib/api/client';
 
 const statusColors: Record<string, string> = {
@@ -171,14 +170,10 @@ export default function DemandForecastsPage() {
   const { data: modelComparison, isLoading: isComparing } = useQuery({
     queryKey: ['snop-model-comparison', granularity],
     queryFn: async () => {
-      const res = await fetch(`/api/v1/snop/forecast/compare-models?granularity=${granularity}&lookback_days=365&forecast_horizon_days=30`, {
-        headers: {
-          'Authorization': `Bearer ${getAccessToken() || ''}`,
-          'X-Tenant-ID': getTenantId(),
-        },
-      });
-      if (!res.ok) return null;
-      return res.json();
+      try {
+        const res = await apiClient.post(`/snop/forecast/compare-models?granularity=${granularity || 'WEEKLY'}&lookback_days=365&forecast_horizon_days=30`);
+        return res.data;
+      } catch { return null; }
     },
     enabled: activeTab === 'models',
   });
@@ -187,14 +182,10 @@ export default function DemandForecastsPage() {
   const { data: classification, isLoading: isClassifying } = useQuery({
     queryKey: ['snop-classification', granularity],
     queryFn: async () => {
-      const res = await fetch(`/api/v1/snop/demand-classification?granularity=${granularity}`, {
-        headers: {
-          'Authorization': `Bearer ${getAccessToken() || ''}`,
-          'X-Tenant-ID': getTenantId(),
-        },
-      });
-      if (!res.ok) return null;
-      return res.json();
+      try {
+        const res = await apiClient.get(`/snop/demand-classification?granularity=${granularity || 'WEEKLY'}`);
+        return res.data;
+      } catch { return null; }
     },
     enabled: activeTab === 'classification',
   });
