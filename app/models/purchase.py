@@ -424,6 +424,14 @@ class PurchaseOrder(Base):
         nullable=True
     )
 
+    # From S&OP Supply Plan (traceability)
+    supply_plan_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("supply_plans.id", ondelete="SET NULL"),
+        nullable=True,
+        comment="S&OP supply plan that triggered this PO"
+    )
+
     # Delivery
     delivery_warehouse_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),

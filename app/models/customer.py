@@ -112,6 +112,20 @@ class Customer(Base):
         comment="Linked GL account for Accounts Receivable (Debtors)"
     )
 
+    # Credit Management
+    credit_limit: Mapped[Optional[Decimal]] = mapped_column(
+        Numeric(14, 2),
+        nullable=True,
+        default=None,
+        comment="Max credit allowed. NULL = unlimited"
+    )
+    credit_used: Mapped[Decimal] = mapped_column(
+        Numeric(14, 2),
+        default=Decimal("0"),
+        server_default="0",
+        comment="Current outstanding AR balance"
+    )
+
     # Status
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)

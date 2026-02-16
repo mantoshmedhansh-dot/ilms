@@ -255,6 +255,87 @@ async def replenish_channel(
     return results
 
 
+# ==================== Warehouse-Level Replenish ====================
+
+async def run_warehouse_replenish_job(db: AsyncSession) -> Dict[str, Any]:
+    """
+    Warehouse-level auto-replenish job.
+
+    Runs the S&OP Reorder Agent and auto-creates DRAFT Purchase Requisitions
+    for EMERGENCY and URGENT suggestions.
+
+    Returns:
+        Summary of reorder checks and PRs created
+    """
+    logger.info("Starting warehouse-level replenish job...")
+
+    results = {
+        "started_at": datetime.now(timezone.utc).isoformat(),
+        "suggestions_total": 0,
+        "prs_created": [],
+        "errors": [],
+    }
+
+    try:
+        from app.services.snop.planning_agents import PlanningAgents
+
+        agents = PlanningAgents(db)
+        reorder_result = await agents.run_reorder_agent()
+
+        suggestions = reorder_result.get("suggestions", [])
+        results["suggestions_total"] = len(suggestions)
+
+        # Auto-create PRs for EMERGENCY and URGENT only
+        for suggestion in suggestions:
+            urgency = suggestion.get("urgency", "NORMAL")
+            if urgency not in ("EMERGENCY", "URGENT"):
+                continue
+
+            try:
+                # Use a system user ID placeholder - in production, use a service account
+                from app.models.user import User
+                system_user_result = await db.execute(
+                    select(User).where(User.email == "system@ilms.ai").limit(1)
+                )
+                system_user = system_user_result.scalar_one_or_none()
+
+                if not system_user:
+                    # Fallback: get any admin user
+                    system_user_result = await db.execute(
+                        select(User).where(User.role == "ADMIN").limit(1)
+                    )
+                    system_user = system_user_result.scalar_one_or_none()
+
+                if system_user:
+                    pr = await agents.create_purchase_requisition_from_suggestion(
+                        suggestion=suggestion,
+                        user_id=system_user.id,
+                    )
+                    results["prs_created"].append(pr)
+                    logger.info(
+                        f"Auto-created PR {pr['pr_number']} for {urgency} "
+                        f"reorder: product {suggestion['product_id']}"
+                    )
+            except Exception as e:
+                error_msg = f"Failed to create PR for product {suggestion.get('product_id')}: {e}"
+                logger.error(error_msg)
+                results["errors"].append(error_msg)
+
+    except Exception as e:
+        error_msg = f"Warehouse replenish job failed: {e}"
+        logger.error(error_msg)
+        results["errors"].append(error_msg)
+
+    results["completed_at"] = datetime.now(timezone.utc).isoformat()
+    logger.info(
+        f"Warehouse replenish job completed: "
+        f"{results['suggestions_total']} suggestions, "
+        f"{len(results['prs_created'])} PRs created"
+    )
+
+    return results
+
+
 # ==================== Scheduler Integration ====================
 
 def register_auto_replenish_job(scheduler):
@@ -282,3 +363,19 @@ def register_auto_replenish_job(scheduler):
     )
 
     logger.info(f"Auto-replenish job registered to run every {interval_minutes} minutes")
+
+    # Register warehouse-level replenish job (every 60 minutes)
+    async def warehouse_job_wrapper():
+        async with get_db_context() as db:
+            await run_warehouse_replenish_job(db)
+
+    scheduler.add_job(
+        warehouse_job_wrapper,
+        'interval',
+        minutes=60,
+        id='auto_replenish_warehouse_inventory',
+        name='Auto-replenish warehouse inventory (S&OP reorder)',
+        replace_existing=True,
+    )
+
+    logger.info("Warehouse-level replenish job registered to run every 60 minutes")

@@ -395,6 +395,16 @@ class OrderService:
 
         total_amount = subtotal + tax_amount
 
+        # Credit limit check
+        if customer.credit_limit is not None:
+            current_used = getattr(customer, 'credit_used', None) or Decimal("0")
+            new_exposure = current_used + total_amount
+            if new_exposure > customer.credit_limit:
+                raise ValueError(
+                    f"Credit limit exceeded. Limit: {customer.credit_limit}, "
+                    f"Used: {current_used}, Order: {total_amount}"
+                )
+
         # Create order - use string values for VARCHAR columns (per CLAUDE.md standards)
         from app.core.enum_utils import get_enum_value
 

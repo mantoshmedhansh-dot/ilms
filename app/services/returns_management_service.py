@@ -426,6 +426,24 @@ class ReturnsManagementService:
 
         await self.db.commit()
         await self.db.refresh(receipt)
+
+        # Auto-post reverse revenue journal for the return
+        try:
+            from app.services.auto_journal_service import AutoJournalService
+            journal_svc = AutoJournalService(self.db)
+            if rma and rma.refund_amount and rma.refund_amount > 0:
+                await journal_svc.generate_for_sales_return(
+                    rma_id=rma.id,
+                    rma_number=rma.rma_number,
+                    return_value=rma.refund_amount,
+                    customer_name="",
+                    user_id=user_id,
+                )
+                await self.db.commit()
+        except Exception as e:
+            import logging
+            logging.warning(f"Return journal failed for RMA {getattr(rma, 'rma_number', 'unknown')}: {e}")
+
         return receipt
 
     async def complete_receipt(
@@ -924,6 +942,23 @@ class ReturnsManagementService:
 
         record.executed_by = user_id
         record.executed_at = datetime.now(timezone.utc)
+
+        # Restore inventory for RESTOCK dispositions
+        if record.disposition_action in ("RESTOCK", "RESTOCK_OPEN_BOX"):
+            try:
+                from app.services.inventory_service import InventoryService
+                inv_svc = InventoryService(self.db)
+                await inv_svc._update_inventory_summary(
+                    warehouse_id=record.warehouse_id,
+                    product_id=record.product_id,
+                    variant_id=None,
+                    quantity_change=record.quantity,
+                )
+            except Exception as e:
+                import logging
+                logging.warning(
+                    f"Inventory restore failed for disposition {record.disposition_number}: {e}"
+                )
 
         await self.db.commit()
         await self.db.refresh(record)

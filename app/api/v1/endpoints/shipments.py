@@ -1,6 +1,7 @@
 """Shipment API endpoints for shipping operations."""
 from typing import Optional
 import uuid
+import logging
 from math import ceil
 from datetime import datetime, timezone
 
@@ -574,8 +575,12 @@ async def mark_delivered(
     )
     db.add(tracking)
 
-    # Update order status
-    order_query = select(Order).where(Order.id == shipment.order_id)
+    # Update order status (eagerly load items for COGS calculation)
+    order_query = (
+        select(Order)
+        .where(Order.id == shipment.order_id)
+        .options(selectinload(Order.items))
+    )
     order_result = await db.execute(order_query)
     order = order_result.scalar_one_or_none()
     if order:
@@ -592,10 +597,22 @@ async def mark_delivered(
             from app.services.accounting_service import AccountingService
             accounting = AccountingService(db)
 
-            # Calculate cost based on order items (using cost_price from items)
-            # For simplicity, we estimate COGS as a percentage of selling price
-            # In production, this should come from actual product cost
-            cost_amount = Decimal(str(order.total_amount)) * Decimal("0.6")  # Approximate 60% margin
+            # Calculate actual COGS from Weighted Average Cost
+            from app.services.costing_service import CostingService
+            costing_svc = CostingService(db)
+            cost_amount = Decimal("0")
+            for item in order.items:
+                item_cost = await costing_svc.get_cost_for_product(
+                    product_id=item.product_id,
+                    quantity=item.quantity,
+                    warehouse_id=shipment.warehouse_id,
+                )
+                cost_amount += item_cost
+            if cost_amount <= 0:
+                cost_amount = Decimal(str(order.total_amount)) * Decimal("0.6")
+                logging.warning(
+                    f"No WAC cost found, using 60%% fallback for order {order.order_number}"
+                )
 
             await accounting.post_cogs_entry(
                 order_id=order.id,

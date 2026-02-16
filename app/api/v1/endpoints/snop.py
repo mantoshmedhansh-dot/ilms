@@ -456,11 +456,31 @@ async def approve_forecast(
         else:  # request_changes
             forecast = await demand_planner.request_adjustment(forecast_id, current_user.id, request.comments or "Please review")
 
-        return {
+        result = {
             "message": f"Forecast {request.action}d successfully",
             "forecast_id": str(forecast.id),
-            "status": forecast.status
+            "status": forecast.status,
         }
+
+        # Auto-generate supply plan on approval
+        if request.action == "approve" and request.auto_generate_supply_plan:
+            try:
+                supply_optimizer = SupplyOptimizer(db)
+                supply_plan_result = await supply_optimizer.optimize_supply(
+                    forecast_id=forecast_id,
+                    user_id=current_user.id,
+                )
+                result["supply_plan"] = {
+                    "plan_id": supply_plan_result.get("plan_id") or supply_plan_result.get("id"),
+                    "message": "Supply plan auto-generated from approved forecast",
+                    "details": supply_plan_result,
+                }
+            except Exception as e:
+                import logging
+                logging.warning(f"Auto supply plan generation failed for forecast {forecast_id}: {e}")
+                result["supply_plan_error"] = str(e)
+
+        return result
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
@@ -1562,6 +1582,54 @@ async def run_bias_agent(
 
     return await agents.run_bias_agent(
         bias_threshold_pct=bias_threshold_pct,
+    )
+
+
+# ==================== Reorder -> Purchase Requisition ====================
+
+class ConvertSuggestionRequest(BaseModel):
+    """Request to convert a reorder suggestion to PR."""
+    suggestion: dict = Field(..., description="Reorder suggestion dict from run_reorder_agent")
+
+
+@router.post("/agents/reorder-suggestion/convert-to-pr")
+@require_module("scm_ai")
+async def convert_suggestion_to_pr(
+    request: ConvertSuggestionRequest,
+    db: TenantDB,
+    current_user: CurrentUser,
+):
+    """
+    Convert a reorder agent suggestion into a DRAFT Purchase Requisition.
+    """
+    agents = PlanningAgents(db)
+    return await agents.create_purchase_requisition_from_suggestion(
+        suggestion=request.suggestion,
+        user_id=current_user.id,
+    )
+
+
+class SupplyPlanApproveRequest(BaseModel):
+    """Request to approve a supply plan."""
+    auto_create_pr: bool = Field(True, description="Auto-create Purchase Requisition if procurement qty > 0")
+
+
+@router.post("/supply-plan/{plan_id}/approve")
+@require_module("scm_ai")
+async def approve_supply_plan(
+    plan_id: UUID,
+    request: SupplyPlanApproveRequest,
+    db: TenantDB,
+    current_user: CurrentUser,
+):
+    """
+    Approve a supply plan and optionally auto-create Purchase Requisition.
+    """
+    service = SNOPService(db)
+    return await service.approve_supply_plan(
+        plan_id=plan_id,
+        approved_by=current_user.id,
+        auto_create_pr=request.auto_create_pr,
     )
 
 

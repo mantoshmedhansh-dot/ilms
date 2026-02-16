@@ -435,6 +435,41 @@ class TransferService:
 
         await self.db.commit()
         await self.db.refresh(transfer)
+
+        # Auto-post GL entry for stock transfer
+        if all_received:
+            try:
+                from decimal import Decimal
+                from app.services.costing_service import CostingService
+                from app.services.auto_journal_service import AutoJournalService
+
+                costing = CostingService(self.db)
+                total_value = Decimal("0")
+                for item in transfer.items:
+                    item_cost = await costing.get_cost_for_product(
+                        product_id=item.product_id,
+                        quantity=item.received_quantity,
+                    )
+                    total_value += item_cost
+
+                if total_value > 0:
+                    journal_svc = AutoJournalService(self.db)
+                    await journal_svc.generate_for_stock_transfer(
+                        transfer_id=transfer.id,
+                        transfer_number=transfer.transfer_number,
+                        total_value=total_value,
+                        from_warehouse_name=str(transfer.from_warehouse_id),
+                        to_warehouse_name=str(transfer.to_warehouse_id),
+                        user_id=received_by,
+                        auto_post=True,
+                    )
+                    await self.db.commit()
+            except Exception as e:
+                import logging
+                logging.warning(
+                    f"GL posting failed for transfer {transfer.transfer_number}: {e}"
+                )
+
         return transfer
 
     async def cancel_transfer(

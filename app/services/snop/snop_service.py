@@ -342,6 +342,83 @@ class SNOPService:
             notes=f"AI-optimized for {target_service_level*100}% service level"
         )
 
+    # ==================== Supply Plan Approval ====================
+
+    async def approve_supply_plan(
+        self,
+        plan_id: uuid.UUID,
+        approved_by: uuid.UUID,
+        auto_create_pr: bool = True,
+    ) -> Dict[str, Any]:
+        """
+        Approve a supply plan and optionally auto-create Purchase Requisition.
+
+        Args:
+            plan_id: Supply plan ID
+            approved_by: User approving the plan
+            auto_create_pr: If True and planned_procurement_qty > 0, creates a PR
+
+        Returns:
+            Dict with plan status and optional PR details
+        """
+        result = await self.db.execute(
+            select(SupplyPlan).where(SupplyPlan.id == plan_id)
+        )
+        plan = result.scalar_one_or_none()
+        if not plan:
+            raise ValueError(f"Supply plan {plan_id} not found")
+
+        if plan.status not in (
+            SupplyPlanStatus.DRAFT, SupplyPlanStatus.SUBMITTED, "DRAFT", "SUBMITTED"
+        ):
+            raise ValueError(f"Cannot approve plan in {plan.status} status")
+
+        plan.status = SupplyPlanStatus.APPROVED
+        plan.approved_by_id = approved_by
+        plan.approved_at = datetime.now(timezone.utc)
+
+        await self.db.commit()
+        await self.db.refresh(plan)
+
+        created_pr = None
+
+        # Auto-create Purchase Requisition if procurement is planned
+        if auto_create_pr and plan.planned_procurement_qty and plan.planned_procurement_qty > 0:
+            try:
+                from app.services.snop.planning_agents import PlanningAgents
+                agents = PlanningAgents(self.db)
+
+                suggestion = {
+                    "product_id": str(plan.product_id) if plan.product_id else None,
+                    "warehouse_id": str(plan.warehouse_id) if plan.warehouse_id else None,
+                    "urgency": "NORMAL",
+                    "suggested_order_qty": float(plan.planned_procurement_qty),
+                    "estimated_cost": float(plan.planned_procurement_qty) * 500,
+                    "expected_delivery_date": (
+                        plan.plan_start_date + timedelta(days=plan.lead_time_days)
+                    ).isoformat() if plan.plan_start_date else None,
+                    "current_stock": 0,
+                    "reorder_point": 0,
+                }
+
+                if suggestion["product_id"] and suggestion["warehouse_id"]:
+                    created_pr = await agents.create_purchase_requisition_from_suggestion(
+                        suggestion=suggestion,
+                        user_id=approved_by,
+                    )
+            except Exception as e:
+                import logging
+                logging.warning(f"Auto PR creation failed for supply plan {plan.plan_code}: {e}")
+
+        return {
+            "plan_id": str(plan.id),
+            "plan_code": plan.plan_code,
+            "status": "APPROVED",
+            "approved_by": str(approved_by),
+            "approved_at": plan.approved_at.isoformat() if plan.approved_at else None,
+            "purchase_requisition": created_pr,
+        }
+
     # ==================== Inventory Optimization ====================
 
     async def calculate_safety_stock(

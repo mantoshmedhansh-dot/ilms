@@ -208,6 +208,7 @@ class ForecastApprovalRequest(BaseModel):
     """Request to approve/reject a forecast or adjustment."""
     action: str = Field(..., pattern="^(approve|reject|request_changes)$")
     comments: Optional[str] = None
+    auto_generate_supply_plan: bool = Field(False, description="Auto-generate supply plan on approval")
 
 
 # ==================== SUPPLY PLAN SCHEMAS ====================

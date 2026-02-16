@@ -45,6 +45,7 @@ class TransactionType(str, Enum):
     BANK_WITHDRAWAL = "BANK_WITHDRAWAL"
     EXPENSE = "EXPENSE"
     STOCK_ADJUSTMENT = "STOCK_ADJUSTMENT"
+    STOCK_TRANSFER = "STOCK_TRANSFER"
 
 
 class AutoJournalError(Exception):
@@ -96,6 +97,12 @@ class AutoJournalService:
         "DISCOUNT_ALLOWED": "6100",
         "DISCOUNT_RECEIVED": "4200",
         "ROUND_OFF": "6900",
+
+        # Revenue contra
+        "SALES_RETURNS": "4400",
+
+        # Transit inventory
+        "INVENTORY_TRANSIT": "1230",
     }
 
     def __init__(self, db: AsyncSession, company_id: UUID = None):
@@ -930,6 +937,217 @@ class AutoJournalService:
         await self.db.flush()
 
         # Post to GL if auto_post
+        if auto_post:
+            await self._post_journal_entry(journal, lines)
+            journal.status = "POSTED"
+            journal.posted_at = datetime.now(timezone.utc)
+
+        await self.db.flush()
+
+        return journal
+
+    async def generate_for_stock_transfer(
+        self,
+        transfer_id: UUID,
+        transfer_number: str,
+        total_value: Decimal,
+        from_warehouse_name: str,
+        to_warehouse_name: str,
+        user_id: Optional[UUID] = None,
+        auto_post: bool = True,
+    ) -> JournalEntry:
+        """
+        Generate journal entry for inter-warehouse stock transfer.
+
+        DR: Inventory (receiving warehouse)
+        CR: Inventory (sending warehouse)
+
+        Args:
+            transfer_id: ID of the stock transfer
+            transfer_number: Transfer reference number
+            total_value: Total value of transferred goods at WAC
+            from_warehouse_name: Name/ID of source warehouse
+            to_warehouse_name: Name/ID of destination warehouse
+            user_id: User creating the journal entry
+            auto_post: If True, automatically post the journal entry
+        """
+        # Check if journal entry already exists
+        existing = await self.db.execute(
+            select(JournalEntry).where(
+                and_(
+                    JournalEntry.source_type == "STOCK_TRANSFER",
+                    JournalEntry.source_id == transfer_id
+                )
+            )
+        )
+        if existing.scalar_one_or_none():
+            raise AutoJournalError("Journal entry already exists for this transfer")
+
+        # Get inventory account (same account, the journal captures the movement)
+        inventory_account = await self.get_or_create_account(
+            self.DEFAULT_ACCOUNTS.get("INVENTORY", "1400"),
+            "Inventory",
+            "ASSET",
+            "INVENTORY"
+        )
+
+        # Get or create financial period
+        period = await self._get_or_create_period()
+
+        # Create journal entry
+        entry_number = await self._generate_entry_number()
+        narration = (
+            f"Stock transfer {transfer_number} from {from_warehouse_name} "
+            f"to {to_warehouse_name}"
+        )
+
+        journal = JournalEntry(
+            entry_number=entry_number,
+            entry_date=date.today(),
+            entry_type="TRANSFER",
+            source_type="STOCK_TRANSFER",
+            source_id=transfer_id,
+            source_number=transfer_number,
+            period_id=period.id,
+            narration=narration,
+            total_debit=total_value,
+            total_credit=total_value,
+            status="DRAFT",
+            created_by=user_id,
+        )
+        self.db.add(journal)
+        await self.db.flush()
+
+        # DR: Inventory (receiving warehouse)
+        debit_line = JournalEntryLine(
+            journal_entry_id=journal.id,
+            account_id=inventory_account.id,
+            debit_amount=total_value,
+            credit_amount=Decimal("0"),
+            description=f"Inventory received at {to_warehouse_name} - {transfer_number}",
+        )
+        self.db.add(debit_line)
+
+        # CR: Inventory (sending warehouse)
+        credit_line = JournalEntryLine(
+            journal_entry_id=journal.id,
+            account_id=inventory_account.id,
+            debit_amount=Decimal("0"),
+            credit_amount=total_value,
+            description=f"Inventory sent from {from_warehouse_name} - {transfer_number}",
+        )
+        self.db.add(credit_line)
+
+        lines = [(debit_line.id, debit_line), (credit_line.id, credit_line)]
+        await self.db.flush()
+
+        if auto_post:
+            await self._post_journal_entry(journal, lines)
+            journal.status = "POSTED"
+            journal.posted_at = datetime.now(timezone.utc)
+
+        await self.db.flush()
+
+        return journal
+
+    async def generate_for_sales_return(
+        self,
+        rma_id: UUID,
+        rma_number: str,
+        return_value: Decimal,
+        customer_name: str,
+        user_id: Optional[UUID] = None,
+        auto_post: bool = True,
+    ) -> JournalEntry:
+        """
+        Generate reverse revenue journal for a sales return/RMA.
+
+        DR: Sales Returns (4400 - revenue contra)
+        CR: Accounts Receivable (1300)
+
+        Args:
+            rma_id: ID of the RMA
+            rma_number: RMA reference number
+            return_value: Refund/credit amount
+            customer_name: Customer name for narration
+            user_id: User creating the journal entry
+            auto_post: If True, automatically post the journal entry
+        """
+        # Check if journal entry already exists
+        existing = await self.db.execute(
+            select(JournalEntry).where(
+                and_(
+                    JournalEntry.source_type == "SALES_RETURN",
+                    JournalEntry.source_id == rma_id
+                )
+            )
+        )
+        if existing.scalar_one_or_none():
+            raise AutoJournalError("Journal entry already exists for this return")
+
+        # Get accounts
+        returns_account = await self.get_or_create_account(
+            self.DEFAULT_ACCOUNTS["SALES_RETURNS"],
+            "Sales Returns",
+            "REVENUE",
+            "SALES_RETURNS"
+        )
+        ar_account = await self.get_or_create_account(
+            self.DEFAULT_ACCOUNTS["ACCOUNTS_RECEIVABLE"],
+            "Accounts Receivable",
+            "ASSET",
+            AccountSubType.ACCOUNTS_RECEIVABLE.value
+        )
+
+        # Get or create financial period
+        period = await self._get_or_create_period()
+
+        # Create journal entry
+        entry_number = await self._generate_entry_number()
+        narration = f"Sales return {rma_number}"
+        if customer_name:
+            narration += f" from {customer_name}"
+
+        journal = JournalEntry(
+            entry_number=entry_number,
+            entry_date=date.today(),
+            entry_type="SALES_RETURN",
+            source_type="SALES_RETURN",
+            source_id=rma_id,
+            source_number=rma_number,
+            period_id=period.id,
+            narration=narration,
+            total_debit=return_value,
+            total_credit=return_value,
+            status="DRAFT",
+            created_by=user_id,
+        )
+        self.db.add(journal)
+        await self.db.flush()
+
+        # DR: Sales Returns (revenue contra)
+        debit_line = JournalEntryLine(
+            journal_entry_id=journal.id,
+            account_id=returns_account.id,
+            debit_amount=return_value,
+            credit_amount=Decimal("0"),
+            description=f"Sales return - {rma_number}",
+        )
+        self.db.add(debit_line)
+
+        # CR: Accounts Receivable
+        credit_line = JournalEntryLine(
+            journal_entry_id=journal.id,
+            account_id=ar_account.id,
+            debit_amount=Decimal("0"),
+            credit_amount=return_value,
+            description=f"AR reversal for return - {rma_number}",
+        )
+        self.db.add(credit_line)
+
+        lines = [(debit_line.id, debit_line), (credit_line.id, credit_line)]
+        await self.db.flush()
+
         if auto_post:
             await self._post_journal_entry(journal, lines)
             journal.status = "POSTED"
