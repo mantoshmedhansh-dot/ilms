@@ -178,7 +178,7 @@ class PlanningAgents:
         for inv in inventories:
             available = float(inv.available_quantity or 0)
             # Estimate daily demand from recent forecasts
-            avg_daily = float(inv.reorder_point or 1) / 14  # Rough estimate
+            avg_daily = float(inv.reorder_level or 1) / 14  # Rough estimate
             if avg_daily <= 0:
                 avg_daily = 1
 
