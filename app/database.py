@@ -165,9 +165,14 @@ async def get_tenant_session(schema: str) -> AsyncGenerator[AsyncSession, None]:
 
         try:
             yield async_session
-            await async_session.commit()
+            # Flush any pending changes from the session to the connection
+            await async_session.flush()
+            # CRITICAL: session.commit() on a session bound to a connection only
+            # flushes but does NOT commit the underlying connection transaction.
+            # We must explicitly commit at the connection level.
+            await conn.commit()
         except Exception:
-            await async_session.rollback()
+            await conn.rollback()
             raise
         finally:
             await async_session.close()
