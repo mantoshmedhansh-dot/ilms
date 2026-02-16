@@ -15,7 +15,7 @@ from typing import List, Dict, Optional, Tuple, Any
 from collections import defaultdict
 import math
 
-from sqlalchemy import select, func, and_, or_, desc, extract
+from sqlalchemy import select, func, and_, or_, desc, extract, literal_column
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -110,7 +110,9 @@ class DemandPlannerService:
 
         # Group by granularity
         if granularity == ForecastGranularity.DAILY:
-            query = query.group_by(func.date_trunc('day', Order.created_at)).order_by(func.date_trunc('day', Order.created_at))
+            # Use literal_column for 'day' to avoid separate bound parameters in GROUP BY vs ORDER BY
+            day_period = func.date_trunc(literal_column("'day'"), Order.created_at)
+            query = query.group_by(day_period).order_by(day_period)
         elif granularity == ForecastGranularity.WEEKLY:
             # Group by ISO week
             query = query.group_by(
