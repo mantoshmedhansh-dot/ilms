@@ -724,6 +724,82 @@ async def accept_grn(
         # Don't fail the acceptance, but include the error
         stock_result = {"error": str(e)}
 
+    # GAP C: Auto-create draft vendor invoice from GRN + PO data
+    vendor_invoice_ref = None
+    try:
+        if po:
+            from app.models.purchase import VendorInvoice
+            import uuid as _uuid
+
+            # Generate reference number
+            vi_date = datetime.now(timezone.utc).strftime("%Y%m%d")
+            vi_seq = await db.execute(
+                select(func.count(VendorInvoice.id)).where(
+                    VendorInvoice.our_reference.like(f"VI-{vi_date}%")
+                )
+            )
+            vi_count = (vi_seq.scalar() or 0) + 1
+            our_ref = f"VI-{vi_date}-{vi_count:04d}"
+
+            grn_value = grn.total_value or Decimal("0")
+            # Proportional tax based on GRN value vs PO total
+            ratio = grn_value / po.subtotal if po.subtotal and po.subtotal > 0 else Decimal("1")
+            cgst = (po.cgst_amount or Decimal("0")) * ratio
+            sgst = (po.sgst_amount or Decimal("0")) * ratio
+            igst = (po.igst_amount or Decimal("0")) * ratio
+            cess = (po.cess_amount or Decimal("0")) * ratio
+            total_tax = cgst + sgst + igst + cess
+            grand_total = grn_value + total_tax
+
+            # Compute due date from PO credit_days
+            from datetime import timedelta
+            due_date_val = date.today() + timedelta(days=po.credit_days or 30)
+
+            vendor_invoice = VendorInvoice(
+                id=_uuid.uuid4(),
+                invoice_number=f"AUTO-{grn.grn_number}",
+                invoice_date=date.today(),
+                our_reference=our_ref,
+                status="UNDER_VERIFICATION",
+                vendor_id=grn.vendor_id,
+                purchase_order_id=po.id,
+                grn_id=grn.id,
+                subtotal=grn_value,
+                discount_amount=Decimal("0"),
+                taxable_amount=grn_value,
+                cgst_amount=cgst.quantize(Decimal("0.01")),
+                sgst_amount=sgst.quantize(Decimal("0.01")),
+                igst_amount=igst.quantize(Decimal("0.01")),
+                cess_amount=cess.quantize(Decimal("0.01")),
+                total_tax=total_tax.quantize(Decimal("0.01")),
+                freight_charges=Decimal("0"),
+                other_charges=Decimal("0"),
+                round_off=Decimal("0"),
+                grand_total=grand_total.quantize(Decimal("0.01")),
+                due_date=due_date_val,
+                amount_paid=Decimal("0"),
+                balance_due=grand_total.quantize(Decimal("0.01")),
+                tds_applicable=True,
+                tds_rate=Decimal("0"),
+                tds_amount=Decimal("0"),
+                net_payable=grand_total.quantize(Decimal("0.01")),
+                po_matched=True,
+                grn_matched=True,
+                received_by=current_user.id,
+            )
+            db.add(vendor_invoice)
+            await db.commit()
+            vendor_invoice_ref = our_ref
+            import logging
+            logging.getLogger(__name__).info(
+                f"Auto-created vendor invoice {our_ref} for GRN {grn.grn_number}"
+            )
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(
+            f"Auto vendor invoice creation failed for GRN {grn_id}: {e}"
+        )
+
     return {
         "message": "GRN accepted, stock items created, and inventory updated",
         "status": grn.status,
@@ -731,6 +807,7 @@ async def accept_grn(
         "cost_update": costing_result,
         "stock_items": stock_result,
         "serial_validation_status": grn.serial_validation_status,
+        "vendor_invoice": vendor_invoice_ref,
     }
 
 

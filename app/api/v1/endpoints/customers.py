@@ -463,6 +463,17 @@ async def record_customer_payment(
     )
 
     db.add(ledger_entry)
+
+    # GAP I: Decrement credit_used when customer payment is received
+    try:
+        if customer.credit_limit is not None:
+            customer.credit_used = max(
+                Decimal("0"),
+                (customer.credit_used or Decimal("0")) - payment_in.amount
+            )
+    except Exception:
+        pass  # Non-critical, don't fail payment recording
+
     await db.commit()
     await db.refresh(ledger_entry)
 

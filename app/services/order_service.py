@@ -472,6 +472,10 @@ class OrderService:
                     customer_id=data.customer_id
                 )
 
+            # GAP I: Increment credit_used when order is created
+            if customer.credit_limit is not None:
+                customer.credit_used = (customer.credit_used or Decimal("0")) + total_amount
+
             await self.db.commit()
             return await self.get_order_by_id(order.id, include_all=True)
 
@@ -512,6 +516,10 @@ class OrderService:
             await self.calculate_partner_commission(order_id)
         elif new_status == OrderStatus.CANCELLED:
             order.cancelled_at = datetime.now(timezone.utc)
+            # GAP F: Release reserved/allocated stock back to available
+            await self._release_stock_on_cancel(order)
+            # GAP I: Restore credit_used on cancellation
+            await self._update_credit_used(order, negate=True)
 
         # Create status history
         status_history = OrderStatusHistory(
@@ -561,6 +569,17 @@ class OrderService:
             order.payment_status = "PAID"  # Use string directly
         elif order.amount_paid > 0:
             order.payment_status = "PARTIALLY_PAID"  # Use string directly
+
+        # GAP I: Decrement credit_used when payment is received
+        try:
+            customer = await self.db.get(Customer, order.customer_id)
+            if customer and customer.credit_limit is not None:
+                customer.credit_used = max(
+                    Decimal("0"),
+                    (customer.credit_used or Decimal("0")) - amount
+                )
+        except Exception as e:
+            logger.warning(f"Failed to update credit_used on payment for order {order_id}: {e}")
 
         await self.db.commit()
         await self.db.refresh(payment)
@@ -983,3 +1002,98 @@ class OrderService:
                     partner.tier_id = tier.id
                     logger.info(f"Partner {partner.partner_code} upgraded from {old_tier} to {tier.name}")
                 break
+
+    # ==================== CANCELLATION & CREDIT HELPERS ====================
+
+    async def _release_stock_on_cancel(self, order: Order) -> None:
+        """
+        GAP F: Release all reserved/allocated stock back to available
+        when an order is cancelled.
+        """
+        try:
+            from app.models.inventory import StockItem, InventorySummary
+            from app.services.inventory_service import InventoryService
+
+            inv_svc = InventoryService(self.db)
+
+            # Find all stock items allocated to this order
+            result = await self.db.execute(
+                select(StockItem).where(
+                    and_(
+                        StockItem.order_id == order.id,
+                        StockItem.status.in_(["RESERVED", "ALLOCATED", "PICKED"]),
+                    )
+                )
+            )
+            allocated_items = result.scalars().all()
+
+            if not allocated_items:
+                # No individual stock items - try to release via InventorySummary directly
+                # This handles bulk (non-serialized) inventory
+                items_result = await self.db.execute(
+                    select(OrderItem).where(OrderItem.order_id == order.id)
+                )
+                order_items = items_result.scalars().all()
+                for oi in order_items:
+                    warehouse_id = order.warehouse_id
+                    if warehouse_id:
+                        await inv_svc._update_inventory_summary(
+                            warehouse_id=warehouse_id,
+                            product_id=oi.product_id,
+                            variant_id=oi.variant_id,
+                            allocated_change=-oi.quantity,
+                            available_change=oi.quantity,
+                        )
+                logger.info(f"Released bulk inventory for cancelled order {order.order_number}")
+                return
+
+            # Group by product+warehouse for summary updates
+            release_map = {}
+            for item in allocated_items:
+                item.status = "AVAILABLE"
+                item.order_id = None
+                item.order_item_id = None
+                item.allocated_at = None
+
+                key = (item.warehouse_id, item.product_id, item.variant_id)
+                release_map[key] = release_map.get(key, 0) + 1
+
+            # Update inventory summaries
+            for (wh_id, prod_id, var_id), qty in release_map.items():
+                await inv_svc._update_inventory_summary(
+                    warehouse_id=wh_id,
+                    product_id=prod_id,
+                    variant_id=var_id,
+                    allocated_change=-qty,
+                    available_change=qty,
+                )
+
+            logger.info(
+                f"Released {len(allocated_items)} stock items for cancelled order {order.order_number}"
+            )
+        except Exception as e:
+            logger.warning(f"Failed to release stock for order {order.order_number}: {e}")
+
+    async def _update_credit_used(self, order: Order, negate: bool = False) -> None:
+        """
+        GAP I: Update customer.credit_used when order is cancelled (negate=True)
+        or confirmed (negate=False).
+        """
+        try:
+            customer = await self.db.get(Customer, order.customer_id)
+            if not customer or customer.credit_limit is None:
+                return
+
+            amount = order.total_amount or Decimal("0")
+            if negate:
+                # Cancellation: reduce credit_used
+                customer.credit_used = max(
+                    Decimal("0"),
+                    (customer.credit_used or Decimal("0")) - amount
+                )
+                logger.info(f"Restored credit {amount} for customer {customer.id} on order cancel")
+            else:
+                # Confirmation: increase credit_used
+                customer.credit_used = (customer.credit_used or Decimal("0")) + amount
+        except Exception as e:
+            logger.warning(f"Failed to update credit_used for order {order.order_number}: {e}")

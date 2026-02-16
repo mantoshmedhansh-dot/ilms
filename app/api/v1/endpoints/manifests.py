@@ -667,6 +667,29 @@ async def complete_handover(
             if order:
                 order.status = OrderStatus.SHIPPED.value
 
+                # GAP H: Deduct inventory on dispatch
+                try:
+                    from app.models.order import OrderItem
+                    from app.services.inventory_service import InventoryService
+                    inv_svc = InventoryService(db)
+                    oi_result = await db.execute(
+                        select(OrderItem).where(OrderItem.order_id == order.id)
+                    )
+                    for oi in oi_result.scalars().all():
+                        await inv_svc._update_inventory_summary(
+                            warehouse_id=shipment.warehouse_id,
+                            product_id=oi.product_id,
+                            variant_id=oi.variant_id,
+                            quantity_change=-oi.quantity,
+                            allocated_change=-oi.quantity,
+                            in_transit_change=oi.quantity,
+                        )
+                except Exception as e:
+                    import logging
+                    logging.getLogger(__name__).warning(
+                        f"Inventory deduction failed for shipment {shipment.shipment_number}: {e}"
+                    )
+
             shipped_count += 1
 
     # Update manifest
