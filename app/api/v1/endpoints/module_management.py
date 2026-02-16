@@ -143,6 +143,10 @@ async def subscribe_to_modules(
             billing_cycle=data.billing_cycle
         )
 
+        # Clear module access cache for this tenant so new subscriptions take effect immediately
+        from app.core.module_decorators import clear_module_access_cache_for_tenant
+        clear_module_access_cache_for_tenant(str(tenant_id))
+
         # Get updated subscriptions
         tenant, all_subs = await service.get_tenant_subscriptions(tenant_id)
 
@@ -214,6 +218,10 @@ async def unsubscribe_from_modules(
             module_codes=data.module_codes,
             reason=data.reason
         )
+
+        # Clear module access cache for this tenant so changes take effect immediately
+        from app.core.module_decorators import clear_module_access_cache_for_tenant
+        clear_module_access_cache_for_tenant(str(tenant_id))
 
         # Get updated subscriptions
         tenant, all_subs = await service.get_tenant_subscriptions(tenant_id)

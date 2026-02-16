@@ -20,7 +20,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
-from app.api.deps import DB, CurrentUser
+from app.api.deps import TenantDB, CurrentUser
 from app.models.snop import (
     ForecastGranularity,
     ForecastLevel,
@@ -83,7 +83,7 @@ router = APIRouter()
 @router.get("/dashboard", response_model=SNOPDashboardSummary)
 @require_module("scm_ai")
 async def get_snop_dashboard(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser
 ):
     """
@@ -102,7 +102,7 @@ async def get_snop_dashboard(
 @router.get("/dashboard/demand-supply-gap", response_model=DemandSupplyGapAnalysis)
 @require_module("scm_ai")
 async def get_demand_supply_gap(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     horizon_days: int = Query(90, ge=7, le=365, description="Forecast horizon in days")
 ):
@@ -116,7 +116,7 @@ async def get_demand_supply_gap(
 @router.get("/dashboard/forecast-accuracy", response_model=ForecastAccuracyReport)
 @require_module("scm_ai")
 async def get_forecast_accuracy_report(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     start_date: date = Query(..., description="Report start date"),
     end_date: date = Query(..., description="Report end date")
@@ -134,7 +134,7 @@ async def get_forecast_accuracy_report(
 @require_module("scm_ai")
 async def generate_forecasts(
     request: DemandForecastGenerateRequest,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser
 ):
     """
@@ -182,7 +182,7 @@ async def generate_forecasts(
 @router.post("/forecast/compare-models")
 @require_module("scm_ai")
 async def compare_forecast_models(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     product_id: Optional[UUID] = Query(None),
     category_id: Optional[UUID] = Query(None),
@@ -226,7 +226,7 @@ async def compare_forecast_models(
 @router.get("/demand-classification")
 @require_module("scm_ai")
 async def get_demand_classification(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     lookback_days: int = Query(365, ge=90, le=1095),
     granularity: ForecastGranularity = Query(ForecastGranularity.WEEKLY),
@@ -294,7 +294,7 @@ async def get_demand_classification(
 @router.get("/forecasts")
 @require_module("scm_ai")
 async def list_forecasts(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     product_id: Optional[UUID] = Query(None),
     category_id: Optional[UUID] = Query(None),
@@ -345,7 +345,7 @@ async def list_forecasts(
 @require_module("scm_ai")
 async def get_forecast(
     forecast_id: UUID,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser
 ):
     """
@@ -416,7 +416,7 @@ async def get_forecast(
 @require_module("scm_ai")
 async def submit_forecast_for_review(
     forecast_id: UUID,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser
 ):
     """
@@ -440,7 +440,7 @@ async def submit_forecast_for_review(
 async def approve_forecast(
     forecast_id: UUID,
     request: ForecastApprovalRequest,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser
 ):
     """
@@ -472,7 +472,7 @@ async def approve_forecast(
 async def create_forecast_adjustment(
     forecast_id: UUID,
     request: ForecastAdjustmentCreate,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser
 ):
     """
@@ -505,7 +505,7 @@ async def create_forecast_adjustment(
 @require_module("scm_ai")
 async def approve_adjustment(
     adjustment_id: UUID,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser
 ):
     """
@@ -530,7 +530,7 @@ async def approve_adjustment(
 @require_module("scm_ai")
 async def create_supply_plan(
     request: SupplyPlanCreate,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser
 ):
     """
@@ -576,7 +576,7 @@ async def create_supply_plan(
 @require_module("scm_ai")
 async def optimize_supply_plan(
     request: SupplyPlanOptimizeRequest,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser
 ):
     """
@@ -609,7 +609,7 @@ async def optimize_supply_plan(
 @require_module("scm_ai")
 async def optimize_supply_advanced(
     request: SupplyOptimizeAdvancedRequest,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
 ):
     """
@@ -645,7 +645,7 @@ async def optimize_supply_advanced(
 @router.get("/supply-plan/capacity-analysis")
 @require_module("scm_ai")
 async def get_capacity_analysis(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     forecast_id: Optional[UUID] = Query(None),
     horizon_days: int = Query(90, ge=7, le=365),
@@ -668,7 +668,7 @@ async def get_capacity_analysis(
 @router.get("/supply-plan/ddmrp-buffers")
 @require_module("scm_ai")
 async def get_ddmrp_buffers(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     lookback_days: int = Query(90, ge=30, le=365),
 ):
@@ -686,7 +686,7 @@ async def get_ddmrp_buffers(
 @require_module("scm_ai")
 async def analyze_multi_source(
     request: MultiSourceRequest,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
 ):
     """
@@ -709,7 +709,7 @@ async def analyze_multi_source(
 @require_module("scm_ai")
 async def calculate_inventory_optimization(
     request: InventoryOptimizationRequest,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser
 ):
     """
@@ -775,7 +775,7 @@ async def calculate_inventory_optimization(
 async def get_safety_stock_recommendation(
     product_id: UUID,
     warehouse_id: UUID,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     service_level: float = Query(0.95, ge=0.8, le=0.99),
     lead_time_days: int = Query(14, ge=1)
@@ -801,7 +801,7 @@ async def get_safety_stock_recommendation(
 @require_module("scm_ai")
 async def create_scenario(
     request: SNOPScenarioCreate,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser
 ):
     """
@@ -836,7 +836,7 @@ async def create_scenario(
 @require_module("scm_ai")
 async def run_scenario_simulation(
     scenario_id: UUID,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser
 ):
     """
@@ -861,7 +861,7 @@ async def run_scenario_simulation(
 @require_module("scm_ai")
 async def compare_scenarios(
     request: ScenarioCompareRequest,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser
 ):
     """
@@ -916,7 +916,7 @@ async def compare_scenarios(
 @require_module("scm_ai")
 async def run_monte_carlo_simulation(
     request: MonteCarloRequest,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
 ):
     """
@@ -946,7 +946,7 @@ async def run_monte_carlo_simulation(
 @require_module("scm_ai")
 async def project_financial_pl(
     request: FinancialPLRequest,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
 ):
     """
@@ -975,7 +975,7 @@ async def project_financial_pl(
 @require_module("scm_ai")
 async def run_sensitivity_analysis(
     request: SensitivityRequest,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
 ):
     """
@@ -1002,7 +1002,7 @@ async def run_sensitivity_analysis(
 @require_module("scm_ai")
 async def quick_what_if_analysis(
     request: QuickWhatIfRequest,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
 ):
     """
@@ -1026,7 +1026,7 @@ async def quick_what_if_analysis(
 @require_module("scm_ai")
 async def compare_scenarios_advanced(
     request: ScenarioCompareAdvancedRequest,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
 ):
     """
@@ -1052,7 +1052,7 @@ async def compare_scenarios_advanced(
 @router.get("/historical/demand")
 @require_module("scm_ai")
 async def get_historical_demand(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     product_id: Optional[UUID] = Query(None),
     category_id: Optional[UUID] = Query(None),
@@ -1097,7 +1097,7 @@ async def get_historical_demand(
 @router.get("/historical/demand/by-product")
 @require_module("scm_ai")
 async def get_demand_by_product(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     start_date: date = Query(...),
     end_date: date = Query(...),
@@ -1139,7 +1139,7 @@ async def get_demand_by_product(
 @router.get("/historical/demand/by-channel")
 @require_module("scm_ai")
 async def get_demand_by_channel(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     start_date: date = Query(...),
     end_date: date = Query(...),
@@ -1166,7 +1166,7 @@ async def get_demand_by_channel(
 @router.get("/historical/statistics")
 @require_module("scm_ai")
 async def get_demand_statistics(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     product_id: Optional[UUID] = Query(None),
     category_id: Optional[UUID] = Query(None),
@@ -1194,7 +1194,7 @@ async def get_demand_statistics(
 @require_module("scm_ai")
 async def create_demand_signal(
     request: DemandSignalCreate,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
 ):
     """
@@ -1249,7 +1249,7 @@ async def create_demand_signal(
 @router.get("/demand-signals")
 @require_module("scm_ai")
 async def list_demand_signals(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     status: Optional[DemandSignalStatus] = Query(None),
     signal_type: Optional[DemandSignalType] = Query(None),
@@ -1313,7 +1313,7 @@ async def list_demand_signals(
 async def update_demand_signal(
     signal_id: UUID,
     request: DemandSignalUpdate,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
 ):
     """
@@ -1350,7 +1350,7 @@ async def update_demand_signal(
 @require_module("scm_ai")
 async def dismiss_demand_signal(
     signal_id: UUID,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
 ):
     """
@@ -1371,7 +1371,7 @@ async def dismiss_demand_signal(
 @router.post("/demand-signals/analyze")
 @require_module("scm_ai")
 async def analyze_demand_signals(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     product_id: Optional[UUID] = Query(None),
     category_id: Optional[UUID] = Query(None),
@@ -1398,7 +1398,7 @@ async def analyze_demand_signals(
 @require_module("scm_ai")
 async def apply_signals_to_forecast(
     forecast_id: UUID,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
 ):
     """
@@ -1421,7 +1421,7 @@ async def apply_signals_to_forecast(
 @router.post("/demand-signals/detect-pos")
 @require_module("scm_ai")
 async def detect_pos_signals(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     lookback_days: int = Query(7, ge=3, le=30),
     spike_threshold: float = Query(1.5, ge=1.1, le=3.0),
@@ -1465,7 +1465,7 @@ async def detect_pos_signals(
 @router.get("/agents/status")
 @require_module("scm_ai")
 async def get_agents_status(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
 ):
     """
@@ -1480,7 +1480,7 @@ async def get_agents_status(
 @router.get("/agents/alert-center")
 @require_module("scm_ai")
 async def get_alert_center(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     include_exceptions: bool = Query(True),
     include_reorder: bool = Query(True),
@@ -1506,7 +1506,7 @@ async def get_alert_center(
 @router.post("/agents/run-exceptions")
 @require_module("scm_ai")
 async def run_exception_agent(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     safety_stock_threshold: float = Query(1.0, ge=0.5, le=2.0),
     overstock_days: int = Query(90, ge=30, le=365),
@@ -1529,7 +1529,7 @@ async def run_exception_agent(
 @router.post("/agents/run-reorder")
 @require_module("scm_ai")
 async def run_reorder_agent(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     lead_time_buffer_pct: float = Query(20.0, ge=0, le=100),
 ):
@@ -1548,7 +1548,7 @@ async def run_reorder_agent(
 @router.post("/agents/run-bias")
 @require_module("scm_ai")
 async def run_bias_agent(
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
     bias_threshold_pct: float = Query(10.0, ge=1, le=50),
 ):
@@ -1576,7 +1576,7 @@ class ChatRequest(BaseModel):
 @require_module("scm_ai")
 async def chat_with_planner(
     request: ChatRequest,
-    db: DB,
+    db: TenantDB,
     current_user: CurrentUser,
 ):
     """
