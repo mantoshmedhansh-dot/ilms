@@ -23,11 +23,12 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { snopApi } from '@/lib/api';
 
-function formatNumber(value: number): string {
-  if (value >= 10000000) return `${(value / 10000000).toFixed(1)}Cr`;
-  if (value >= 100000) return `${(value / 100000).toFixed(1)}L`;
-  if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
-  return value.toFixed(0);
+function formatNumber(value: number | string | null | undefined): string {
+  const num = Number(value) || 0;
+  if (num >= 10000000) return `${(num / 10000000).toFixed(1)}Cr`;
+  if (num >= 100000) return `${(num / 100000).toFixed(1)}L`;
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+  return num.toFixed(0);
 }
 
 export default function SNOPDashboardPage() {
@@ -87,10 +88,10 @@ export default function SNOPDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {dashboard?.forecast_accuracy?.toFixed(1) || 85}%
+              {Number(dashboard?.forecast_accuracy || 85).toFixed(1)}%
             </div>
             <p className="text-xs text-muted-foreground">
-              MAPE: {dashboard?.mape?.toFixed(1) || 15}%
+              MAPE: {Number(dashboard?.mape || 15).toFixed(1)}%
             </p>
           </CardContent>
         </Card>
@@ -142,7 +143,7 @@ export default function SNOPDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {dashboard?.inventory_health_score?.toFixed(0) || 78}%
+              {Number(dashboard?.inventory_health_score || 78).toFixed(0)}%
             </div>
             <p className="text-xs text-muted-foreground">
               {dashboard?.items_below_safety || 0} below safety stock
