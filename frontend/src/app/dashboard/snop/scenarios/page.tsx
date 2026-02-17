@@ -98,7 +98,7 @@ export default function ScenariosPage() {
   const { data: whatIfResult, isFetching: whatIfLoading } = useQuery({
     queryKey: ['snop-what-if', whatIf],
     queryFn: async () => {
-      const res = await apiClient.post('/api/v1/snop/scenario/what-if', whatIf);
+      const res = await apiClient.post('/snop/scenario/what-if', whatIf);
       return res.data;
     },
     enabled: activeTab === 'whatif',
@@ -107,7 +107,7 @@ export default function ScenariosPage() {
   // ---- Mutations ----
   const runMonteCarlo = useMutation({
     mutationFn: async (scenarioId: string) => {
-      const res = await apiClient.post('/api/v1/snop/scenario/monte-carlo', {
+      const res = await apiClient.post('/snop/scenario/monte-carlo', {
         scenario_id: scenarioId,
         num_simulations: 1000,
       });
@@ -120,7 +120,7 @@ export default function ScenariosPage() {
 
   const runPL = useMutation({
     mutationFn: async (scenarioId: string) => {
-      const res = await apiClient.post('/api/v1/snop/scenario/financial-pl', {
+      const res = await apiClient.post('/snop/scenario/financial-pl', {
         scenario_id: scenarioId,
       });
       return res.data;
@@ -132,7 +132,7 @@ export default function ScenariosPage() {
 
   const runSensitivity = useMutation({
     mutationFn: async (scenarioId: string) => {
-      const res = await apiClient.post('/api/v1/snop/scenario/sensitivity', {
+      const res = await apiClient.post('/snop/scenario/sensitivity', {
         scenario_id: scenarioId,
         variation_pct: 20,
       });

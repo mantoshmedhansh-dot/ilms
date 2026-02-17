@@ -95,7 +95,8 @@ class ScenarioEngine:
 
             # Apply scenario multipliers
             base_demand *= scenario.demand_multiplier
-            base_supply_capacity *= scenario.supply_constraint_pct / 100.0
+            supply_pct = scenario.supply_constraint_pct if scenario.supply_constraint_pct > 0 else 100.0
+            base_supply_capacity *= supply_pct / 100.0
             base_lead_time *= scenario.lead_time_multiplier
             base_revenue_per_unit *= (1 + scenario.price_change_pct / 100.0)
 
@@ -531,7 +532,8 @@ class ScenarioEngine:
         demand = baseline["daily_demand"] * scenario.demand_multiplier * days
         price = baseline["revenue_per_unit"] * (1 + scenario.price_change_pct / 100)
         cost_pct = 60.0  # COGS as % of revenue
-        supply_cap = baseline["supply_capacity"] * (scenario.supply_constraint_pct / 100) * days
+        supply_pct = scenario.supply_constraint_pct if scenario.supply_constraint_pct > 0 else 100.0
+        supply_cap = baseline["supply_capacity"] * (supply_pct / 100) * days
         lead_time = baseline["lead_time_days"] * scenario.lead_time_multiplier
         opex_pct = 15.0
         holding_cost_rate = 0.25

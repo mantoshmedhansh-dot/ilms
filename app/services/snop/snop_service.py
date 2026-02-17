@@ -658,7 +658,8 @@ class SNOPService:
 
             # Stockout risk increases with higher demand and supply constraints
             base_stockout_risk = 0.05
-            stockout_probability = min(0.95, base_stockout_risk * scenario.demand_multiplier / (scenario.supply_constraint_pct / 100))
+            supply_pct = scenario.supply_constraint_pct if scenario.supply_constraint_pct > 0 else 100.0
+            stockout_probability = min(0.95, base_stockout_risk * scenario.demand_multiplier / (supply_pct / 100))
 
             service_level = 1 - stockout_probability
 
