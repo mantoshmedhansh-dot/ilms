@@ -164,9 +164,11 @@ export default function DemandForecastsPage() {
       ...(granularity ? { granularity } : {}),
       ...(level ? { level } : {}),
     }),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
-  // Model comparison query
+  // Model comparison query - always fetch (prefetch for Model Arena tab)
   const { data: modelComparison, isLoading: isComparing } = useQuery({
     queryKey: ['snop-model-comparison', granularity],
     queryFn: async () => {
@@ -175,7 +177,8 @@ export default function DemandForecastsPage() {
         return res.data;
       } catch { return null; }
     },
-    enabled: activeTab === 'models',
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
   // Demand classification query
@@ -188,6 +191,8 @@ export default function DemandForecastsPage() {
       } catch { return null; }
     },
     enabled: activeTab === 'classification',
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
   // Demand signals query
@@ -198,6 +203,8 @@ export default function DemandForecastsPage() {
       return res.data;
     },
     enabled: activeTab === 'sensing',
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
   // Demand sensing analysis
@@ -208,6 +215,8 @@ export default function DemandForecastsPage() {
       return res.data;
     },
     enabled: activeTab === 'sensing',
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
   // Create signal state
@@ -302,11 +311,17 @@ export default function DemandForecastsPage() {
     ? Object.entries(modelComparison.model_comparison).map(([name, data]: [string, any]) => ({
         name: algorithmLabels[name] || name,
         mape: data.mape,
-        accuracy: Math.max(0, 100 - data.mape),
+        accuracy: data.accuracy ?? Math.max(0, 100 - data.mape),
         weight: (data.weight * 100),
         fill: algorithmColors[name] || '#6B7280',
       }))
     : [];
+
+  // Detect insufficient data: all models at ~0% accuracy (MAPE >= 99)
+  const hasInsufficientData = modelChartData.length > 0 &&
+    modelChartData.every((m) => m.mape >= 99);
+  const hasEmptyChartData = modelChartData.length > 0 &&
+    modelChartData.every((m) => m.accuracy < 1);
 
   return (
     <div className="space-y-6 p-6">
@@ -570,6 +585,33 @@ export default function DemandForecastsPage() {
             </div>
           ) : modelComparison ? (
             <>
+              {/* Insufficient Data Warning */}
+              {hasInsufficientData && (
+                <Card className="border-2 border-amber-200 bg-amber-50/50">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-amber-100 rounded-full">
+                        <AlertCircle className="h-8 w-8 text-amber-600" />
+                      </div>
+                      <div>
+                        <p className="text-base font-semibold text-amber-800">
+                          Insufficient Historical Data
+                        </p>
+                        <p className="text-sm text-amber-700 mt-1">
+                          Not enough delivered order data for accurate model training. All models are showing ~0% accuracy.
+                          Generate more orders or adjust the lookback period to improve results.
+                        </p>
+                        {modelComparison.data_points != null && (
+                          <p className="text-xs text-amber-600 mt-1">
+                            Data points available: {modelComparison.data_points}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Winning Model Banner */}
               <Card className="border-2 border-green-200 bg-green-50/50">
                 <CardContent className="p-6">
@@ -610,23 +652,29 @@ export default function DemandForecastsPage() {
                     <CardTitle className="text-base">Model Accuracy (Lower MAPE = Better)</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={modelChartData} layout="vertical">
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis type="number" domain={[0, 100]} unit="%" />
-                          <YAxis type="category" dataKey="name" width={100} />
-                          <Tooltip
-                            formatter={(value) => [`${Number(value).toFixed(1)}%`, 'Accuracy']}
-                          />
-                          <Bar dataKey="accuracy" radius={[0, 4, 4, 0]}>
-                            {modelChartData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.fill} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
+                    {hasEmptyChartData ? (
+                      <div className="h-64 flex items-center justify-center text-muted-foreground text-sm">
+                        No meaningful accuracy data to display. Models need more historical data to train.
+                      </div>
+                    ) : (
+                      <div className="h-64">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart data={modelChartData} layout="vertical">
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis type="number" domain={[0, 100]} unit="%" />
+                            <YAxis type="category" dataKey="name" width={100} />
+                            <Tooltip
+                              formatter={(value) => [`${Number(value).toFixed(1)}%`, 'Accuracy']}
+                            />
+                            <Bar dataKey="accuracy" radius={[0, 4, 4, 0]}>
+                              {modelChartData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.fill} />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -691,13 +739,19 @@ export default function DemandForecastsPage() {
                   <Card key={model.name} className="relative overflow-hidden">
                     <div
                       className="absolute top-0 left-0 w-full h-1"
-                      style={{ backgroundColor: model.fill }}
+                      style={{ backgroundColor: hasInsufficientData ? '#D97706' : model.fill }}
                     />
                     <CardContent className="p-4 pt-5">
                       <p className="text-sm font-medium" style={{ color: model.fill }}>
                         {model.name}
                       </p>
-                      <p className="text-2xl font-bold mt-1">{model.accuracy.toFixed(1)}%</p>
+                      <p className="text-2xl font-bold mt-1">
+                        {hasInsufficientData ? (
+                          <span className="text-amber-600">N/A</span>
+                        ) : (
+                          <>{model.accuracy.toFixed(1)}%</>
+                        )}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         MAPE: {model.mape.toFixed(1)}% | Weight: {model.weight.toFixed(1)}%
                       </p>

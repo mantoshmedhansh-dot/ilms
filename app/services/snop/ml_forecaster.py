@@ -911,6 +911,7 @@ class MLForecaster:
                 "model_comparison": {
                     name: {
                         "mape": round(m["metrics"].get("mape", 100), 2),
+                        "accuracy": round(max(0, 100 - m["metrics"].get("mape", 100)), 2),
                         "weight": round(weights.get(name, 0), 4),
                     }
                     for name, m in models.items()
@@ -918,6 +919,7 @@ class MLForecaster:
             },
             "demand_classification": classification,
             "model_weights": weights,
+            "data_points": len(data),
         }
 
     # ==================== Single Algorithm Interface ====================
@@ -1031,6 +1033,7 @@ class MLForecaster:
             "algorithm": ForecastAlgorithm.ENSEMBLE,
             "accuracy_metrics": {"mape": 100.0},
             "model_weights": {},
+            "data_points": 0,
         }
 
     def _calculate_accuracy(self, actual: List[float], predicted: List[float]) -> Dict[str, float]:

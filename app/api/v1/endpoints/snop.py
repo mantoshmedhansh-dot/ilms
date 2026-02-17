@@ -214,6 +214,7 @@ async def compare_forecast_models(
         "model_comparison": result["accuracy_metrics"].get("model_comparison", {}),
         "demand_classification": result.get("demand_classification", {}),
         "forecast_data": result["forecasts"],
+        "data_points": result.get("data_points", 0),
         "ml_libraries": {
             "prophet": ml_forecaster.has_prophet,
             "xgboost": ml_forecaster.has_xgboost,
