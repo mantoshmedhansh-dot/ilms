@@ -20,7 +20,7 @@ from collections import defaultdict
 from sqlalchemy import select, func, and_, or_, desc, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.order import Order, OrderStatus
+from app.models.order import Order, OrderItem, OrderStatus
 from app.models.wms_advanced import WarehouseTask, TaskType, TaskStatus
 from app.models.labor import (
     WarehouseWorker, WorkShift, LaborStandard, ProductivityMetric,
@@ -128,8 +128,9 @@ class WMSLaborForecastingAgent:
             select(
                 func.date_trunc('day', Order.created_at).label("day"),
                 func.count(Order.id).label("order_count"),
-                func.sum(Order.item_count).label("total_items"),
+                func.coalesce(func.sum(OrderItem.quantity), 0).label("total_items"),
             )
+            .outerjoin(OrderItem, OrderItem.order_id == Order.id)
             .where(Order.created_at >= cutoff)
             .group_by("day")
             .order_by("day")
@@ -226,7 +227,7 @@ class WMSLaborForecastingAgent:
         )
 
         if warehouse_id:
-            query = query.where(WarehouseWorker.warehouse_id == warehouse_id)
+            query = query.where(WarehouseWorker.primary_warehouse_id == warehouse_id)
 
         result = await self.db.execute(query)
         row = result.one()

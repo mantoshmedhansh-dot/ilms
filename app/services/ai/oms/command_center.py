@@ -33,6 +33,15 @@ class OMSCommandCenter:
 
     async def get_dashboard(self) -> Dict:
         """Get full OMS AI dashboard data."""
+        # Run analysis on all agents first so they populate _results
+        agents = [self.fraud_agent, self.routing_agent, self.delivery_agent,
+                  self.priority_agent, self.returns_agent]
+        for agent in agents:
+            try:
+                await agent.analyze()
+            except Exception:
+                pass  # Agent sets its own error status
+
         statuses = [
             await self.fraud_agent.get_status(),
             await self.routing_agent.get_status(),
@@ -42,8 +51,7 @@ class OMSCommandCenter:
         ]
 
         all_recommendations = []
-        for agent in [self.fraud_agent, self.routing_agent, self.delivery_agent,
-                     self.priority_agent, self.returns_agent]:
+        for agent in agents:
             recs = await agent.get_recommendations()
             all_recommendations.extend(recs)
 

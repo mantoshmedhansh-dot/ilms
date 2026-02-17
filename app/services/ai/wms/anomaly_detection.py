@@ -260,12 +260,12 @@ class WMSAnomalyDetectionAgent:
         # Get daily movement counts by type
         query = (
             select(
-                func.date_trunc('day', StockMovement.created_at).label("day"),
+                func.date_trunc('day', StockMovement.movement_date).label("day"),
                 StockMovement.movement_type,
                 func.count(StockMovement.id).label("count"),
                 func.sum(StockMovement.quantity).label("total_qty"),
             )
-            .where(StockMovement.created_at >= cutoff)
+            .where(StockMovement.movement_date >= cutoff)
             .group_by("day", StockMovement.movement_type)
             .order_by("day")
         )
@@ -306,27 +306,30 @@ class WMSAnomalyDetectionAgent:
 
     async def _analyze_cycle_count_variances(self, warehouse_id: Optional[UUID] = None, days: int = 90) -> Dict:
         """Analyze cycle count variances for patterns."""
-        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+        try:
+            cutoff = datetime.now(timezone.utc) - timedelta(days=days)
 
-        query = (
-            select(
-                InventoryVariance.product_id,
-                InventoryVariance.warehouse_id,
-                InventoryVariance.expected_quantity,
-                InventoryVariance.actual_quantity,
-                InventoryVariance.variance_quantity,
-                InventoryVariance.variance_percentage,
-                InventoryVariance.variance_status,
-                InventoryVariance.variance_reason,
+            query = (
+                select(
+                    InventoryVariance.product_id,
+                    InventoryVariance.warehouse_id,
+                    InventoryVariance.expected_quantity,
+                    InventoryVariance.actual_quantity,
+                    InventoryVariance.variance_quantity,
+                    InventoryVariance.variance_percentage,
+                    InventoryVariance.variance_status,
+                    InventoryVariance.variance_reason,
+                )
+                .where(InventoryVariance.created_at >= cutoff)
             )
-            .where(InventoryVariance.created_at >= cutoff)
-        )
 
-        if warehouse_id:
-            query = query.where(InventoryVariance.warehouse_id == warehouse_id)
+            if warehouse_id:
+                query = query.where(InventoryVariance.warehouse_id == warehouse_id)
 
-        result = await self.db.execute(query)
-        rows = result.all()
+            result = await self.db.execute(query)
+            rows = result.all()
+        except Exception:
+            return {"total_variances": 0, "anomalies": [], "period_days": days}
 
         if not rows:
             return {"total_variances": 0, "anomalies": [], "period_days": days}

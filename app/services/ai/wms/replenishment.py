@@ -152,7 +152,7 @@ class WMSReplenishmentAgent:
             select(
                 WarehouseBin.id.label("bin_id"),
                 WarehouseBin.bin_code,
-                WarehouseBin.max_quantity,
+                WarehouseBin.max_capacity,
                 WarehouseZone.id.label("zone_id"),
                 WarehouseZone.name.label("zone_name"),
                 StockItem.product_id,
@@ -170,7 +170,7 @@ class WMSReplenishmentAgent:
             .group_by(
                 WarehouseBin.id,
                 WarehouseBin.bin_code,
-                WarehouseBin.max_quantity,
+                WarehouseBin.max_capacity,
                 WarehouseZone.id,
                 WarehouseZone.name,
                 StockItem.product_id,

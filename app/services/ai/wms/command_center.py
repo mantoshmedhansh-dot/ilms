@@ -31,6 +31,14 @@ class WMSCommandCenter:
 
     async def get_dashboard(self, warehouse_id: Optional[UUID] = None) -> Dict:
         """Get full dashboard data from all agents."""
+        # Run analysis on all agents first so they populate _results
+        agents = [self.anomaly_agent, self.slotting_agent, self.labor_agent, self.replenishment_agent]
+        for agent in agents:
+            try:
+                await agent.analyze(warehouse_id=warehouse_id)
+            except Exception:
+                pass  # Agent sets its own error status
+
         # Get status from all agents
         statuses = [
             await self.anomaly_agent.get_status(),
@@ -41,7 +49,7 @@ class WMSCommandCenter:
 
         # Collect all recommendations
         all_recommendations = []
-        for agent in [self.anomaly_agent, self.slotting_agent, self.labor_agent, self.replenishment_agent]:
+        for agent in agents:
             recs = await agent.get_recommendations()
             all_recommendations.extend(recs)
 
