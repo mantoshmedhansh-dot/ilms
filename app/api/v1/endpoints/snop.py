@@ -882,7 +882,7 @@ async def list_inventory_optimizations(
     stock_map = {}
     for o in optimizations:
         inv_result = await db.execute(
-            select(sa_func.coalesce(sa_func.sum(InventorySummary.quantity_on_hand), 0))
+            select(sa_func.coalesce(sa_func.sum(InventorySummary.available_quantity), 0))
             .where(
                 and_(
                     InventorySummary.product_id == o.product_id,
