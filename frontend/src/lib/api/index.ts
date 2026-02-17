@@ -5729,7 +5729,7 @@ export const snopApi = {
     return data;
   },
   // Forecasts
-  getForecasts: async (params?: { granularity?: string; level?: string; skip?: number; limit?: number }) => {
+  getForecasts: async (params?: { granularity?: string; level?: string; warehouse_id?: string; skip?: number; limit?: number }) => {
     const { data } = await apiClient.get('/snop/forecasts', { params });
     return data;
   },
@@ -5764,12 +5764,29 @@ export const snopApi = {
     return data;
   },
   // Inventory Optimization
-  getOptimizations: async (params?: { skip?: number; limit?: number }) => {
+  getOptimizations: async (params?: { skip?: number; limit?: number; warehouse_id?: string; region_id?: string; cluster_id?: string }) => {
     const { data } = await apiClient.get('/snop/inventory/optimizations', { params });
     return data;
   },
   runOptimization: async () => {
     const { data } = await apiClient.post('/snop/inventory/optimize', {});
+    return data;
+  },
+  // Inventory Network Health (Geo Drill-Down)
+  getNetworkHealth: async (params?: { region_id?: string; cluster_id?: string; warehouse_id?: string }) => {
+    const { data } = await apiClient.get('/snop/inventory/network-health', { params });
+    return data;
+  },
+  getWarehouseDetail: async (warehouseId: string, params?: { product_id?: string }) => {
+    const { data } = await apiClient.get(`/snop/inventory/warehouse-detail/${warehouseId}`, { params });
+    return data;
+  },
+  getForecastAccuracyGeo: async (params: { start_date: string; end_date: string; region_id?: string; cluster_id?: string; warehouse_id?: string }) => {
+    const { data } = await apiClient.get('/snop/inventory/forecast-accuracy-geo', { params });
+    return data;
+  },
+  getAvailabilityVsForecast: async (params: { warehouse_id: string; product_id?: string; horizon_days?: number }) => {
+    const { data } = await apiClient.get('/snop/inventory/availability-vs-forecast', { params });
     return data;
   },
 };

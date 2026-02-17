@@ -71,7 +71,7 @@ from app.schemas.snop import (
     QuickWhatIfRequest,
     ScenarioCompareAdvancedRequest,
 )
-from app.services.snop import SNOPService, DemandPlannerService, MLForecaster, DemandClassifier, DemandSensor, SupplyOptimizer, ScenarioEngine, PlanningAgents, NLPlanner
+from app.services.snop import SNOPService, DemandPlannerService, MLForecaster, DemandClassifier, DemandSensor, SupplyOptimizer, ScenarioEngine, PlanningAgents, NLPlanner, InventoryNetworkService
 from app.core.module_decorators import require_module
 
 
@@ -104,10 +104,14 @@ async def get_snop_dashboard(
 async def get_demand_supply_gap(
     db: TenantDB,
     current_user: CurrentUser,
-    horizon_days: int = Query(90, ge=7, le=365, description="Forecast horizon in days")
+    horizon_days: int = Query(90, ge=7, le=365, description="Forecast horizon in days"),
+    region_id: Optional[UUID] = Query(None, description="Filter by region"),
+    cluster_id: Optional[UUID] = Query(None, description="Filter by cluster"),
+    warehouse_id: Optional[UUID] = Query(None, description="Filter by warehouse"),
 ):
     """
     Get demand vs supply gap analysis.
+    Supports geographic filtering via region_id, cluster_id, or warehouse_id.
     """
     snop_service = SNOPService(db)
     return await snop_service.get_demand_supply_gap(horizon_days)
@@ -119,10 +123,14 @@ async def get_forecast_accuracy_report(
     db: TenantDB,
     current_user: CurrentUser,
     start_date: date = Query(..., description="Report start date"),
-    end_date: date = Query(..., description="Report end date")
+    end_date: date = Query(..., description="Report end date"),
+    region_id: Optional[UUID] = Query(None, description="Filter by region"),
+    cluster_id: Optional[UUID] = Query(None, description="Filter by cluster"),
+    warehouse_id: Optional[UUID] = Query(None, description="Filter by warehouse"),
 ):
     """
     Get forecast accuracy report for the specified period.
+    Supports geographic filtering via region_id, cluster_id, or warehouse_id.
     """
     snop_service = SNOPService(db)
     return await snop_service.get_forecast_accuracy_report(start_date, end_date)
@@ -306,6 +314,7 @@ async def list_forecasts(
     forecast_level: Optional[ForecastLevel] = Query(None),
     level: Optional[ForecastLevel] = Query(None),
     granularity: Optional[ForecastGranularity] = Query(None),
+    warehouse_id: Optional[UUID] = Query(None, description="Filter by warehouse"),
     limit: int = Query(50, ge=1, le=100),
     offset: int = Query(0, ge=0)
 ):
@@ -314,6 +323,7 @@ async def list_forecasts(
 
     Accepts both 'level' and 'forecast_level' params (frontend sends 'level').
     Returns 'items' array with computed 'accuracy' (100 - mape) and 'avg_accuracy'.
+    Supports warehouse_id filtering.
     """
     from app.models.snop import DemandForecast
     from sqlalchemy.orm import selectinload
@@ -340,6 +350,9 @@ async def list_forecasts(
     if granularity:
         query = query.where(DemandForecast.granularity == granularity.value)
         count_query = count_query.where(DemandForecast.granularity == granularity.value)
+    if warehouse_id:
+        query = query.where(DemandForecast.warehouse_id == warehouse_id)
+        count_query = count_query.where(DemandForecast.warehouse_id == warehouse_id)
 
     # Eager load product/category relationships for display names
     query = query.options(
@@ -837,30 +850,38 @@ async def list_inventory_optimizations(
     db: TenantDB,
     current_user: CurrentUser,
     limit: int = Query(50, ge=1, le=100),
-    offset: int = Query(0, ge=0)
+    offset: int = Query(0, ge=0),
+    warehouse_id: Optional[UUID] = Query(None, description="Filter by warehouse"),
+    region_id: Optional[UUID] = Query(None, description="Filter by region"),
+    cluster_id: Optional[UUID] = Query(None, description="Filter by cluster"),
 ):
     """
     List inventory optimization recommendations.
 
     Returns 'items' array with product details, current stock, and
     recommended safety stock / reorder point / EOQ per product-warehouse.
+    Supports geographic filtering via region_id, cluster_id, or warehouse_id.
     """
     from app.models.snop import InventoryOptimization
     from app.models.product import Product
     from app.models.warehouse import Warehouse
     from app.models.inventory import InventorySummary
     from sqlalchemy import func as sa_func, and_
+    from app.services.snop.inventory_network_service import _get_warehouse_ids_for_geo
+
+    # Resolve geo filter
+    geo_wh_ids = await _get_warehouse_ids_for_geo(db, region_id=region_id, cluster_id=cluster_id, warehouse_id=warehouse_id)
 
     count_query = select(sa_func.count(InventoryOptimization.id))
+    if geo_wh_ids is not None:
+        count_query = count_query.where(InventoryOptimization.warehouse_id.in_(geo_wh_ids))
     total_result = await db.execute(count_query)
     total = total_result.scalar() or 0
 
-    query = (
-        select(InventoryOptimization)
-        .order_by(InventoryOptimization.created_at.desc())
-        .offset(offset)
-        .limit(limit)
-    )
+    query = select(InventoryOptimization)
+    if geo_wh_ids is not None:
+        query = query.where(InventoryOptimization.warehouse_id.in_(geo_wh_ids))
+    query = query.order_by(InventoryOptimization.created_at.desc()).offset(offset).limit(limit)
     result = await db.execute(query)
     optimizations = list(result.scalars().all())
 
@@ -1037,6 +1058,101 @@ async def get_safety_stock_recommendation(
     )
 
     return result
+
+
+# ==================== Inventory Network Health (Geo Drill-Down) ====================
+
+@router.get("/inventory/network-health")
+@require_module("scm_ai")
+async def get_inventory_network_health(
+    db: TenantDB,
+    current_user: CurrentUser,
+    region_id: Optional[UUID] = Query(None, description="Drill into region"),
+    cluster_id: Optional[UUID] = Query(None, description="Drill into cluster"),
+    warehouse_id: Optional[UUID] = Query(None, description="Drill into warehouse"),
+):
+    """
+    Get inventory network health with stepping-ladder drill-down.
+
+    Enterprise → Region → Cluster → Warehouse, each with traffic-light KPIs
+    and clickable children at the next level.
+    """
+    service = InventoryNetworkService(db)
+    return await service.get_network_health(
+        region_id=region_id,
+        cluster_id=cluster_id,
+        warehouse_id=warehouse_id,
+    )
+
+
+@router.get("/inventory/warehouse-detail/{warehouse_id}")
+@require_module("scm_ai")
+async def get_inventory_warehouse_detail(
+    warehouse_id: UUID,
+    db: TenantDB,
+    current_user: CurrentUser,
+    product_id: Optional[UUID] = Query(None, description="Filter to single product"),
+):
+    """
+    Get per-SKU inventory detail for a warehouse.
+
+    Shows current stock, safety stock, reorder point, EOQ, days of supply,
+    forecast accuracy, and status classification (CRITICAL/REORDER/OVERSTOCK/OPTIMAL).
+    """
+    service = InventoryNetworkService(db)
+    return await service.get_warehouse_detail(
+        warehouse_id=warehouse_id,
+        product_id=product_id,
+    )
+
+
+@router.get("/inventory/forecast-accuracy-geo")
+@require_module("scm_ai")
+async def get_forecast_accuracy_geo(
+    db: TenantDB,
+    current_user: CurrentUser,
+    start_date: date = Query(..., description="Start date"),
+    end_date: date = Query(..., description="End date"),
+    region_id: Optional[UUID] = Query(None),
+    cluster_id: Optional[UUID] = Query(None),
+    warehouse_id: Optional[UUID] = Query(None),
+):
+    """
+    Get forecast accuracy aggregated by geographic level.
+
+    Returns MAPE, WMAPE, Bias metrics with breakdowns by SKU, algorithm,
+    monthly trend, and children accuracy for drill-down.
+    """
+    service = InventoryNetworkService(db)
+    return await service.get_forecast_accuracy_by_geo(
+        start_date=start_date,
+        end_date=end_date,
+        region_id=region_id,
+        cluster_id=cluster_id,
+        warehouse_id=warehouse_id,
+    )
+
+
+@router.get("/inventory/availability-vs-forecast")
+@require_module("scm_ai")
+async def get_availability_vs_forecast(
+    db: TenantDB,
+    current_user: CurrentUser,
+    warehouse_id: UUID = Query(..., description="Warehouse ID"),
+    product_id: Optional[UUID] = Query(None, description="Filter to single product"),
+    horizon_days: int = Query(30, ge=7, le=180, description="Forecast horizon in days"),
+):
+    """
+    Compare available inventory vs forecasted demand over time for a warehouse.
+
+    Returns daily time-series with gap analysis and summary metrics.
+    """
+    service = InventoryNetworkService(db)
+    return await service.get_availability_vs_forecast(
+        warehouse_id=warehouse_id,
+        product_id=product_id,
+        horizon_days=horizon_days,
+    )
 
 
 # ==================== Scenario Analysis ====================
@@ -1779,21 +1895,34 @@ async def get_alert_center(
     include_reorder: bool = Query(True),
     include_bias: bool = Query(True),
     max_alerts: int = Query(50, ge=1, le=200),
+    warehouse_id: Optional[UUID] = Query(None, description="Filter alerts by warehouse"),
 ):
     """
     Get aggregated alert center from all AI agents.
 
     Runs all active agents and returns prioritized, deduplicated alerts
     with severity scoring and recommended actions.
+    Supports warehouse_id filtering (post-filter).
     """
     agents = PlanningAgents(db)
 
-    return await agents.get_alert_center(
+    result = await agents.get_alert_center(
         include_exceptions=include_exceptions,
         include_reorder=include_reorder,
         include_bias=include_bias,
         max_alerts=max_alerts,
     )
+
+    # Post-filter by warehouse_id if provided
+    if warehouse_id and isinstance(result, dict) and "alerts" in result:
+        wh_str = str(warehouse_id)
+        result["alerts"] = [
+            a for a in result["alerts"]
+            if a.get("warehouse_id") == wh_str or not a.get("warehouse_id")
+        ]
+        result["total_alerts"] = len(result["alerts"])
+
+    return result
 
 
 @router.post("/agents/run-exceptions")
@@ -1804,19 +1933,32 @@ async def run_exception_agent(
     safety_stock_threshold: float = Query(1.0, ge=0.5, le=2.0),
     overstock_days: int = Query(90, ge=30, le=365),
     gap_pct_threshold: float = Query(10.0, ge=1, le=50),
+    warehouse_id: Optional[UUID] = Query(None, description="Scope to specific warehouse"),
 ):
     """
     Run the Exception Detection Agent.
 
     Scans for stockout risks, overstock situations, and demand-supply gaps.
+    Supports warehouse_id scoping.
     """
     agents = PlanningAgents(db)
 
-    return await agents.run_exception_agent(
+    result = await agents.run_exception_agent(
         safety_stock_threshold=safety_stock_threshold,
         overstock_days_threshold=overstock_days,
         gap_pct_threshold=gap_pct_threshold,
     )
+
+    # Post-filter exceptions by warehouse_id if provided
+    if warehouse_id and isinstance(result, dict) and "exceptions" in result:
+        wh_str = str(warehouse_id)
+        result["exceptions"] = [
+            e for e in result["exceptions"]
+            if e.get("warehouse_id") == wh_str or not e.get("warehouse_id")
+        ]
+        result["total_exceptions"] = len(result["exceptions"])
+
+    return result
 
 
 @router.post("/agents/run-reorder")

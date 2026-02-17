@@ -22,6 +22,7 @@ from app.services.snop.scenario_engine import ScenarioEngine
 from app.services.snop.planning_agents import PlanningAgents
 from app.services.snop.nl_planner import NLPlanner
 from app.services.snop.snop_service import SNOPService
+from app.services.snop.inventory_network_service import InventoryNetworkService
 
 __all__ = [
     "DemandPlannerService",
@@ -34,4 +35,5 @@ __all__ = [
     "PlanningAgents",
     "NLPlanner",
     "SNOPService",
+    "InventoryNetworkService",
 ]

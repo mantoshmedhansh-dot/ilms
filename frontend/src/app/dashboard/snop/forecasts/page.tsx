@@ -155,14 +155,36 @@ export default function DemandForecastsPage() {
   const queryClient = useQueryClient();
   const [granularity, setGranularity] = useState<string>('');
   const [level, setLevel] = useState<string>('');
+  const [warehouseId, setWarehouseId] = useState<string>('');
   const [selectedForecast, setSelectedForecast] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<string>('forecasts');
 
+  // Warehouse list for filter dropdown
+  const { data: geoData } = useQuery({
+    queryKey: ['geo-hierarchy'],
+    queryFn: async () => {
+      try {
+        const { data } = await apiClient.get('/channel-reports/geo-hierarchy');
+        return data;
+      } catch {
+        return { regions: [] };
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Flatten warehouses from geo hierarchy for dropdown
+  const allWarehouses = (geoData?.regions || []).flatMap((r: any) => [
+    ...(r.warehouses || []),
+    ...(r.clusters || []).flatMap((c: any) => c.warehouses || []),
+  ]);
+
   const { data: forecasts, isLoading, refetch, isFetching } = useQuery({
-    queryKey: ['snop-forecasts', granularity, level],
+    queryKey: ['snop-forecasts', granularity, level, warehouseId],
     queryFn: () => snopApi.getForecasts({
       ...(granularity ? { granularity } : {}),
       ...(level ? { level } : {}),
+      ...(warehouseId ? { warehouse_id: warehouseId } : {}),
     }),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
@@ -381,6 +403,17 @@ export default function DemandForecastsPage() {
                 <SelectItem value="REGION">By Region</SelectItem>
                 <SelectItem value="CHANNEL">By Channel</SelectItem>
                 <SelectItem value="COMPANY">Company-wide</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={warehouseId || 'ALL'} onValueChange={(v) => setWarehouseId(v === 'ALL' ? '' : v)}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="All Warehouses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Warehouses</SelectItem>
+                {allWarehouses.map((w: any) => (
+                  <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

@@ -622,6 +622,87 @@ class DemandSupplyGapAnalysis(BaseModel):
     recommendations: List[str] = []
 
 
+# ==================== INVENTORY NETWORK / GEO DRILL-DOWN SCHEMAS ====================
+
+class InventoryHealthKPIs(BaseModel):
+    """KPIs for a geographic level in the inventory network."""
+    total_skus: int = 0
+    stockout_count: int = 0
+    overstock_count: int = 0
+    healthy_count: int = 0
+    avg_days_of_supply: float = 0
+    avg_fill_rate: float = 0
+    forecast_accuracy_mape: Optional[float] = None
+    forecast_accuracy_wmape: Optional[float] = None
+    forecast_bias: Optional[float] = None
+    demand_supply_gap_pct: float = 0
+    total_exceptions: int = 0
+    health_status: str = "GREEN"  # GREEN, AMBER, RED
+
+
+class GeoChildSummary(BaseModel):
+    """Summary for a child entity in the geo hierarchy."""
+    id: str
+    name: str
+    code: Optional[str] = None
+    type: str
+    kpis: InventoryHealthKPIs
+
+
+class NetworkHealthResponse(BaseModel):
+    """Response for network health drill-down."""
+    level: str
+    level_name: str
+    kpis: InventoryHealthKPIs
+    children: List[GeoChildSummary] = []
+    breadcrumb: List[Dict[str, Any]] = []
+
+
+class WarehouseSKUDetail(BaseModel):
+    """Per-SKU detail at warehouse level."""
+    product_id: str
+    product_name: str
+    sku: Optional[str] = None
+    current_stock: float = 0
+    safety_stock: float = 0
+    reorder_point: float = 0
+    eoq: float = 0
+    days_of_supply: float = 0
+    stockout_risk_pct: float = 0
+    is_overstock: bool = False
+    forecast_accuracy_mape: Optional[float] = None
+    forecast_qty: float = 0
+    available_qty: float = 0
+    gap: float = 0
+    gap_pct: float = 0
+    status: str = "OPTIMAL"  # CRITICAL, REORDER, OVERSTOCK, OPTIMAL
+    recommended_action: Optional[str] = None
+
+
+class WarehouseDetailResponse(BaseModel):
+    """Response for warehouse-level detail view."""
+    warehouse: Dict[str, Any]
+    summary_kpis: InventoryHealthKPIs
+    sku_details: List[WarehouseSKUDetail] = []
+
+
+class ForecastAccuracyGeoResponse(BaseModel):
+    """Response for forecast accuracy by geography."""
+    level: str
+    overall: Dict[str, Any] = {}
+    by_sku: List[Dict[str, Any]] = []
+    by_algorithm: Dict[str, Any] = {}
+    trend: List[Dict[str, Any]] = []
+    children_accuracy: List[Dict[str, Any]] = []
+
+
+class AvailabilityVsForecastResponse(BaseModel):
+    """Response for availability vs forecast comparison."""
+    warehouse_name: str = ""
+    comparison: List[Dict[str, Any]] = []
+    summary: Dict[str, Any] = {}
+
+
 # ==================== DEMAND SIGNAL SCHEMAS ====================
 
 class DemandSignalCreate(BaseModel):
