@@ -5726,7 +5726,11 @@ export const snopApi = {
     return data;
   },
   generateForecast: async (payload: { granularity: string; level: string; horizon_periods: number }) => {
-    const { data } = await apiClient.post('/snop/forecast/generate', payload);
+    const { data } = await apiClient.post('/snop/forecast/generate', {
+      granularity: payload.granularity || 'WEEKLY',
+      forecast_level: payload.level || 'SKU',
+      forecast_horizon_days: (payload.horizon_periods || 12) * 7,
+    });
     return data;
   },
   // Supply Plans

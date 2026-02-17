@@ -148,13 +148,16 @@ async def generate_forecasts(
     """
     snop_service = SNOPService(db)
 
+    from datetime import date as date_type
+    forecast_start = request.forecast_start_date or date_type.today()
+
     forecasts = await snop_service.generate_forecasts(
         product_ids=request.product_ids,
         category_ids=request.category_ids,
         warehouse_ids=request.warehouse_ids,
         forecast_level=request.forecast_level,
         granularity=request.granularity,
-        forecast_start_date=request.forecast_start_date,
+        forecast_start_date=forecast_start,
         forecast_horizon_days=request.forecast_horizon_days,
         algorithm=request.algorithm,
         lookback_days=request.lookback_days,

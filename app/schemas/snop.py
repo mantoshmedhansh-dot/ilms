@@ -90,7 +90,7 @@ class DemandForecastGenerateRequest(BaseModel):
     forecast_level: ForecastLevel = ForecastLevel.SKU
     granularity: ForecastGranularity = ForecastGranularity.WEEKLY
 
-    forecast_start_date: date
+    forecast_start_date: Optional[date] = None  # Defaults to today if not provided
     forecast_horizon_days: int = Field(90, ge=7, le=365)
 
     # AI configuration
