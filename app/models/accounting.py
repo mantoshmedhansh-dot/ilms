@@ -19,6 +19,7 @@ from app.database import Base
 if TYPE_CHECKING:
     from app.models.user import User
     from app.models.channel import SalesChannel
+    from app.models.warehouse import Warehouse
 
 
 class AccountType(str, Enum):
@@ -357,6 +358,14 @@ class CostCenter(Base):
         nullable=True
     )
 
+    # Warehouse link (for LOCATION-type cost centres)
+    warehouse_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("warehouses.id", ondelete="SET NULL"),
+        nullable=True,
+        comment="Links LOCATION cost centres to warehouses for P&L attribution"
+    )
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -374,6 +383,10 @@ class CostCenter(Base):
     parent: Mapped[Optional["CostCenter"]] = relationship(
         "CostCenter",
         remote_side=[id]
+    )
+    warehouse: Mapped[Optional["Warehouse"]] = relationship(
+        "Warehouse",
+        back_populates="cost_centers"
     )
 
     def __repr__(self) -> str:

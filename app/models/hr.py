@@ -22,6 +22,7 @@ from app.database import Base
 
 if TYPE_CHECKING:
     from app.models.user import User
+    from app.models.accounting import CostCenter
 
 
 # ==================== Enums ====================
@@ -236,6 +237,12 @@ class Employee(Base):
         ForeignKey("departments.id", ondelete="SET NULL"),
         nullable=True
     )
+    cost_center_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("cost_centers.id", ondelete="SET NULL"),
+        nullable=True,
+        comment="Cost centre for manpower cost attribution to warehouse P&L"
+    )
     designation: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     employment_type: Mapped[str] = mapped_column(
         String(50),
@@ -310,6 +317,7 @@ class Employee(Base):
         "Department",
         back_populates="employees"
     )
+    cost_center: Mapped[Optional["CostCenter"]] = relationship("CostCenter")
     reporting_manager: Mapped[Optional["Employee"]] = relationship(
         "Employee",
         remote_side=[id],

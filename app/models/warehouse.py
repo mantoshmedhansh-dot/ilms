@@ -81,6 +81,11 @@ class Warehouse(Base, TimestampMixin):
         foreign_keys="StockTransfer.to_warehouse_id",
         back_populates="to_warehouse"
     )
+    # Cost center link
+    cost_centers = relationship(
+        "CostCenter",
+        back_populates="warehouse"
+    )
     # WMS relationships
     zones = relationship(
         "WarehouseZone",

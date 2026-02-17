@@ -469,6 +469,12 @@ class OrderItem(Base):
     # Quantity & Pricing
     quantity: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     unit_price: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    unit_cost: Mapped[Optional[Decimal]] = mapped_column(
+        Numeric(12, 2),
+        nullable=True,
+        default=0,
+        comment="Cost price for COGS calculation"
+    )
     unit_mrp: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     discount_amount: Mapped[Decimal] = mapped_column(
         Numeric(12, 2),
