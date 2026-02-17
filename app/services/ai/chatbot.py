@@ -302,7 +302,7 @@ class ERPChatbotService:
                 Product.name,
                 Product.sku,
                 func.sum(OrderItem.quantity).label('qty'),
-                func.sum(OrderItem.total_price).label('revenue')
+                func.sum(OrderItem.total_amount).label('revenue')
             ).join(
                 OrderItem, Product.id == OrderItem.product_id
             ).join(
@@ -316,7 +316,7 @@ class ERPChatbotService:
             ).group_by(
                 Product.id, Product.name, Product.sku
             ).order_by(
-                desc(func.sum(OrderItem.total_price))
+                desc(func.sum(OrderItem.total_amount))
             ).limit(10)
         )
         rows = result.all()

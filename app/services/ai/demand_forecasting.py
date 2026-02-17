@@ -348,7 +348,7 @@ class DemandForecastingService:
         query = select(
             func.date(Order.created_at).label('sale_date'),
             func.sum(OrderItem.quantity).label('quantity'),
-            func.sum(OrderItem.total_price).label('revenue')
+            func.sum(OrderItem.total_amount).label('revenue')
         ).join(
             OrderItem, Order.id == OrderItem.order_id
         ).join(

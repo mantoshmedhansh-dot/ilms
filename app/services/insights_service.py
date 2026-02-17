@@ -320,7 +320,7 @@ class InsightsService:
             Product.id,
             Product.name,
             Product.sku,
-            func.sum(OrderItem.total_price).label('revenue'),
+            func.sum(OrderItem.total_amount).label('revenue'),
             func.sum(OrderItem.quantity).label('quantity')
         ).join(
             OrderItem, Product.id == OrderItem.product_id
@@ -334,7 +334,7 @@ class InsightsService:
         ).group_by(
             Product.id, Product.name, Product.sku
         ).order_by(
-            desc(func.sum(OrderItem.total_price))
+            desc(func.sum(OrderItem.total_amount))
         ).limit(limit)
 
         result = await self.db.execute(product_query)
@@ -353,7 +353,7 @@ class InsightsService:
         category_query = select(
             Category.id,
             Category.name,
-            func.sum(OrderItem.total_price).label('revenue')
+            func.sum(OrderItem.total_amount).label('revenue')
         ).join(
             Product, Category.id == Product.category_id
         ).join(
@@ -368,7 +368,7 @@ class InsightsService:
         ).group_by(
             Category.id, Category.name
         ).order_by(
-            desc(func.sum(OrderItem.total_price))
+            desc(func.sum(OrderItem.total_amount))
         ).limit(5)
 
         result = await self.db.execute(category_query)

@@ -229,7 +229,7 @@ class CustomerPortalService:
                     "sku": item.product.sku if item.product else getattr(item, 'sku', ''),
                     "quantity": item.quantity,
                     "unit_price": float(item.unit_price or 0),
-                    "total_price": float(item.total_price or 0),
+                    "total_price": float(item.total_amount or 0),
                     "image_url": item.product.image_url if item.product and hasattr(item.product, 'image_url') else None,
                 }
                 for item in (order.items or [])

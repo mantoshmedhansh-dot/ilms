@@ -430,7 +430,7 @@ def build_tracking_response(order: Order) -> OrderTrackingResponse:
                 "sku": item.sku,
                 "quantity": item.quantity,
                 "unit_price": float(item.unit_price),
-                "total_price": float(item.total_price),
+                "total_price": float(item.total_amount),
             }
             for item in (order.items or [])
         ],

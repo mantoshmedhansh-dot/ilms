@@ -13,7 +13,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
+from app.database import get_db_with_tenant as get_db
 from app.services.insights_service import InsightsService
 from app.schemas.insights import (
 
