@@ -70,6 +70,7 @@ def start_scheduler():
         # Import tenant job runner to register jobs
         # This import triggers @tenant_job decorators
         from app.jobs import tenant_job_runner  # noqa: F401
+        from app.jobs import snop_jobs  # noqa: F401
 
         # ============================================================
         # TENANT-AWARE SCHEDULED JOBS
@@ -117,6 +118,80 @@ def start_scheduler():
             args=['process_abandoned_carts'],
             id='process_abandoned_carts',
             name='[Multi-Tenant] Process Abandoned Carts',
+            replace_existing=True,
+        )
+
+        # ============================================================
+        # S&OP AUTO-TRIGGERING JOBS
+        # ============================================================
+
+        # S&OP: Exception detection every 4 hours
+        scheduler.add_job(
+            run_tenant_aware_job,
+            'interval',
+            hours=4,
+            args=['snop_exception_agent'],
+            id='snop_exception_agent',
+            name='[Multi-Tenant] S&OP Exception Detection',
+            replace_existing=True,
+        )
+
+        # S&OP: Reorder check every 60 minutes
+        scheduler.add_job(
+            run_tenant_aware_job,
+            'interval',
+            minutes=60,
+            args=['snop_reorder_check'],
+            id='snop_reorder_check',
+            name='[Multi-Tenant] S&OP Reorder Agent',
+            replace_existing=True,
+        )
+
+        # S&OP: Forecast bias detection daily at 6 AM IST
+        scheduler.add_job(
+            run_tenant_aware_job,
+            'cron',
+            hour=6,
+            minute=0,
+            args=['snop_bias_detection'],
+            id='snop_bias_detection',
+            name='[Multi-Tenant] S&OP Forecast Bias Detection',
+            replace_existing=True,
+        )
+
+        # S&OP: POS signal detection every 60 minutes
+        scheduler.add_job(
+            run_tenant_aware_job,
+            'interval',
+            minutes=60,
+            args=['snop_pos_signal_detection'],
+            id='snop_pos_signal_detection',
+            name='[Multi-Tenant] S&OP POS Signal Detection',
+            replace_existing=True,
+        )
+
+        # S&OP: Weekly forecast regeneration (Sunday 2 AM IST)
+        scheduler.add_job(
+            run_tenant_aware_job,
+            'cron',
+            day_of_week='sun',
+            hour=2,
+            minute=0,
+            args=['snop_forecast_regeneration'],
+            id='snop_forecast_regeneration',
+            name='[Multi-Tenant] S&OP Weekly Forecast Regeneration',
+            replace_existing=True,
+        )
+
+        # S&OP: Daily alert digest (8 AM IST)
+        scheduler.add_job(
+            run_tenant_aware_job,
+            'cron',
+            hour=8,
+            minute=0,
+            args=['snop_alert_digest'],
+            id='snop_alert_digest',
+            name='[Multi-Tenant] S&OP Daily Alert Digest',
             replace_existing=True,
         )
 

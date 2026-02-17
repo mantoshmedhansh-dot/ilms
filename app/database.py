@@ -121,6 +121,9 @@ async def get_db_session():
             await session.rollback()
             raise
 
+# Alias for background jobs that import get_db_context
+get_db_context = get_db_session
+
 
 async def init_db() -> None:
     """Initialize database tables."""
