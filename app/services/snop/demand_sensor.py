@@ -644,6 +644,7 @@ class DemandSensor:
         historical_start = today - timedelta(days=90)
 
         # Get products with recent orders
+        order_date = func.date(Order.created_at)
         recent_query = (
             select(
                 OrderItem.product_id,
@@ -652,7 +653,7 @@ class DemandSensor:
             .join(Order, OrderItem.order_id == Order.id)
             .where(
                 and_(
-                    Order.order_date >= recent_start,
+                    order_date >= recent_start,
                     Order.status.notin_([OrderStatus.CANCELLED.value]),
                 )
             )
@@ -663,13 +664,13 @@ class DemandSensor:
             select(
                 OrderItem.product_id,
                 func.sum(OrderItem.quantity).label("hist_qty"),
-                func.count(func.distinct(Order.order_date)).label("hist_days"),
+                func.count(func.distinct(order_date)).label("hist_days"),
             )
             .join(Order, OrderItem.order_id == Order.id)
             .where(
                 and_(
-                    Order.order_date >= historical_start,
-                    Order.order_date < recent_start,
+                    order_date >= historical_start,
+                    order_date < recent_start,
                     Order.status.notin_([OrderStatus.CANCELLED.value]),
                 )
             )
