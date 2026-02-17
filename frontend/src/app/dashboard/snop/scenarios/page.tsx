@@ -153,9 +153,15 @@ export default function ScenariosPage() {
   }
 
   const completedScenarios = scenarios?.items?.filter((s: any) => s.status === 'COMPLETED') || [];
-  const mcResult = runMonteCarlo.data;
-  const plResult = runPL.data;
-  const sensitivityResult = runSensitivity.data;
+
+  // Use fresh mutation data if available, otherwise load from latest completed scenario
+  const latestMC = completedScenarios.find((s: any) => s.results?.monte_carlo);
+  const latestPL = completedScenarios.find((s: any) => s.results?.financial_pl);
+  const latestSensitivity = completedScenarios.find((s: any) => s.results?.sensitivity);
+
+  const mcResult = runMonteCarlo.data || latestMC?.results?.monte_carlo || null;
+  const plResult = runPL.data || latestPL?.results?.financial_pl || null;
+  const sensitivityResult = runSensitivity.data || latestSensitivity?.results?.sensitivity || null;
 
   return (
     <div className="space-y-6 p-6">
