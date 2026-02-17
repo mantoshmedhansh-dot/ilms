@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -51,15 +50,11 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
-            <Image
-              src="/logo.png"
-              alt="ILMS.AI Logo"
-              width={180}
-              height={180}
-              priority
-            />
+            <span className="font-bold text-4xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              Fretron
+            </span>
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome to ILMS.AI</CardTitle>
+          <CardTitle className="text-2xl font-bold">Welcome to Fretron</CardTitle>
           <CardDescription>
             Enter your organization ID to continue
           </CardDescription>

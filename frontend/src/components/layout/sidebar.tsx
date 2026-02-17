@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { ChevronDown, ChevronLeft, Menu, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -365,19 +364,9 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       )}>
         {!isCollapsed && (
           <Link href="/dashboard" className="flex items-center gap-3 group">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-xl blur-sm opacity-50 group-hover:opacity-75 transition-opacity" />
-              <Image
-                src="/logo.png"
-                alt="ILMS.AI Logo"
-                width={36}
-                height={36}
-                className="relative rounded-xl shadow-md"
-              />
-            </div>
             <div className="flex flex-col">
-              <span className="font-bold text-sm bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                ILMS.AI
+              <span className="font-bold text-lg bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                Fretron
               </span>
               <span className="text-[10px] text-muted-foreground font-medium">
                 ERP System

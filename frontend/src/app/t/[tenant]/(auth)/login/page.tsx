@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
@@ -121,13 +120,9 @@ export default function TenantLoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
-            <Image
-              src="/logo.png"
-              alt="Logo"
-              width={180}
-              height={180}
-              priority
-            />
+            <span className="font-bold text-4xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              Fretron
+            </span>
           </div>
           <CardTitle className="text-2xl font-bold">
             {tenantName || 'Sign In'}
