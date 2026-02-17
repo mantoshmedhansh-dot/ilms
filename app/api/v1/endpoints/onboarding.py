@@ -10,7 +10,7 @@ from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 from pydantic import BaseModel
 
-from app.api.deps import DB
+from app.api.deps import PublicDB as DB
 from app.schemas.onboarding import (
     SubdomainCheckRequest,
     SubdomainCheckResponse,

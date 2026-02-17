@@ -195,6 +195,7 @@ def require_role_level(level: RoleLevel):
 
 # Type aliases for cleaner endpoint signatures
 CurrentUser = Annotated[User, Depends(get_current_user)]
-DB = Annotated[AsyncSession, Depends(get_db)]  # Public schema (for tenant management)
-TenantDB = Annotated[AsyncSession, Depends(get_db_with_tenant)]  # Tenant schema (for user data)
+PublicDB = Annotated[AsyncSession, Depends(get_db)]  # Public schema (for tenant management, onboarding, storefront)
+DB = Annotated[AsyncSession, Depends(get_db_with_tenant)]  # Tenant schema (for all tenant data)
+TenantDB = Annotated[AsyncSession, Depends(get_db_with_tenant)]  # Alias for DB (backward compat)
 Permissions = Annotated[PermissionChecker, Depends(get_permission_checker)]

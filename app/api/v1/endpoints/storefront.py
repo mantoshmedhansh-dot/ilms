@@ -10,7 +10,7 @@ from fastapi import APIRouter, HTTPException, Query, Response
 from sqlalchemy import select, func, or_
 from sqlalchemy.orm import selectinload
 
-from app.api.deps import DB
+from app.api.deps import PublicDB as DB
 from app.config import settings
 from app.models.company import Company
 from app.models.product import Product, ProductImage
