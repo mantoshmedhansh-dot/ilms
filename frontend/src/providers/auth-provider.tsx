@@ -58,49 +58,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      console.log('[Auth] Fetching user from API...');
+      console.log('[Auth] Fetching user and permissions from API...');
 
-      // Fetch user first - this is required
+      // Fetch user and permissions in parallel to reduce load time
       let userData;
       try {
-        userData = await authApi.getCurrentUser();
-        console.log('[Auth] User fetched successfully:', userData.email);
-        setUser(userData);
-      } catch (userError: unknown) {
-        const errorDetails = userError instanceof Error ? userError.message : String(userError);
-        console.error('[Auth] Failed to fetch user:', errorDetails);
+        const [userResult, permissionsResult] = await Promise.allSettled([
+          authApi.getCurrentUser(),
+          authApi.getUserPermissions(),
+        ]);
 
-        // Log more details for debugging
-        if (userError && typeof userError === 'object' && 'response' in userError) {
-          const axiosError = userError as { response?: { status?: number; data?: unknown } };
-          console.error('[Auth] API Error details:', {
-            status: axiosError.response?.status,
-            data: axiosError.response?.data,
-          });
+        if (userResult.status === 'rejected') {
+          const errorDetails = userResult.reason instanceof Error ? userResult.reason.message : String(userResult.reason);
+          console.error('[Auth] Failed to fetch user:', errorDetails);
+          setUser(null);
+          setPermissions(null);
+          setIsLoading(false);
+          return;
         }
 
+        userData = userResult.value;
+        console.log('[Auth] User fetched successfully:', userData.email);
+        setUser(userData);
+
+        if (permissionsResult.status === 'fulfilled') {
+          console.log('[Auth] Permissions fetched successfully');
+          setPermissions(permissionsResult.value);
+        } else {
+          console.warn('[Auth] Failed to fetch permissions, using defaults:', permissionsResult.reason);
+          const isSuperAdmin = userData.roles?.some((r: { code: string }) => r.code === 'SUPER_ADMIN') ?? false;
+          setPermissions({
+            is_super_admin: isSuperAdmin,
+            roles: userData.roles,
+            permissions_by_module: {},
+            total_permissions: 0,
+            permissions: {},
+          });
+        }
+      } catch (unexpectedError) {
+        console.error('[Auth] Unexpected error during fetch:', unexpectedError);
         setUser(null);
         setPermissions(null);
         setIsLoading(false);
         return;
-      }
-
-      // Fetch permissions - optional, don't fail auth if this fails
-      try {
-        const permissionsData = await authApi.getUserPermissions();
-        console.log('[Auth] Permissions fetched successfully');
-        setPermissions(permissionsData);
-      } catch (permError) {
-        console.warn('[Auth] Failed to fetch permissions, using defaults:', permError);
-        // For SUPER_ADMIN, set default permissions flag
-        const isSuperAdmin = userData.roles?.some((r: { code: string }) => r.code === 'SUPER_ADMIN') ?? false;
-        setPermissions({
-          is_super_admin: isSuperAdmin,
-          roles: userData.roles,
-          permissions_by_module: {},
-          total_permissions: 0,
-          permissions: {},
-        });
       }
 
       console.log('[Auth] Auth check complete - user authenticated');

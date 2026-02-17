@@ -137,22 +137,26 @@ function StatCard({ title, value, change, icon, isLoading, href }: StatCardProps
 export default function DashboardPage() {
   const queryClient = useQueryClient();
 
+  // Critical data — loads first
   const { data: stats, isLoading } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: dashboardApi.getStats,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
   const { data: recentActivity, isLoading: activityLoading } = useQuery({
     queryKey: ['recent-activity'],
     queryFn: () => dashboardApi.getRecentActivity(5),
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: topProducts, isLoading: productsLoading } = useQuery({
     queryKey: ['top-selling-products'],
     queryFn: () => dashboardApi.getTopSellingProducts(4),
+    staleTime: 5 * 60 * 1000,
   });
 
-  // Additional data for enhanced dashboard
   const { data: announcements } = useQuery({
     queryKey: ['dashboard-announcements'],
     queryFn: async () => {
@@ -163,8 +167,10 @@ export default function DashboardPage() {
         return [];
       }
     },
+    staleTime: 10 * 60 * 1000,
   });
 
+  // Secondary data — deferred loading to avoid blocking initial render
   const { data: hrDashboard } = useQuery({
     queryKey: ['hr-dashboard'],
     queryFn: async () => {
@@ -174,6 +180,8 @@ export default function DashboardPage() {
         return null;
       }
     },
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const { data: fixedAssetsDashboard } = useQuery({
@@ -185,43 +193,48 @@ export default function DashboardPage() {
         return null;
       }
     },
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
-  // Fetch real chart data from API
+  // Chart data — cached aggressively since it changes infrequently
   const { data: salesTrend } = useQuery({
     queryKey: ['dashboard-sales-trend'],
     queryFn: async () => {
       try {
-        const result = await dashboardApi.getSalesTrend();
-        return result;
+        return await dashboardApi.getSalesTrend();
       } catch {
         return [];
       }
     },
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const { data: orderStatusDistribution } = useQuery({
     queryKey: ['dashboard-order-status'],
     queryFn: async () => {
       try {
-        const result = await dashboardApi.getOrderStatusDistribution();
-        return result;
+        return await dashboardApi.getOrderStatusDistribution();
       } catch {
         return [];
       }
     },
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const { data: categorySales } = useQuery({
     queryKey: ['dashboard-category-sales'],
     queryFn: async () => {
       try {
-        const result = await dashboardApi.getCategorySales();
-        return result;
+        return await dashboardApi.getCategorySales();
       } catch {
         return [];
       }
     },
+    staleTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   const dismissAnnouncementMutation = useMutation({
