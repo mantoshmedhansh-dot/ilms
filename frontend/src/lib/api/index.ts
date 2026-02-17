@@ -1552,6 +1552,14 @@ export const dashboardApi = {
   getSalesTrend: async (days: number = 7) => {
     try {
       const { data } = await apiClient.get(`/dashboard/sales/trend?days=${days}`);
+      // API returns { labels: [], orders: [], revenue: [] } — transform to array format
+      if (data.labels && Array.isArray(data.labels)) {
+        return data.labels.map((label: string, i: number) => ({
+          date: new Date(label).toLocaleDateString('en-US', { month: 'short', day: '2-digit' }),
+          revenue: data.revenue?.[i] || 0,
+          orders: data.orders?.[i] || 0,
+        }));
+      }
       return data.items || data.trend || data || [];
     } catch (error) {
       console.warn('Sales trend endpoint not available:', error);

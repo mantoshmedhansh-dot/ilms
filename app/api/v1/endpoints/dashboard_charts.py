@@ -148,10 +148,23 @@ async def get_sales_trend(
     result = await db.execute(query)
     data = result.all()
 
+    # Build a map from date->data for sparse results
+    data_map = {str(row.period)[:10]: row for row in data}
+
+    # Fill in all days in the range so the chart has a complete x-axis
+    labels, orders_list, revenue_list = [], [], []
+    for i in range(days):
+        d = start_date + timedelta(days=i)
+        d_str = str(d)
+        row = data_map.get(d_str)
+        labels.append(d_str)
+        orders_list.append(row.orders if row else 0)
+        revenue_list.append(float(row.revenue or 0) if row else 0)
+
     return {
-        "labels": [str(row.period)[:10] for row in data],
-        "orders": [row.orders for row in data],
-        "revenue": [float(row.revenue or 0) for row in data],
+        "labels": labels,
+        "orders": orders_list,
+        "revenue": revenue_list,
     }
 
 
