@@ -36,6 +36,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { apiClient } from '@/lib/api/client';
+import { toast } from 'sonner';
 
 const severityConfig: Record<string, { color: string; icon: any; bg: string }> = {
   CRITICAL: { color: 'text-red-600', icon: AlertTriangle, bg: 'bg-red-100 dark:bg-red-900/30' },
@@ -85,7 +86,13 @@ export default function AIAgentsPage() {
       const res = await apiClient.post('/snop/agents/run-exceptions');
       return res.data;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['snop-alert-center'] }),
+    onSuccess: (data) => {
+      toast.success(`Exception agent found ${data.total_alerts ?? 0} alerts`);
+      queryClient.invalidateQueries({ queryKey: ['snop-alert-center'] });
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.detail || 'Failed to run Exception Detection agent');
+    },
   });
 
   const runReorder = useMutation({
@@ -93,12 +100,24 @@ export default function AIAgentsPage() {
       const res = await apiClient.post('/snop/agents/run-reorder');
       return res.data;
     },
+    onSuccess: (data) => {
+      toast.success(`Reorder agent generated ${data.total_suggestions ?? 0} suggestions`);
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.detail || 'Failed to run Reorder agent');
+    },
   });
 
   const runBias = useMutation({
     mutationFn: async () => {
       const res = await apiClient.post('/snop/agents/run-bias');
       return res.data;
+    },
+    onSuccess: (data) => {
+      toast.success(`Bias agent found ${data.total_findings ?? 0} findings`);
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.detail || 'Failed to run Forecast Bias agent');
     },
   });
 
