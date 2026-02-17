@@ -3,12 +3,16 @@ OMS AI Command Center
 
 Aggregator for all 5 OMS AI agents.
 Returns combined status, alerts, and recommendations.
+Uses parallel execution and in-memory caching for fast response.
 """
 
+import asyncio
+import time
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
 from uuid import UUID
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.ai.oms.fraud_detection import OMSFraudDetectionAgent
@@ -16,6 +20,10 @@ from app.services.ai.oms.smart_routing import OMSSmartRoutingAgent
 from app.services.ai.oms.delivery_promise import OMSDeliveryPromiseAgent
 from app.services.ai.oms.order_prioritization import OMSOrderPrioritizationAgent
 from app.services.ai.oms.returns_prediction import OMSReturnsPredictionAgent
+
+# In-memory TTL cache: {schema: {"data": ..., "ts": ...}}
+_dashboard_cache: Dict[str, Dict] = {}
+_CACHE_TTL = 120  # seconds
 
 
 class OMSCommandCenter:
@@ -25,35 +33,62 @@ class OMSCommandCenter:
 
     def __init__(self, db: AsyncSession):
         self.db = db
-        self.fraud_agent = OMSFraudDetectionAgent(db)
-        self.routing_agent = OMSSmartRoutingAgent(db)
-        self.delivery_agent = OMSDeliveryPromiseAgent(db)
-        self.priority_agent = OMSOrderPrioritizationAgent(db)
-        self.returns_agent = OMSReturnsPredictionAgent(db)
+
+    async def _get_schema(self) -> str:
+        result = await self.db.execute(text("SELECT current_setting('search_path')"))
+        return result.scalar() or "public"
+
+    async def _run_agent(self, agent_class, schema: str, **kwargs) -> tuple:
+        """Run a single agent with its own DB session for parallel execution."""
+        from app.database import engine
+        async with engine.connect() as conn:
+            await conn.execute(text(f'SET search_path TO {schema}'))
+            session = AsyncSession(bind=conn, expire_on_commit=False)
+            try:
+                agent = agent_class(session)
+                await agent.analyze(**kwargs)
+                status = await agent.get_status()
+                recs = await agent.get_recommendations()
+                return status, recs
+            except Exception:
+                agent = agent_class(session)
+                status = await agent.get_status()
+                return status, []
+            finally:
+                await session.close()
 
     async def get_dashboard(self) -> Dict:
-        """Get full OMS AI dashboard data."""
-        # Run analysis on all agents first so they populate _results
-        agents = [self.fraud_agent, self.routing_agent, self.delivery_agent,
-                  self.priority_agent, self.returns_agent]
-        for agent in agents:
-            try:
-                await agent.analyze()
-            except Exception:
-                pass  # Agent sets its own error status
+        """Get full OMS AI dashboard data (cached, parallel agents)."""
+        schema = await self._get_schema()
 
-        statuses = [
-            await self.fraud_agent.get_status(),
-            await self.routing_agent.get_status(),
-            await self.delivery_agent.get_status(),
-            await self.priority_agent.get_status(),
-            await self.returns_agent.get_status(),
+        # Check cache
+        cached = _dashboard_cache.get(schema)
+        if cached and (time.time() - cached["ts"]) < _CACHE_TTL:
+            return cached["data"]
+
+        # Run all 5 agents in parallel, each with its own DB session
+        agent_classes = [
+            OMSFraudDetectionAgent,
+            OMSSmartRoutingAgent,
+            OMSDeliveryPromiseAgent,
+            OMSOrderPrioritizationAgent,
+            OMSReturnsPredictionAgent,
         ]
 
+        results = await asyncio.gather(
+            *[self._run_agent(cls, schema) for cls in agent_classes],
+            return_exceptions=True,
+        )
+
+        statuses = []
         all_recommendations = []
-        for agent in agents:
-            recs = await agent.get_recommendations()
-            all_recommendations.extend(recs)
+        for r in results:
+            if isinstance(r, Exception):
+                statuses.append({"id": "unknown", "status": "error", "error": str(r)})
+            else:
+                status, recs = r
+                statuses.append(status)
+                all_recommendations.extend(recs)
 
         severity_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
         all_recommendations.sort(key=lambda x: severity_order.get(x.get("severity", "LOW"), 4))
@@ -64,7 +99,7 @@ class OMSCommandCenter:
             if sev in severity_counts:
                 severity_counts[sev] += 1
 
-        return {
+        data = {
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "agents": statuses,
             "summary": {
@@ -76,54 +111,46 @@ class OMSCommandCenter:
             "recommendations": all_recommendations[:30],
         }
 
+        # Store in cache
+        _dashboard_cache[schema] = {"data": data, "ts": time.time()}
+        return data
+
+    def _agent_map(self) -> Dict:
+        return {
+            "fraud-detection": OMSFraudDetectionAgent,
+            "smart-routing": OMSSmartRoutingAgent,
+            "delivery-promise": OMSDeliveryPromiseAgent,
+            "order-prioritization": OMSOrderPrioritizationAgent,
+            "returns-prediction": OMSReturnsPredictionAgent,
+        }
+
     async def run_agent(self, agent_name: str, **kwargs) -> Dict:
         """Run a specific agent."""
-        agents = {
-            "fraud-detection": self.fraud_agent,
-            "smart-routing": self.routing_agent,
-            "delivery-promise": self.delivery_agent,
-            "order-prioritization": self.priority_agent,
-            "returns-prediction": self.returns_agent,
-        }
-        agent = agents.get(agent_name)
-        if not agent:
-            return {"error": f"Unknown agent: {agent_name}", "available": list(agents.keys())}
+        cls = self._agent_map().get(agent_name)
+        if not cls:
+            return {"error": f"Unknown agent: {agent_name}", "available": list(self._agent_map().keys())}
+        agent = cls(self.db)
         return await agent.analyze(**kwargs)
 
     async def get_agent_status(self, agent_name: str) -> Dict:
-        agents = {
-            "fraud-detection": self.fraud_agent,
-            "smart-routing": self.routing_agent,
-            "delivery-promise": self.delivery_agent,
-            "order-prioritization": self.priority_agent,
-            "returns-prediction": self.returns_agent,
-        }
-        agent = agents.get(agent_name)
-        if not agent:
+        cls = self._agent_map().get(agent_name)
+        if not cls:
             return {"error": f"Unknown agent: {agent_name}"}
+        agent = cls(self.db)
         return await agent.get_status()
 
     async def get_agent_recommendations(self, agent_name: str) -> List[Dict]:
-        agents = {
-            "fraud-detection": self.fraud_agent,
-            "smart-routing": self.routing_agent,
-            "delivery-promise": self.delivery_agent,
-            "order-prioritization": self.priority_agent,
-            "returns-prediction": self.returns_agent,
-        }
-        agent = agents.get(agent_name)
-        if not agent:
+        cls = self._agent_map().get(agent_name)
+        if not cls:
             return []
+        agent = cls(self.db)
         return await agent.get_recommendations()
 
     async def get_capabilities(self) -> Dict:
-        statuses = [
-            await self.fraud_agent.get_status(),
-            await self.routing_agent.get_status(),
-            await self.delivery_agent.get_status(),
-            await self.priority_agent.get_status(),
-            await self.returns_agent.get_status(),
-        ]
+        statuses = []
+        for cls in self._agent_map().values():
+            agent = cls(self.db)
+            statuses.append(await agent.get_status())
         return {
             "module": "OMS AI",
             "description": "AI-powered order management intelligence",
