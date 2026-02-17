@@ -150,8 +150,6 @@ export const navigation: NavItem[] = [
           { title: 'All Orders', href: '/dashboard/orders', icon: ShoppingCart, permissions: ['ORDERS_VIEW'] },
           { title: 'New Order', href: '/dashboard/orders/new', icon: FileInput, permissions: ['ORDERS_CREATE'] },
           { title: 'Picklists', href: '/dashboard/orders/picklists', icon: ClipboardList, permissions: ['ORDERS_VIEW'] },
-          { title: 'AI Command Center', href: '/dashboard/oms/ai/command-center', icon: Brain, badge: 'AI', permissions: ['ORDERS_VIEW'] },
-          { title: 'AI Chat', href: '/dashboard/oms/ai/chat', icon: MessageSquare, permissions: ['ORDERS_VIEW'] },
         ],
       },
       {
@@ -200,8 +198,6 @@ export const navigation: NavItem[] = [
           { title: 'Warehouse Billing', href: '/dashboard/wms/billing', icon: Receipt, permissions: ['INVENTORY_VIEW'] },
           { title: 'Cycle Counting', href: '/dashboard/wms/cycle-count', icon: Clipboard, permissions: ['INVENTORY_VIEW'] },
           { title: 'WMS Reports', href: '/dashboard/wms/reports', icon: BarChart3, permissions: ['INVENTORY_VIEW'] },
-          { title: 'AI Command Center', href: '/dashboard/wms/ai/command-center', icon: Brain, badge: 'AI', permissions: ['INVENTORY_VIEW'] },
-          { title: 'AI Chat', href: '/dashboard/wms/ai/chat', icon: MessageSquare, permissions: ['INVENTORY_VIEW'] },
         ],
       },
       {
@@ -233,6 +229,18 @@ export const navigation: NavItem[] = [
           { title: 'Categories', href: '/dashboard/catalog/categories', icon: FolderTree, permissions: ['PRODUCTS_VIEW'] },
           { title: 'Brands', href: '/dashboard/catalog/brands', icon: Tag, permissions: ['PRODUCTS_VIEW'] },
           { title: 'Serialization', href: '/dashboard/serialization', icon: Barcode, permissions: ['PRODUCTS_VIEW'] },
+        ],
+      },
+      {
+        title: 'AI Agents',
+        icon: Brain,
+        badge: 'AI',
+        permissions: ['ORDERS_VIEW', 'INVENTORY_VIEW'],
+        children: [
+          { title: 'OMS Command Center', href: '/dashboard/oms/ai/command-center', icon: Brain, badge: 'AI', permissions: ['ORDERS_VIEW'] },
+          { title: 'OMS AI Chat', href: '/dashboard/oms/ai/chat', icon: MessageSquare, permissions: ['ORDERS_VIEW'] },
+          { title: 'WMS Command Center', href: '/dashboard/wms/ai/command-center', icon: Brain, badge: 'AI', permissions: ['INVENTORY_VIEW'] },
+          { title: 'WMS AI Chat', href: '/dashboard/wms/ai/chat', icon: MessageSquare, permissions: ['INVENTORY_VIEW'] },
         ],
       },
     ],

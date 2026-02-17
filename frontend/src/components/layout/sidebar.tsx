@@ -116,6 +116,12 @@ const moduleColors: Record<string, { bg: string; text: string; hover: string; gr
     hover: 'hover:bg-cyan-50 dark:hover:bg-cyan-900/20',
     gradient: 'from-cyan-500 to-sky-600'
   },
+  'AI Agents': {
+    bg: 'bg-fuchsia-100 dark:bg-fuchsia-900/30',
+    text: 'text-fuchsia-600 dark:text-fuchsia-400',
+    hover: 'hover:bg-fuchsia-50 dark:hover:bg-fuchsia-900/20',
+    gradient: 'from-fuchsia-500 to-purple-600'
+  },
   // Submodules - Finance
   'Receivables': {
     bg: 'bg-green-100 dark:bg-green-900/30',
