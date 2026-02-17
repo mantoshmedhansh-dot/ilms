@@ -1,5 +1,6 @@
 from typing import Optional, List
 import uuid
+import logging
 from math import ceil
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -267,6 +268,26 @@ async def create_order(
 
     try:
         order = await service.create_order(data, created_by=current_user.id)
+
+        # --- AI Fraud Scoring Hook ---
+        # Score the order for fraud risk inline. If HIGH/CRITICAL, set ON_HOLD.
+        # Wrapped in try/except so fraud scoring failure never blocks order creation.
+        try:
+            from app.services.ai.oms.fraud_detection import OMSFraudDetectionAgent
+            fraud_agent = OMSFraudDetectionAgent(db)
+            fraud_result = await fraud_agent.score_order(order.id)
+            if fraud_result.get("risk_level") in ("HIGH", "CRITICAL"):
+                await service.update_order_status(
+                    order.id,
+                    OrderStatus.ON_HOLD,
+                    changed_by=None,
+                    notes=f"Auto-held by AI fraud detection (score: {fraud_result.get('risk_score', 'N/A')}, level: {fraud_result.get('risk_level')})",
+                )
+                order = await service.get_order_by_id(order.id, include_all=True)
+        except Exception:
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Fraud scoring failed for order {order.id}, continuing without hold", exc_info=True)
+
         return _build_order_detail_response(order)
     except ValueError as e:
         raise HTTPException(

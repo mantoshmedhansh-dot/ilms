@@ -2601,3 +2601,33 @@ async def get_faq(
     response.headers["X-Cache"] = "MISS"
     response.headers["X-Response-Time"] = f"{(time.time() - start_time) * 1000:.2f}ms"
     return result_data
+
+
+# ==================== Delivery Promise ====================
+
+@router.get("/delivery-promise")
+async def check_delivery_promise(
+    db: DB,
+    product_id: Optional[uuid_module.UUID] = Query(None, description="Product ID"),
+    pincode: Optional[str] = Query(None, description="Delivery pincode"),
+    quantity: int = Query(1, ge=1, description="Quantity"),
+):
+    """
+    Public delivery promise endpoint for storefront.
+    Returns estimated delivery date for a product + pincode combination.
+    No authentication required.
+    """
+    from app.services.ai.oms.delivery_promise import OMSDeliveryPromiseAgent
+    agent = OMSDeliveryPromiseAgent(db)
+    try:
+        result = await agent.analyze(
+            product_id=product_id,
+            pincode=pincode,
+            quantity=quantity,
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Delivery promise check failed: {str(e)}",
+        )

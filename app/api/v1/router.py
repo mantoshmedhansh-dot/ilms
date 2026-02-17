@@ -154,6 +154,10 @@ from app.api.v1.endpoints import (
     dashboard_charts,
     # Community Partners (Meesho-style)
     partners,
+    # WMS AI (Warehouse AI Agents)
+    wms_ai,
+    # OMS AI (Order Management AI Agents)
+    oms_ai,
 )
 
 
@@ -757,4 +761,18 @@ api_router.include_router(
 api_router.include_router(
     partners.router,
     tags=["Community Partners"]
+)
+
+# ==================== WMS AI (Warehouse AI Agents) ====================
+api_router.include_router(
+    wms_ai.router,
+    prefix="/wms-ai",
+    tags=["WMS AI"]
+)
+
+# ==================== OMS AI (Order Management AI Agents) ====================
+api_router.include_router(
+    oms_ai.router,
+    prefix="/oms-ai",
+    tags=["OMS AI"]
 )
