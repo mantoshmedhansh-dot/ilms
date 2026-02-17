@@ -5769,7 +5769,7 @@ export const snopApi = {
     return data;
   },
   runOptimization: async () => {
-    const { data } = await apiClient.post('/snop/inventory/optimize');
+    const { data } = await apiClient.post('/snop/inventory/optimize', {});
     return data;
   },
 };

@@ -998,8 +998,8 @@ async def calculate_inventory_optimization(
                     "recommended_reorder_point": float(optimization.recommended_reorder_point),
                     "recommended_order_qty": float(optimization.recommended_order_qty),
                     "current_safety_stock": float(optimization.current_safety_stock),
-                    "expected_stockout_rate": optimization.expected_stockout_rate,
-                    "expected_inventory_turns": optimization.expected_inventory_turns
+                    "expected_stockout_rate": float(optimization.expected_stockout_rate or 0),
+                    "expected_inventory_turns": float(optimization.expected_inventory_turns or 0)
                 })
             except Exception as e:
                 results.append({
