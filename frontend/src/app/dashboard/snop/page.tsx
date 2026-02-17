@@ -326,11 +326,11 @@ export default function SNOPDashboardPage() {
                       <div>
                         <p className="font-medium">{meeting.title}</p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(meeting.scheduled_date).toLocaleDateString()}
+                          {new Date(meeting.date).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
-                    <Badge variant="outline">{meeting.status}</Badge>
+                    <Badge variant="outline">Scheduled</Badge>
                   </div>
                 ))}
               </div>

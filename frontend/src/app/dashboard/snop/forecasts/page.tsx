@@ -277,6 +277,9 @@ export default function DemandForecastsPage() {
       queryClient.invalidateQueries({ queryKey: ['snop-demand-signals'] });
       queryClient.invalidateQueries({ queryKey: ['snop-sensing-analysis'] });
     },
+    onError: () => {
+      toast.error('Failed to dismiss signal');
+    },
   });
 
   const generateMutation = useMutation({

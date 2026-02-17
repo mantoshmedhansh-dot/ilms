@@ -763,7 +763,8 @@ class SNOPService:
             {
                 "id": str(m.id),
                 "title": m.meeting_title,
-                "date": m.meeting_date.isoformat()
+                "date": m.meeting_date.isoformat(),
+                "status": "COMPLETED" if m.is_completed else "SCHEDULED",
             }
             for m in upcoming_result.scalars().all()
         ]

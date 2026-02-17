@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
   GitBranch,
   Plus,
@@ -54,6 +55,7 @@ const zoneColors: Record<string, string> = {
 
 export default function SupplyPlansPage() {
   const [activeTab, setActiveTab] = useState<string>('plans');
+  const queryClient = useQueryClient();
 
   const { data: plans, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['snop-supply-plans'],
@@ -61,8 +63,26 @@ export default function SupplyPlansPage() {
       try {
         return await snopApi.getSupplyPlans();
       } catch {
+        toast.error('Failed to load supply plans');
         return { items: [], total: 0 };
       }
+    },
+  });
+
+  const createPlanMutation = useMutation({
+    mutationFn: async () => {
+      return await snopApi.createSupplyPlan({
+        plan_name: `Supply Plan - ${new Date().toLocaleDateString()}`,
+        plan_type: 'PROCUREMENT',
+        horizon_days: 90,
+      });
+    },
+    onSuccess: () => {
+      toast.success('Supply plan created');
+      queryClient.invalidateQueries({ queryKey: ['snop-supply-plans'] });
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.detail || 'Failed to create supply plan');
     },
   });
 
@@ -118,9 +138,9 @@ export default function SupplyPlansPage() {
             <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
-          <Button>
+          <Button onClick={() => createPlanMutation.mutate()} disabled={createPlanMutation.isPending}>
             <Plus className="h-4 w-4 mr-2" />
-            Create Plan
+            {createPlanMutation.isPending ? 'Creating...' : 'Create Plan'}
           </Button>
         </div>
       </div>

@@ -87,7 +87,7 @@ export default function SNOPChatPage() {
         ...prev,
         {
           role: 'assistant',
-          content: data.response || data.narrative || 'No response generated.',
+          content: data.response || 'No response generated.',
           data: data.data || null,
           suggestions: data.suggestions || [],
           actions: data.actions || [],
@@ -180,8 +180,9 @@ export default function SNOPChatPage() {
     const objectEntries = Object.entries(data).filter(
       ([, v]) => typeof v === 'object' && v !== null && !Array.isArray(v)
     );
+    const metadataKeys = ['type', 'query', 'timestamp', 'intent'];
     const flatEntries = Object.entries(data).filter(
-      ([, v]) => !Array.isArray(v) && (typeof v !== 'object' || v === null)
+      ([k, v]) => !metadataKeys.includes(k) && !Array.isArray(v) && (typeof v !== 'object' || v === null)
     );
 
     return (
@@ -324,6 +325,22 @@ export default function SNOPChatPage() {
                             onClick={() => handleSend(s)}
                           >
                             {s}
+                          </Button>
+                        ))}
+                      </div>
+                    )}
+
+                    {msg.actions && msg.actions.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {msg.actions.map((action, aIdx) => (
+                          <Button
+                            key={aIdx}
+                            variant="secondary"
+                            size="sm"
+                            className="h-7 text-xs"
+                            onClick={() => handleSend(action.label)}
+                          >
+                            {action.label}
                           </Button>
                         ))}
                       </div>
