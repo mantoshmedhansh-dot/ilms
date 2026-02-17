@@ -211,8 +211,8 @@ export default function SNOPDashboardPage() {
           <Card className="hover:shadow-md transition-shadow cursor-pointer">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-amber-100 rounded-lg">
-                  <Boxes className="h-6 w-6 text-amber-600" />
+                <div className="p-3 bg-indigo-100 rounded-lg">
+                  <Boxes className="h-6 w-6 text-indigo-600" />
                 </div>
                 <div>
                   <h3 className="font-semibold">Inventory Optimization</h3>

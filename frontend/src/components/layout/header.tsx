@@ -30,7 +30,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b bg-background px-6">
+    <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm px-6">
       <Breadcrumbs />
 
       <div className="flex items-center gap-4">

@@ -1,42 +1,28 @@
 /**
  * ILMS.AI Theme Configuration
  *
- * Dark mode theme with Golden and Blue accents
- * Inspired by: Eureka Forbes, Atomberg, Havells
+ * Clean, professional SaaS design system
+ * Indigo & Slate palette
  */
 
 export const theme = {
   // Primary Colors
   colors: {
-    // Golden - Primary brand color
-    gold: {
-      50: '#FFFBEB',
-      100: '#FEF3C7',
-      200: '#FDE68A',
-      300: '#FCD34D',
-      400: '#FBBF24',
-      500: '#F59E0B',  // Main gold
-      600: '#D97706',
-      700: '#B45309',
-      800: '#92400E',
-      900: '#78350F',
+    // Indigo - Primary brand color
+    indigo: {
+      50: '#EEF2FF',
+      100: '#E0E7FF',
+      200: '#C7D2FE',
+      300: '#A5B4FC',
+      400: '#818CF8',
+      500: '#6366F1',  // Main indigo
+      600: '#5C6BC0',
+      700: '#4338CA',
+      800: '#3730A3',
+      900: '#312E81',
     },
-    // Blue - Secondary brand color
-    blue: {
-      50: '#EFF6FF',
-      100: '#DBEAFE',
-      200: '#BFDBFE',
-      300: '#93C5FD',
-      400: '#60A5FA',
-      500: '#3B82F6',
-      600: '#2563EB',  // Main blue
-      700: '#1D4ED8',
-      800: '#1E40AF',
-      900: '#1E3A8A',
-      950: '#172554',
-    },
-    // Dark backgrounds
-    dark: {
+    // Slate - Neutral palette
+    slate: {
       50: '#F8FAFC',
       100: '#F1F5F9',
       200: '#E2E8F0',
@@ -45,20 +31,17 @@ export const theme = {
       500: '#64748B',
       600: '#475569',
       700: '#334155',
-      800: '#1E293B',  // Card background
-      900: '#0F172A',  // Main background
-      950: '#020617',  // Darkest
+      800: '#1E293B',
+      900: '#0F172A',
+      950: '#020617',
     },
   },
 
   // Gradient combinations
   gradients: {
-    goldShine: 'linear-gradient(135deg, #F59E0B 0%, #FBBF24 50%, #F59E0B 100%)',
-    goldDark: 'linear-gradient(135deg, #B45309 0%, #F59E0B 100%)',
-    blueDark: 'linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%)',
+    indigoDark: 'linear-gradient(135deg, #312E81 0%, #6366F1 100%)',
     darkCard: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)',
-    hero: 'linear-gradient(135deg, #0F172A 0%, #1E3A8A 50%, #0F172A 100%)',
-    heroGold: 'linear-gradient(135deg, #0F172A 0%, #78350F 100%)',
+    hero: 'linear-gradient(135deg, #0F172A 0%, #312E81 50%, #0F172A 100%)',
   },
 
   // Semantic colors
@@ -66,7 +49,7 @@ export const theme = {
     success: '#10B981',
     error: '#EF4444',
     warning: '#F59E0B',
-    info: '#3B82F6',
+    info: '#6366F1',
   },
 
   // Typography
@@ -88,29 +71,29 @@ export const darkThemeClasses = {
   textPrimary: 'text-white',
   textSecondary: 'text-slate-300',
   textMuted: 'text-slate-400',
-  textGold: 'text-amber-500',
+  textAccent: 'text-indigo-400',
   textBlue: 'text-blue-500',
 
   // Borders
   borderDefault: 'border-slate-700',
-  borderGold: 'border-amber-500',
+  borderAccent: 'border-indigo-500',
   borderBlue: 'border-blue-600',
 
   // Buttons
-  btnPrimary: 'bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold',
-  btnSecondary: 'bg-blue-600 hover:bg-blue-700 text-white',
-  btnOutline: 'border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-slate-900',
+  btnPrimary: 'bg-indigo-600 hover:bg-indigo-700 text-white font-semibold',
+  btnSecondary: 'bg-slate-700 hover:bg-slate-600 text-white',
+  btnOutline: 'border-indigo-500 text-indigo-400 hover:bg-indigo-500 hover:text-white',
   btnGhost: 'text-slate-300 hover:text-white hover:bg-slate-700',
 
   // Cards
   card: 'bg-slate-800/50 border border-slate-700 rounded-xl',
-  cardHover: 'hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/10',
+  cardHover: 'hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/10',
 
   // Inputs
-  input: 'bg-slate-800 border-slate-600 text-white placeholder:text-slate-400 focus:border-amber-500 focus:ring-amber-500/20',
+  input: 'bg-slate-800 border-slate-600 text-white placeholder:text-slate-400 focus:border-indigo-500 focus:ring-indigo-500/20',
 
   // Badges
-  badgeGold: 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
+  badgeAccent: 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30',
   badgeBlue: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
   badgeSuccess: 'bg-emerald-500/20 text-emerald-400',
   badgeDiscount: 'bg-red-500 text-white',
@@ -119,9 +102,9 @@ export const darkThemeClasses = {
 // CSS Variables for global styles
 export const cssVariables = `
   :root {
-    --color-gold: #F59E0B;
-    --color-gold-light: #FBBF24;
-    --color-gold-dark: #B45309;
+    --color-indigo: #6366F1;
+    --color-indigo-light: #818CF8;
+    --color-indigo-dark: #4338CA;
     --color-blue: #2563EB;
     --color-blue-light: #3B82F6;
     --color-blue-dark: #1E3A8A;

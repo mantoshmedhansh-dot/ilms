@@ -173,8 +173,8 @@ export default function AIPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg">
-            <Brain className="h-6 w-6 text-white" />
+          <div className="p-2 bg-indigo-100 rounded-lg">
+            <Brain className="h-6 w-6 text-indigo-600" />
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">

@@ -48,78 +48,80 @@
 
 :root {
   --radius: 0.625rem;
-  /* AQUAPURITE Brand Colors - Blue and Gold */
+  /* ILMS.AI Design System - Indigo & Slate */
   --background: oklch(1 0 0);
   --foreground: oklch(0.15 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.15 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0 0);
-  /* Primary: Royal Blue (#0056B3) */
-  --primary: oklch(0.48 0.18 250);
+  /* Primary: Indigo (#5C6BC0) */
+  --primary: oklch(0.50 0.14 270);
   --primary-foreground: oklch(1 0 0);
-  /* Secondary: Gold (#D4AF37) */
-  --secondary: oklch(0.75 0.14 85);
+  /* Secondary: Neutral Slate */
+  --secondary: oklch(0.97 0.003 264);
   --secondary-foreground: oklch(0.15 0 0);
-  --muted: oklch(0.96 0.01 250);
+  --muted: oklch(0.97 0.003 264);
   --muted-foreground: oklch(0.45 0 0);
-  /* Accent: Light Gold */
-  --accent: oklch(0.92 0.06 85);
+  /* Accent: Indigo wash */
+  --accent: oklch(0.95 0.02 270);
   --accent-foreground: oklch(0.15 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.88 0.02 250);
-  --input: oklch(0.88 0.02 250);
-  --ring: oklch(0.48 0.18 250);
-  --chart-1: oklch(0.48 0.18 250);
-  --chart-2: oklch(0.75 0.14 85);
-  --chart-3: oklch(0.6 0.15 250);
-  --chart-4: oklch(0.65 0.12 85);
-  --chart-5: oklch(0.55 0.10 200);
-  --sidebar: oklch(0.98 0.005 250);
+  --border: oklch(0.91 0.005 264);
+  --input: oklch(0.91 0.005 264);
+  --ring: oklch(0.50 0.14 270);
+  /* Chart: Indigo / Teal / Blue / Amber / Violet */
+  --chart-1: oklch(0.50 0.14 270);
+  --chart-2: oklch(0.60 0.13 175);
+  --chart-3: oklch(0.55 0.15 250);
+  --chart-4: oklch(0.70 0.12 85);
+  --chart-5: oklch(0.55 0.16 300);
+  --sidebar: oklch(1 0 0);
   --sidebar-foreground: oklch(0.15 0 0);
-  --sidebar-primary: oklch(0.48 0.18 250);
+  --sidebar-primary: oklch(0.50 0.14 270);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.92 0.06 85);
+  --sidebar-accent: oklch(0.95 0.02 270);
   --sidebar-accent-foreground: oklch(0.15 0 0);
-  --sidebar-border: oklch(0.88 0.02 250);
-  --sidebar-ring: oklch(0.48 0.18 250);
+  --sidebar-border: oklch(0.91 0.005 264);
+  --sidebar-ring: oklch(0.50 0.14 270);
 }
 
 .dark {
-  /* AQUAPURITE Dark Mode - Blue and Gold */
-  --background: oklch(0.12 0.02 250);
+  /* ILMS.AI Dark Mode - Indigo & Slate */
+  --background: oklch(0.13 0.015 264);
   --foreground: oklch(0.98 0 0);
-  --card: oklch(0.16 0.02 250);
+  --card: oklch(0.17 0.015 264);
   --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.16 0.02 250);
+  --popover: oklch(0.17 0.015 264);
   --popover-foreground: oklch(0.98 0 0);
-  /* Primary: Bright Blue in dark mode */
-  --primary: oklch(0.58 0.20 250);
+  /* Primary: Bright Indigo in dark mode */
+  --primary: oklch(0.60 0.16 270);
   --primary-foreground: oklch(1 0 0);
-  /* Secondary: Bright Gold in dark mode */
-  --secondary: oklch(0.78 0.15 85);
-  --secondary-foreground: oklch(0.12 0 0);
-  --muted: oklch(0.22 0.02 250);
+  /* Secondary: Dark Slate */
+  --secondary: oklch(0.22 0.01 264);
+  --secondary-foreground: oklch(0.98 0 0);
+  --muted: oklch(0.22 0.01 264);
   --muted-foreground: oklch(0.65 0 0);
-  --accent: oklch(0.30 0.08 85);
+  --accent: oklch(0.25 0.04 270);
   --accent-foreground: oklch(0.98 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.58 0.20 250);
-  --chart-1: oklch(0.58 0.20 250);
-  --chart-2: oklch(0.78 0.15 85);
-  --chart-3: oklch(0.65 0.18 250);
-  --chart-4: oklch(0.70 0.12 85);
-  --chart-5: oklch(0.55 0.15 200);
-  --sidebar: oklch(0.14 0.02 250);
+  --ring: oklch(0.60 0.16 270);
+  /* Chart: Indigo / Teal / Blue / Amber / Violet */
+  --chart-1: oklch(0.60 0.16 270);
+  --chart-2: oklch(0.65 0.13 175);
+  --chart-3: oklch(0.60 0.18 250);
+  --chart-4: oklch(0.72 0.12 85);
+  --chart-5: oklch(0.60 0.16 300);
+  --sidebar: oklch(0.15 0.015 264);
   --sidebar-foreground: oklch(0.98 0 0);
-  --sidebar-primary: oklch(0.58 0.20 250);
+  --sidebar-primary: oklch(0.60 0.16 270);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.30 0.08 85);
+  --sidebar-accent: oklch(0.25 0.04 270);
   --sidebar-accent-foreground: oklch(0.98 0 0);
   --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: oklch(0.58 0.20 250);
+  --sidebar-ring: oklch(0.60 0.16 270);
 }
 
 @layer base {
@@ -251,18 +253,48 @@
   @apply scale-105;
 }
 
-/* Gradient text for special headings */
-.gradient-text {
-  @apply bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent;
-}
-
 /* Card hover lift effect */
 .card-lift {
-  @apply transition-all duration-300;
+  @apply transition-all duration-200;
 }
 
 .card-lift:hover {
-  @apply -translate-y-1 shadow-lg;
+  @apply -translate-y-px shadow-md;
+}
+
+/* Hover lift utility */
+.hover-lift {
+  @apply transition-all duration-200;
+}
+
+.hover-lift:hover {
+  @apply -translate-y-px shadow-sm;
+}
+
+/* Icon background utilities */
+.icon-bg {
+  @apply flex items-center justify-center rounded-lg;
+}
+
+.icon-bg-sm {
+  @apply flex items-center justify-center rounded-lg h-8 w-8;
+}
+
+.icon-bg-md {
+  @apply flex items-center justify-center rounded-lg h-10 w-10;
+}
+
+.icon-bg-lg {
+  @apply flex items-center justify-center rounded-lg h-12 w-12;
+}
+
+/* Sidebar section utilities */
+.sidebar-divider {
+  @apply my-2 border-t border-slate-200 dark:border-slate-800;
+}
+
+.sidebar-section-label {
+  @apply px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground;
 }
 
 /* Backdrop blur for overlays */

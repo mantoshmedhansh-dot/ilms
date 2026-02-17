@@ -18,8 +18,6 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  ArrowRight,
-  BarChart3,
   X,
   Info,
   CreditCard,
@@ -61,6 +59,8 @@ interface TopProduct {
   sales: number;
 }
 
+type StatColor = 'indigo' | 'emerald' | 'sky' | 'amber' | 'rose' | 'violet';
+
 interface StatCardProps {
   title: string;
   value: string | number;
@@ -68,9 +68,19 @@ interface StatCardProps {
   icon: React.ReactNode;
   isLoading?: boolean;
   href?: string;
+  color?: StatColor;
 }
 
-const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+const statColorMap: Record<StatColor, { iconBg: string; iconText: string }> = {
+  indigo: { iconBg: 'bg-indigo-100 dark:bg-indigo-900/30', iconText: 'text-indigo-600 dark:text-indigo-400' },
+  emerald: { iconBg: 'bg-emerald-100 dark:bg-emerald-900/30', iconText: 'text-emerald-600 dark:text-emerald-400' },
+  sky: { iconBg: 'bg-sky-100 dark:bg-sky-900/30', iconText: 'text-sky-600 dark:text-sky-400' },
+  amber: { iconBg: 'bg-amber-100 dark:bg-amber-900/30', iconText: 'text-amber-600 dark:text-amber-400' },
+  rose: { iconBg: 'bg-rose-100 dark:bg-rose-900/30', iconText: 'text-rose-600 dark:text-rose-400' },
+  violet: { iconBg: 'bg-violet-100 dark:bg-violet-900/30', iconText: 'text-violet-600 dark:text-violet-400' },
+};
+
+const COLORS = ['#5C6BC0', '#0D9488', '#3B82F6', '#F59E0B', '#8B5CF6', '#EC4899'];
 
 const announcementTypeColors: Record<string, string> = {
   INFO: 'bg-blue-50 border-blue-200 text-blue-800',
@@ -86,32 +96,39 @@ const announcementTypeIcons: Record<string, typeof Info> = {
   ERROR: AlertCircle,
 };
 
-function StatCard({ title, value, change, icon, isLoading, href }: StatCardProps) {
+function StatCard({ title, value, change, icon, isLoading, href, color = 'indigo' }: StatCardProps) {
+  const colorStyles = statColorMap[color];
+
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-4 w-4" />
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-8 w-32 mb-2" />
-          <Skeleton className="h-4 w-20" />
+      <Card className="shadow-none">
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-10 w-10 rounded-lg" />
+            <div className="flex-1">
+              <Skeleton className="h-4 w-24 mb-2" />
+              <Skeleton className="h-6 w-32" />
+            </div>
+          </div>
         </CardContent>
       </Card>
     );
   }
 
   const content = (
-    <Card className={href ? 'hover:shadow-md transition-shadow cursor-pointer' : ''}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-        <div className="text-muted-foreground">{icon}</div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+    <Card className={`shadow-none border hover:shadow-sm transition-shadow ${href ? 'cursor-pointer' : ''}`}>
+      <CardContent className="pt-6">
+        <div className="flex items-center gap-4">
+          <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${colorStyles.iconBg} ${colorStyles.iconText}`}>
+            {icon}
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-muted-foreground">{title}</p>
+            <div className="text-2xl font-bold">{value}</div>
+          </div>
+        </div>
         {change !== undefined && (
-          <p className="flex items-center text-xs text-muted-foreground mt-1">
+          <p className="flex items-center text-xs text-muted-foreground mt-3">
             {change >= 0 ? (
               <TrendingUp className="mr-1 h-3 w-3 text-green-500" />
             ) : (
@@ -311,7 +328,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground">
           Welcome to your ERP Control Panel. Here&apos;s an overview of your business.
         </p>
@@ -358,32 +375,36 @@ export default function DashboardPage() {
           title="Total Revenue"
           value={formatCurrency(defaultStats.total_revenue)}
           change={defaultStats.revenue_change}
-          icon={<DollarSign className="h-4 w-4" />}
+          icon={<DollarSign className="h-5 w-5" />}
           isLoading={isLoading}
           href="/dashboard/reports/profit-loss"
+          color="indigo"
         />
         <StatCard
           title="Total Orders"
           value={defaultStats.total_orders.toLocaleString()}
           change={defaultStats.orders_change}
-          icon={<ShoppingCart className="h-4 w-4" />}
+          icon={<ShoppingCart className="h-5 w-5" />}
           isLoading={isLoading}
           href="/dashboard/orders"
+          color="sky"
         />
         <StatCard
           title="Total Customers"
           value={defaultStats.total_customers.toLocaleString()}
           change={defaultStats.customers_change}
-          icon={<Users className="h-4 w-4" />}
+          icon={<Users className="h-5 w-5" />}
           isLoading={isLoading}
           href="/dashboard/crm/customers"
+          color="emerald"
         />
         <StatCard
           title="Products"
           value={defaultStats.total_products.toLocaleString()}
-          icon={<Package className="h-4 w-4" />}
+          icon={<Package className="h-5 w-5" />}
           isLoading={isLoading}
           href="/dashboard/catalog"
+          color="amber"
         />
       </div>
 
@@ -415,9 +436,9 @@ export default function DashboardPage() {
                     yAxisId="left"
                     type="monotone"
                     dataKey="revenue"
-                    stroke="#3B82F6"
+                    stroke="#5C6BC0"
                     strokeWidth={2}
-                    dot={{ fill: '#3B82F6' }}
+                    dot={{ fill: '#5C6BC0' }}
                     name="Revenue"
                   />
                   <Line
@@ -473,61 +494,77 @@ export default function DashboardPage() {
       {/* Action Required */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Link href="/dashboard/orders?status=PENDING">
-          <Card className="border-orange-200 dark:border-orange-800 hover:shadow-md transition-shadow cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
-              <ShoppingCart className="h-4 w-4 text-orange-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600">
-                {isLoading ? <Skeleton className="h-8 w-16" /> : defaultStats.pending_orders}
+          <Card className="shadow-none border hover:shadow-sm transition-shadow cursor-pointer">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400">
+                  <ShoppingCart className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Pending Orders</p>
+                  <div className="text-2xl font-bold">
+                    {isLoading ? <Skeleton className="h-8 w-16" /> : defaultStats.pending_orders}
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">Requires attention</p>
+              <p className="text-xs text-muted-foreground mt-3">Requires attention</p>
             </CardContent>
           </Card>
         </Link>
 
         <Link href="/dashboard/service/requests?status=PENDING">
-          <Card className="border-blue-200 dark:border-blue-800 hover:shadow-md transition-shadow cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Service Requests</CardTitle>
-              <Wrench className="h-4 w-4 text-blue-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
-                {isLoading ? <Skeleton className="h-8 w-16" /> : defaultStats.pending_service_requests}
+          <Card className="shadow-none border hover:shadow-sm transition-shadow cursor-pointer">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+                  <Wrench className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Service Requests</p>
+                  <div className="text-2xl font-bold">
+                    {isLoading ? <Skeleton className="h-8 w-16" /> : defaultStats.pending_service_requests}
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">Pending assignment</p>
+              <p className="text-xs text-muted-foreground mt-3">Pending assignment</p>
             </CardContent>
           </Card>
         </Link>
 
         <Link href="/dashboard/inventory?low_stock=true">
-          <Card className="border-red-200 dark:border-red-800 hover:shadow-md transition-shadow cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Low Stock Items</CardTitle>
-              <Package className="h-4 w-4 text-red-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {isLoading ? <Skeleton className="h-8 w-16" /> : defaultStats.low_stock_items}
+          <Card className="shadow-none border hover:shadow-sm transition-shadow cursor-pointer">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400">
+                  <Package className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Low Stock Items</p>
+                  <div className="text-2xl font-bold">
+                    {isLoading ? <Skeleton className="h-8 w-16" /> : defaultStats.low_stock_items}
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">Below reorder level</p>
+              <p className="text-xs text-muted-foreground mt-3">Below reorder level</p>
             </CardContent>
           </Card>
         </Link>
 
         <Link href="/dashboard/logistics/shipments?status=IN_TRANSIT">
-          <Card className="border-green-200 dark:border-green-800 hover:shadow-md transition-shadow cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">In Transit</CardTitle>
-              <Truck className="h-4 w-4 text-green-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {isLoading ? <Skeleton className="h-8 w-16" /> : defaultStats.shipments_in_transit}
+          <Card className="shadow-none border hover:shadow-sm transition-shadow cursor-pointer">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                  <Truck className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">In Transit</p>
+                  <div className="text-2xl font-bold">
+                    {isLoading ? <Skeleton className="h-8 w-16" /> : defaultStats.shipments_in_transit}
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">Shipments on the way</p>
+              <p className="text-xs text-muted-foreground mt-3">Shipments on the way</p>
             </CardContent>
           </Card>
         </Link>
@@ -552,7 +589,7 @@ export default function DashboardPage() {
                     contentStyle={{ backgroundColor: 'hsl(var(--background))', border: '1px solid hsl(var(--border))' }}
                     formatter={(value) => [formatCurrency(value as number), 'Sales']}
                   />
-                  <Bar dataKey="sales" fill="#3B82F6" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="sales" fill="#5C6BC0" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -566,37 +603,35 @@ export default function DashboardPage() {
               <CardTitle className="text-lg">HR Overview</CardTitle>
               <CardDescription>Employee & attendance summary</CardDescription>
             </div>
-            <Link href="/dashboard/hr">
-              <Button variant="ghost" size="sm">
-                <ArrowRight className="h-4 w-4" />
-              </Button>
+            <Link href="/dashboard/hr" className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium">
+              View all
             </Link>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-0">
             {hrDashboard ? (
               <>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between py-3 border-b border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-2">
                     <Briefcase className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">Active Employees</span>
                   </div>
                   <span className="font-semibold">{hrDashboard.active_employees || 0}</span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between py-3 border-b border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">Present Today</span>
                   </div>
                   <span className="font-semibold text-green-600">{hrDashboard.present_today || 0}</span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between py-3 border-b border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4 text-orange-500" />
                     <span className="text-sm">Pending Leaves</span>
                   </div>
                   <Badge variant="secondary">{hrDashboard.pending_leave_requests || 0}</Badge>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between py-3">
                   <div className="flex items-center gap-2">
                     <CreditCard className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">Pending Payroll</span>
@@ -620,23 +655,21 @@ export default function DashboardPage() {
               <CardTitle className="text-lg">Fixed Assets</CardTitle>
               <CardDescription>Asset value summary</CardDescription>
             </div>
-            <Link href="/dashboard/finance/fixed-assets">
-              <Button variant="ghost" size="sm">
-                <ArrowRight className="h-4 w-4" />
-              </Button>
+            <Link href="/dashboard/finance/fixed-assets" className="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium">
+              View all
             </Link>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-0">
             {fixedAssetsDashboard ? (
               <>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between py-3 border-b border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-2">
                     <Building2 className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">Total Assets</span>
                   </div>
                   <span className="font-semibold">{fixedAssetsDashboard.total_assets || 0}</span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between py-3 border-b border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-2">
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">Book Value</span>
@@ -645,7 +678,7 @@ export default function DashboardPage() {
                     {formatCurrency(fixedAssetsDashboard.total_current_book_value || 0)}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between py-3 border-b border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-2">
                     <Wrench className="h-4 w-4 text-orange-500" />
                     <span className="text-sm">Under Maintenance</span>
@@ -791,21 +824,24 @@ export default function DashboardPage() {
           <CardContent>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'New Order', href: '/dashboard/orders/new', icon: ShoppingCart },
-                { label: 'Add Product', href: '/dashboard/catalog/new', icon: Package },
-                { label: 'Create PO', href: '/dashboard/procurement/purchase-orders?create=true', icon: DollarSign },
-                { label: 'Service Req', href: '/dashboard/service/requests/new', icon: Wrench },
-                { label: 'New Employee', href: '/dashboard/hr/employees/new', icon: Users },
-                { label: 'Add Asset', href: '/dashboard/finance/fixed-assets', icon: Building2 },
+                { label: 'New Order', href: '/dashboard/orders/new', icon: ShoppingCart, color: 'sky' as const },
+                { label: 'Add Product', href: '/dashboard/catalog/new', icon: Package, color: 'amber' as const },
+                { label: 'Create PO', href: '/dashboard/procurement/purchase-orders?create=true', icon: DollarSign, color: 'indigo' as const },
+                { label: 'Service Req', href: '/dashboard/service/requests/new', icon: Wrench, color: 'violet' as const },
+                { label: 'New Employee', href: '/dashboard/hr/employees/new', icon: Users, color: 'emerald' as const },
+                { label: 'Add Asset', href: '/dashboard/finance/fixed-assets', icon: Building2, color: 'rose' as const },
               ].map((action, i) => {
                 const Icon = action.icon;
+                const colors = statColorMap[action.color];
                 return (
                   <Link
                     key={i}
                     href={action.href}
-                    className="flex items-center justify-center gap-2 rounded-lg border p-3 text-sm font-medium transition-colors hover:bg-accent"
+                    className="flex flex-col items-center gap-2 rounded-lg border p-3 text-sm font-medium transition-colors hover:border-indigo-200 hover:bg-indigo-50/50 dark:hover:border-indigo-800 dark:hover:bg-indigo-950/20"
                   >
-                    <Icon className="h-4 w-4" />
+                    <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${colors.iconBg} ${colors.iconText}`}>
+                      <Icon className="h-4 w-4" />
+                    </div>
                     {action.label}
                   </Link>
                 );

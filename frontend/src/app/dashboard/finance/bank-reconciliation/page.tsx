@@ -370,7 +370,7 @@ export default function BankReconciliationPage() {
             <Button
               onClick={() => handleAutoReconcile(true)}
               disabled={!selectedAccount || isAutoReconciling}
-              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700"
+              className="bg-indigo-600 text-white hover:bg-indigo-700"
             >
               <Sparkles className="mr-2 h-4 w-4" />
               {isAutoReconciling ? 'Processing...' : 'Auto-Reconcile'}
@@ -494,7 +494,7 @@ export default function BankReconciliationPage() {
 
           {/* ML Auto-Reconcile Suggestions */}
           {showSuggestions && autoReconcileResults && (
-            <Card className="border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50">
+            <Card className="border-indigo-200 bg-indigo-50/50 dark:border-indigo-800 dark:bg-indigo-950/20">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-purple-600" />
@@ -533,7 +533,7 @@ export default function BankReconciliationPage() {
                                 <div className="flex items-center gap-2">
                                   <div className="w-16 bg-gray-200 rounded-full h-2">
                                     <div
-                                      className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full"
+                                      className="bg-indigo-600 h-2 rounded-full"
                                       style={{ width: `${suggestion.confidence * 100}%` }}
                                     />
                                   </div>
@@ -559,7 +559,7 @@ export default function BankReconciliationPage() {
                         <Button
                           onClick={() => handleAutoReconcile(false)}
                           disabled={isAutoReconciling}
-                          className="bg-gradient-to-r from-green-600 to-emerald-600 text-white"
+                          className="bg-emerald-600 text-white hover:bg-emerald-700"
                         >
                           <CheckCircle2 className="mr-2 h-4 w-4" />
                           Apply {autoReconcileResults.matched_count} Matches
