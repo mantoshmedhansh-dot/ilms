@@ -31,6 +31,43 @@ from app.core.module_decorators import require_module
 router = APIRouter()
 
 
+# ==================== Helper: Map SalesChannel to Order.source values ====================
+def _channel_to_sources(channel) -> list[str]:
+    """Map a SalesChannel record to matching Order.source values.
+
+    Order.source uses: WEBSITE, MOBILE_APP, STORE, PHONE, DEALER, AMAZON, FLIPKART, OTHER
+    SalesChannel.channel_type uses: D2C, D2C_WEBSITE, D2C_APP, MARKETPLACE, AMAZON, FLIPKART, etc.
+    """
+    ct = (channel.channel_type or "").upper()
+    code = (channel.code or "").upper()
+
+    # Direct marketplace matches
+    for mp in ("AMAZON", "FLIPKART", "MYNTRA", "MEESHO", "AJIO", "NYKAA", "TATACLIQ", "JIOMART"):
+        if mp in ct or mp in code:
+            return [mp]
+
+    # D2C channels
+    if ct in ("D2C", "D2C_WEBSITE"):
+        return ["WEBSITE", "D2C"]
+    if ct == "D2C_APP":
+        return ["MOBILE_APP"]
+
+    # B2B / Dealer channels
+    if ct in ("B2B", "DEALER", "DEALER_PORTAL", "DISTRIBUTOR", "MODERN_TRADE", "CORPORATE", "GOVERNMENT"):
+        return ["DEALER"]
+
+    # Offline / Retail
+    if ct in ("OFFLINE", "RETAIL_STORE", "FRANCHISE"):
+        return ["STORE"]
+
+    # Quick commerce
+    if ct == "QUICK_COMMERCE":
+        return ["QUICK_COMMERCE"]
+
+    # Fallback: try to match channel_type directly as a source
+    return [ct] if ct else ["OTHER"]
+
+
 # ==================== Helper: Get warehouse IDs for geo filter ====================
 async def _get_warehouse_ids_for_geo(
     db,
@@ -367,9 +404,13 @@ async def get_channel_pnl(
     pnl_data = []
 
     for channel in channels:
-        # Base order filter conditions
+        # Map channel to Order.source values
+        source_values = _channel_to_sources(channel)
+
+        # Base order filter conditions — match by Order.source (always populated)
+        # instead of Order.channel_id (often NULL)
         base_conditions = [
-            Order.channel_id == channel.id,
+            Order.source.in_(source_values),
             Order.status.notin_(["CANCELLED", "DRAFT"]),
             Order.created_at >= start_date,
             Order.created_at <= end_date,
@@ -564,12 +605,14 @@ async def get_channel_balance_sheet(
     balance_sheets = []
 
     for channel in channels:
+        source_values = _channel_to_sources(channel)
+
         # Accounts Receivable (unpaid orders)
         ar_query = select(
             func.coalesce(func.sum(Order.total_amount - Order.amount_paid), 0)
         ).where(
             and_(
-                Order.channel_id == channel.id,
+                Order.source.in_(source_values),
                 Order.status.notin_(["CANCELLED", "DRAFT"]),
                 Order.payment_status != "PAID",
                 Order.created_at <= as_of_date
@@ -590,7 +633,7 @@ async def get_channel_balance_sheet(
             func.coalesce(func.sum(Order.total_amount), 0)
         ).where(
             and_(
-                Order.channel_id == channel.id,
+                Order.source.in_(source_values),
                 Order.status == "DELIVERED",
                 Order.created_at >= as_of_date - timedelta(days=30),
                 Order.created_at <= as_of_date
@@ -603,7 +646,7 @@ async def get_channel_balance_sheet(
             func.coalesce(func.sum(Order.amount_paid), 0)
         ).where(
             and_(
-                Order.channel_id == channel.id,
+                Order.source.in_(source_values),
                 Order.status.in_(["PENDING_PAYMENT", "CONFIRMED", "ALLOCATED"]),
                 Order.payment_status == "PAID"
             )
@@ -619,7 +662,7 @@ async def get_channel_balance_sheet(
             func.coalesce(func.sum(Order.total_amount - Order.discount_amount), 0)
         ).where(
             and_(
-                Order.channel_id == channel.id,
+                Order.source.in_(source_values),
                 Order.status == "DELIVERED",
                 Order.created_at <= as_of_date
             )
@@ -704,13 +747,15 @@ async def get_channel_comparison(
     comparison = []
 
     for channel in channels:
+        source_values = _channel_to_sources(channel)
+
         metrics_query = select(
             func.count(Order.id).label("orders"),
             func.coalesce(func.sum(Order.total_amount), 0).label("revenue"),
             func.coalesce(func.avg(Order.total_amount), 0).label("aov")
         ).where(
             and_(
-                Order.channel_id == channel.id,
+                Order.source.in_(source_values),
                 Order.status.notin_(["CANCELLED", "DRAFT"]),
                 Order.created_at >= start_date,
                 Order.created_at <= end_date
@@ -730,7 +775,7 @@ async def get_channel_comparison(
             Order, OrderItem.order_id == Order.id
         ).where(
             and_(
-                Order.channel_id == channel.id,
+                Order.source.in_(source_values),
                 Order.status.notin_(["CANCELLED", "DRAFT"]),
                 Order.created_at >= start_date,
                 Order.created_at <= end_date
@@ -779,13 +824,6 @@ async def get_channel_trend(
     """Get channel performance trend over time."""
     start_date = date.today() - timedelta(days=days)
 
-    conditions = [
-        Order.status.notin_(["CANCELLED", "DRAFT"]),
-        Order.created_at >= start_date
-    ]
-    if channel_id:
-        conditions.append(Order.channel_id == channel_id)
-
     if group_by == "day":
         date_expr = func.date(Order.created_at)
     elif group_by == "week":
@@ -793,28 +831,39 @@ async def get_channel_trend(
     else:
         date_expr = func.date_trunc('month', Order.created_at)
 
-    query = select(
-        date_expr.label("period"),
-        SalesChannel.name.label("channel_name"),
-        func.count(Order.id).label("orders"),
-        func.coalesce(func.sum(Order.total_amount), 0).label("revenue")
-    ).select_from(Order).join(
-        SalesChannel, Order.channel_id == SalesChannel.id
-    ).where(
-        and_(*conditions)
-    ).group_by(date_expr, SalesChannel.name).order_by(date_expr)
-
-    result = await db.execute(query)
-    data = result.all()
+    # Get channels and query per-channel using Order.source mapping
+    channels_query = select(SalesChannel).where(SalesChannel.status == "ACTIVE")
+    if channel_id:
+        channels_query = channels_query.where(SalesChannel.id == channel_id)
+    channels_result = await db.execute(channels_query)
+    all_channels = channels_result.scalars().all()
 
     channels_data = {}
-    for row in data:
-        channel_name = row.channel_name
-        if channel_name not in channels_data:
-            channels_data[channel_name] = {"labels": [], "orders": [], "revenue": []}
-        channels_data[channel_name]["labels"].append(str(row.period)[:10])
-        channels_data[channel_name]["orders"].append(row.orders)
-        channels_data[channel_name]["revenue"].append(float(row.revenue or 0))
+    for channel in all_channels:
+        source_values = _channel_to_sources(channel)
+        conditions = [
+            Order.source.in_(source_values),
+            Order.status.notin_(["CANCELLED", "DRAFT"]),
+            Order.created_at >= start_date,
+        ]
+
+        query = select(
+            date_expr.label("period"),
+            func.count(Order.id).label("orders"),
+            func.coalesce(func.sum(Order.total_amount), 0).label("revenue")
+        ).where(
+            and_(*conditions)
+        ).group_by(date_expr).order_by(date_expr)
+
+        result = await db.execute(query)
+        data = result.all()
+
+        if data:
+            channels_data[channel.name] = {
+                "labels": [str(row.period)[:10] for row in data],
+                "orders": [row.orders for row in data],
+                "revenue": [float(row.revenue or 0) for row in data],
+            }
 
     return {
         "period_days": days,
