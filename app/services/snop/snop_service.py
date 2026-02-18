@@ -848,8 +848,8 @@ class SNOPService:
             .where(
                 and_(
                     DemandForecast.is_active == True,
-                    DemandForecast.forecast_start_date >= start_date,
-                    DemandForecast.forecast_end_date <= end_date,
+                    DemandForecast.forecast_start_date <= end_date,
+                    DemandForecast.forecast_end_date >= start_date,
                     DemandForecast.mape.isnot(None)
                 )
             )

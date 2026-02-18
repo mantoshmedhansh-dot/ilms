@@ -302,11 +302,11 @@ class InventoryNetworkService:
             self.db, region_id=region_id, cluster_id=cluster_id, warehouse_id=warehouse_id
         )
 
-        # Build base filter
+        # Build base filter — use date-range overlap (forecasts are forward-looking)
         base_filter = and_(
             DemandForecast.is_active == True,
-            DemandForecast.forecast_start_date >= start_date,
-            DemandForecast.forecast_end_date <= end_date,
+            DemandForecast.forecast_start_date <= end_date,
+            DemandForecast.forecast_end_date >= start_date,
         )
         if wh_ids is not None:
             base_filter = and_(base_filter, DemandForecast.warehouse_id.in_(wh_ids))
