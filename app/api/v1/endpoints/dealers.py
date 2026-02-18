@@ -1290,7 +1290,7 @@ async def create_dms_order(
     order = Order(
         order_number=order_number,
         dealer_id=dealer_id,
-        customer_id=dealer.user_id,
+        customer_id=dealer.user_id or current_user.id,
         status="CONFIRMED",
         payment_status="PENDING",
         subtotal=subtotal,
@@ -2063,7 +2063,7 @@ async def create_secondary_sale(
     order = Order(
         order_number=order_number,
         dealer_id=sale_in.dealer_id,
-        customer_id=dealer.user_id,
+        customer_id=dealer.user_id or current_user.id,
         status="CONFIRMED",
         payment_status="PENDING",
         subtotal=subtotal,
