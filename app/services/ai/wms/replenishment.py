@@ -185,7 +185,7 @@ class WMSReplenishmentAgent:
 
         bins = []
         for row in rows:
-            max_qty = int(row.max_quantity or 100)
+            max_qty = int(row.max_capacity or 100)
             current = int(row.current_qty or 0)
             fill_pct = (current / max_qty * 100) if max_qty > 0 else 0
 
