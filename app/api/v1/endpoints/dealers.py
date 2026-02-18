@@ -1297,11 +1297,14 @@ async def create_dms_order(
         "pincode": dealer.registered_pincode,
     }
 
+    # Get or create a customer record for this dealer
+    customer_id = await get_or_create_dealer_customer(db, dealer)
+
     # Create order
     order = Order(
         order_number=order_number,
         dealer_id=dealer_id,
-        customer_id=dealer.user_id or current_user.id,
+        customer_id=customer_id,
         status="CONFIRMED",
         payment_status="PENDING",
         subtotal=subtotal,
@@ -2013,6 +2016,43 @@ async def update_retailer(
     )
 
 
+# ==================== DMS Helper: Dealer → Customer ====================
+
+async def get_or_create_dealer_customer(db, dealer):
+    """Find or create a Customer record linked to a dealer for order creation."""
+    from app.models.customer import Customer
+
+    # Try to find existing customer by dealer email or phone
+    result = await db.execute(
+        select(Customer).where(
+            or_(
+                Customer.email == dealer.email,
+                Customer.phone == dealer.phone,
+            )
+        )
+    )
+    customer = result.scalar_one_or_none()
+    if customer:
+        return customer.id
+
+    # Create a new customer record for this dealer
+    customer = Customer(
+        customer_code=f"DLR-{dealer.dealer_code}",
+        first_name=dealer.contact_person or dealer.name,
+        last_name="",
+        email=dealer.email,
+        phone=dealer.phone,
+        customer_type="B2B",
+        source="DMS",
+        is_active=True,
+        is_verified=True,
+        credit_used=Decimal("0"),
+    )
+    db.add(customer)
+    await db.flush()
+    return customer.id
+
+
 # ==================== DMS Phase 2: Secondary Sales ====================
 
 @router.post("/dms/secondary-sales", response_model=DMSSecondarySaleResponse, status_code=status.HTTP_201_CREATED)
@@ -2082,11 +2122,14 @@ async def create_secondary_sale(
         "pincode": retailer.pincode,
     }
 
+    # Get or create a customer record for this dealer
+    customer_id = await get_or_create_dealer_customer(db, dealer)
+
     # Create order with source=SECONDARY
     order = Order(
         order_number=order_number,
         dealer_id=sale_in.dealer_id,
-        customer_id=dealer.user_id or current_user.id,
+        customer_id=customer_id,
         status="CONFIRMED",
         payment_status="PENDING",
         subtotal=subtotal,
