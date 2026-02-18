@@ -357,9 +357,6 @@ export const navigation: NavItem[] = [
           { title: 'Marketplaces', href: '/dashboard/channels/marketplaces', icon: Store, permissions: ['ORDERS_VIEW'] },
           { title: 'Channel Pricing', href: '/dashboard/channels/pricing', icon: DollarSign, permissions: ['ORDERS_VIEW'] },
           { title: 'Omnichannel (BOPIS)', href: '/dashboard/omnichannel', icon: Store, permissions: ['ORDERS_VIEW'] },
-          { title: 'Dealers', href: '/dashboard/distribution/dealers', icon: Handshake, permissions: ['ORDERS_VIEW'] },
-          { title: 'Franchisees', href: '/dashboard/distribution/franchisees', icon: Building2, permissions: ['ORDERS_VIEW'] },
-          { title: 'Pricing Tiers', href: '/dashboard/distribution/pricing-tiers', icon: Layers, permissions: ['ORDERS_VIEW'] },
         ],
       },
       {
@@ -407,7 +404,25 @@ export const navigation: NavItem[] = [
     ],
   },
 
-  // ==================== 5. AI INSIGHTS ====================
+  // ==================== 5. DMS (Distribution Management) ====================
+  {
+    title: 'DMS',
+    icon: Truck,
+    permissions: ['ORDERS_VIEW'],
+    moduleCode: 'dms',
+    children: [
+      { title: 'DMS Dashboard', href: '/dashboard/dms', icon: BarChart3, permissions: ['ORDERS_VIEW'] },
+      { title: 'Distributors', href: '/dashboard/distribution/dealers', icon: Handshake, permissions: ['ORDERS_VIEW'] },
+      { title: 'DMS Orders', href: '/dashboard/dms/orders', icon: ShoppingCart, permissions: ['ORDERS_VIEW'] },
+      { title: 'Pricing Tiers', href: '/dashboard/distribution/pricing-tiers', icon: Layers, permissions: ['ORDERS_VIEW'] },
+      { title: 'Schemes', href: '/dashboard/distribution/schemes', icon: BadgePercent, permissions: ['ORDERS_VIEW'] },
+      { title: 'Franchisees', href: '/dashboard/distribution/franchisees', icon: Building2, permissions: ['ORDERS_VIEW'] },
+      { title: 'Targets', href: '/dashboard/distribution/targets', icon: Target, permissions: ['ORDERS_VIEW'] },
+      { title: 'Credit Ledger', href: '/dashboard/distribution/credit-ledger', icon: IndianRupee, permissions: ['ORDERS_VIEW'] },
+    ],
+  },
+
+  // ==================== 6. AI INSIGHTS ====================
   {
     title: 'AI Insights',
     icon: Brain,

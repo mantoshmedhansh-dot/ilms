@@ -644,3 +644,132 @@ class DealerAgingResponse(BaseModel):
     days_31_60: Decimal = Decimal("0")
     days_61_90: Decimal = Decimal("0")
     days_90_plus: Decimal = Decimal("0")
+
+
+# ==================== DMS Dashboard Schemas ====================
+
+class DMSDashboardSummary(BaseModel):
+    """Summary KPIs for DMS Dashboard."""
+    total_distributors: int = 0
+    active_distributors: int = 0
+    pending_approval: int = 0
+    total_orders_mtd: int = 0
+    revenue_mtd: Decimal = Decimal("0")
+    collection_mtd: Decimal = Decimal("0")
+    total_outstanding: Decimal = Decimal("0")
+    total_overdue: Decimal = Decimal("0")
+    avg_order_value: Decimal = Decimal("0")
+    credit_utilization_avg: Decimal = Decimal("0")
+
+
+class DMSRegionData(BaseModel):
+    region: str
+    count: int = 0
+    revenue: Decimal = Decimal("0")
+    outstanding: Decimal = Decimal("0")
+
+
+class DMSTierData(BaseModel):
+    tier: str
+    count: int = 0
+    revenue: Decimal = Decimal("0")
+
+
+class DMSMonthlyTrend(BaseModel):
+    month: str
+    orders: int = 0
+    revenue: Decimal = Decimal("0")
+    collection: Decimal = Decimal("0")
+
+
+class DMSTopPerformer(BaseModel):
+    dealer_id: str
+    dealer_code: str
+    name: str
+    revenue: Decimal = Decimal("0")
+    orders: int = 0
+    achievement_pct: Decimal = Decimal("0")
+
+
+class DMSCreditAlert(BaseModel):
+    dealer_id: str
+    dealer_code: str
+    name: str
+    outstanding: Decimal = Decimal("0")
+    overdue: Decimal = Decimal("0")
+    credit_limit: Decimal = Decimal("0")
+    utilization_pct: Decimal = Decimal("0")
+
+
+class DMSRecentOrder(BaseModel):
+    order_id: str
+    order_number: str
+    dealer_name: str
+    amount: Decimal = Decimal("0")
+    status: str = ""
+    date: str = ""
+
+
+class DMSDashboardResponse(BaseModel):
+    """Full DMS Dashboard response."""
+    summary: DMSDashboardSummary
+    by_region: List[DMSRegionData] = []
+    by_tier: List[DMSTierData] = []
+    monthly_trend: List[DMSMonthlyTrend] = []
+    top_performers: List[DMSTopPerformer] = []
+    credit_alerts: List[DMSCreditAlert] = []
+    recent_orders: List[DMSRecentOrder] = []
+
+
+# ==================== DMS Order Schemas ====================
+
+class DMSOrderItemCreate(BaseModel):
+    """Item in a DMS order."""
+    product_id: UUID
+    variant_id: Optional[UUID] = None
+    quantity: int = Field(..., ge=1)
+
+
+class DMSOrderCreate(BaseModel):
+    """Schema for creating a B2B DMS order."""
+    items: List[DMSOrderItemCreate] = Field(..., min_length=1)
+    notes: Optional[str] = None
+    payment_terms: Optional[str] = None
+
+
+class DMSOrderItemResponse(BaseModel):
+    """Response for a single order item."""
+    product_id: str
+    product_name: str = ""
+    sku: str = ""
+    quantity: int = 0
+    unit_price: Decimal = Decimal("0")
+    total: Decimal = Decimal("0")
+
+
+class DMSOrderResponse(BaseModel):
+    """Response for a single DMS order."""
+    id: str
+    order_number: str
+    dealer_id: str
+    dealer_name: str = ""
+    dealer_code: str = ""
+    items: List[DMSOrderItemResponse] = []
+    subtotal: Decimal = Decimal("0")
+    tax_amount: Decimal = Decimal("0")
+    discount_amount: Decimal = Decimal("0")
+    total_amount: Decimal = Decimal("0")
+    status: str = ""
+    payment_status: str = ""
+    schemes_applied: List[str] = []
+    credit_impact: Decimal = Decimal("0")
+    notes: Optional[str] = None
+    created_at: Optional[str] = None
+
+
+class DMSOrderListResponse(BaseModel):
+    """Paginated response for DMS orders."""
+    items: List[DMSOrderResponse] = []
+    total: int = 0
+    page: int = 1
+    size: int = 50

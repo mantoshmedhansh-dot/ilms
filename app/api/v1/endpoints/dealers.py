@@ -5,7 +5,7 @@ from datetime import date, datetime, timezone
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy import select, func, and_, or_
+from sqlalchemy import select, func, and_, or_, extract, case, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -30,6 +30,10 @@ from app.schemas.dealer import (
     DealerSchemeApplicationCreate, DealerSchemeApplicationResponse,
     # Reports
     DealerPerformanceResponse, DealerAgingResponse,
+    # DMS
+    DMSDashboardResponse, DMSDashboardSummary, DMSRegionData, DMSTierData,
+    DMSMonthlyTrend, DMSTopPerformer, DMSCreditAlert, DMSRecentOrder,
+    DMSOrderCreate, DMSOrderResponse, DMSOrderItemResponse, DMSOrderListResponse,
 )
 from app.api.deps import DB, CurrentUser, get_current_user, require_permissions
 from app.services.audit_service import AuditService
@@ -443,7 +447,7 @@ async def get_dealer_ledger(
         total=total,
         total_debit=totals.total_debit,
         total_credit=totals.total_credit,
-        closing_balance=dealer.current_balance,
+        closing_balance=dealer.outstanding_amount,
         skip=skip,
         limit=limit
     )
@@ -466,7 +470,7 @@ async def record_dealer_payment(
     if not dealer:
         raise HTTPException(status_code=404, detail="Dealer not found")
 
-    new_balance = dealer.current_balance - payment_in.credit_amount + payment_in.debit_amount
+    new_balance = dealer.outstanding_amount - payment_in.credit_amount + payment_in.debit_amount
 
     ledger = DealerCreditLedger(
         dealer_id=dealer_id,
@@ -487,16 +491,16 @@ async def record_dealer_payment(
     db.add(ledger)
 
     # Update dealer balance
-    dealer.current_balance = new_balance
+    dealer.outstanding_amount = new_balance
     dealer.last_payment_date = payment_in.transaction_date
 
-    # Update credit status
-    if new_balance > dealer.credit_limit:
-        dealer.credit_status = CreditStatus.OVER_LIMI.valueT.value
-    elif new_balance > dealer.credit_limit * Decimal("0.8"):
-        dealer.credit_status = CreditStatus.WARNIN.valueG.value
+    # Update credit status based on utilization
+    if dealer.credit_limit > 0 and new_balance > dealer.credit_limit * Decimal("0.9"):
+        dealer.credit_status = CreditStatus.ON_HOLD.value
+    elif dealer.credit_limit > 0 and new_balance > dealer.credit_limit * Decimal("0.75"):
+        dealer.credit_status = CreditStatus.ACTIVE.value
     else:
-        dealer.credit_status = CreditStatus.NORMA.valueL.value
+        dealer.credit_status = CreditStatus.ACTIVE.value
 
     await db.commit()
     await db.refresh(ledger)
@@ -770,8 +774,8 @@ async def get_dealer_performance_report(
             "target_value": float(targets.target_value),
             "achievement_percentage": round(achievement_pct, 2),
             "credit_limit": float(dealer.credit_limit),
-            "current_balance": float(dealer.current_balance),
-            "available_credit": float(dealer.credit_limit - dealer.current_balance),
+            "current_balance": float(dealer.outstanding_amount),
+            "available_credit": float(dealer.credit_limit - dealer.outstanding_amount),
         })
 
     return {
@@ -799,7 +803,7 @@ async def get_dealer_aging_report(
     current_user: User = Depends(get_current_user),
 ):
     """Get dealer aging report (Accounts Receivable)."""
-    query = select(Dealer).where(Dealer.current_balance > 0)
+    query = select(Dealer).where(Dealer.outstanding_amount > 0)
 
     if region_id:
         query = query.where(Dealer.region_id == region_id)
@@ -856,3 +860,555 @@ async def get_dealer_aging_report(
         "summary": summary_buckets,
         "total_outstanding": sum(summary_buckets.values()),
     }
+
+
+# ==================== DMS Dashboard ====================
+
+@router.get("/dms/dashboard", response_model=DMSDashboardResponse)
+@require_module("dms")
+async def get_dms_dashboard(
+    db: DB,
+    current_user: User = Depends(get_current_user),
+):
+    """Get DMS Dashboard with KPIs, charts, and tables."""
+    from app.models.order import Order, OrderStatus
+
+    today = date.today()
+    month_start = today.replace(day=1)
+
+    # --- Summary KPIs ---
+    total_result = await db.execute(select(func.count(Dealer.id)))
+    total_distributors = total_result.scalar() or 0
+
+    active_result = await db.execute(
+        select(func.count(Dealer.id)).where(Dealer.status == DealerStatus.ACTIVE.value)
+    )
+    active_distributors = active_result.scalar() or 0
+
+    pending_result = await db.execute(
+        select(func.count(Dealer.id)).where(Dealer.status == DealerStatus.PENDING_APPROVAL.value)
+    )
+    pending_approval = pending_result.scalar() or 0
+
+    # Orders MTD (B2B only = orders with dealer_id)
+    orders_mtd_result = await db.execute(
+        select(
+            func.count(Order.id).label("count"),
+            func.coalesce(func.sum(Order.total_amount), 0).label("revenue"),
+            func.coalesce(func.avg(Order.total_amount), 0).label("avg_value"),
+        ).where(
+            and_(
+                Order.dealer_id.isnot(None),
+                Order.created_at >= month_start,
+            )
+        )
+    )
+    orders_mtd = orders_mtd_result.one()
+
+    # Collection MTD (credit payments)
+    collection_result = await db.execute(
+        select(
+            func.coalesce(func.sum(DealerCreditLedger.credit_amount), 0)
+        ).where(
+            and_(
+                DealerCreditLedger.transaction_date >= month_start,
+                DealerCreditLedger.credit_amount > 0,
+            )
+        )
+    )
+    collection_mtd = collection_result.scalar() or Decimal("0")
+
+    # Outstanding and overdue
+    outstanding_result = await db.execute(
+        select(
+            func.coalesce(func.sum(Dealer.outstanding_amount), 0).label("outstanding"),
+            func.coalesce(func.sum(Dealer.overdue_amount), 0).label("overdue"),
+        )
+    )
+    outstanding_row = outstanding_result.one()
+
+    # Average credit utilization
+    credit_util_result = await db.execute(
+        select(
+            func.avg(
+                case(
+                    (Dealer.credit_limit > 0, (Dealer.outstanding_amount / Dealer.credit_limit) * 100),
+                    else_=Decimal("0"),
+                )
+            )
+        ).where(Dealer.status == DealerStatus.ACTIVE.value)
+    )
+    credit_util_avg = credit_util_result.scalar() or Decimal("0")
+
+    summary = DMSDashboardSummary(
+        total_distributors=total_distributors,
+        active_distributors=active_distributors,
+        pending_approval=pending_approval,
+        total_orders_mtd=orders_mtd.count,
+        revenue_mtd=orders_mtd.revenue,
+        collection_mtd=collection_mtd,
+        total_outstanding=outstanding_row.outstanding,
+        total_overdue=outstanding_row.overdue,
+        avg_order_value=orders_mtd.avg_value,
+        credit_utilization_avg=round(credit_util_avg, 2),
+    )
+
+    # --- By Region ---
+    region_result = await db.execute(
+        select(
+            Dealer.region,
+            func.count(Dealer.id).label("count"),
+            func.coalesce(func.sum(Dealer.outstanding_amount), 0).label("outstanding"),
+        ).where(Dealer.region.isnot(None))
+        .group_by(Dealer.region)
+        .order_by(desc(func.count(Dealer.id)))
+    )
+    by_region = []
+    for row in region_result.all():
+        by_region.append(DMSRegionData(
+            region=row.region or "Unknown",
+            count=row.count,
+            outstanding=row.outstanding,
+        ))
+
+    # --- By Tier ---
+    tier_result = await db.execute(
+        select(
+            Dealer.tier,
+            func.count(Dealer.id).label("count"),
+        ).where(Dealer.tier.isnot(None))
+        .group_by(Dealer.tier)
+        .order_by(desc(func.count(Dealer.id)))
+    )
+    by_tier = [
+        DMSTierData(tier=row.tier or "STANDARD", count=row.count)
+        for row in tier_result.all()
+    ]
+
+    # --- Monthly Trend (last 12 months) ---
+    twelve_months_ago = today.replace(day=1)
+    try:
+        twelve_months_ago = twelve_months_ago.replace(year=today.year - 1)
+    except ValueError:
+        twelve_months_ago = twelve_months_ago.replace(year=today.year - 1, day=28)
+
+    trend_result = await db.execute(
+        select(
+            extract("year", Order.created_at).label("yr"),
+            extract("month", Order.created_at).label("mo"),
+            func.count(Order.id).label("orders"),
+            func.coalesce(func.sum(Order.total_amount), 0).label("revenue"),
+        ).where(
+            and_(
+                Order.dealer_id.isnot(None),
+                Order.created_at >= twelve_months_ago,
+            )
+        )
+        .group_by("yr", "mo")
+        .order_by("yr", "mo")
+    )
+    monthly_trend = []
+    for row in trend_result.all():
+        month_str = f"{int(row.yr)}-{int(row.mo):02d}"
+        monthly_trend.append(DMSMonthlyTrend(
+            month=month_str,
+            orders=row.orders,
+            revenue=row.revenue,
+        ))
+
+    # --- Top 10 Performers (by revenue in current FY) ---
+    fy_start = date(today.year if today.month >= 4 else today.year - 1, 4, 1)
+
+    top_result = await db.execute(
+        select(
+            Dealer.id,
+            Dealer.dealer_code,
+            Dealer.name,
+            func.count(Order.id).label("order_count"),
+            func.coalesce(func.sum(Order.total_amount), 0).label("revenue"),
+        )
+        .join(Order, Order.dealer_id == Dealer.id)
+        .where(Order.created_at >= fy_start)
+        .group_by(Dealer.id, Dealer.dealer_code, Dealer.name)
+        .order_by(desc(func.sum(Order.total_amount)))
+        .limit(10)
+    )
+    top_performers = []
+    for row in top_result.all():
+        # Get target for achievement %
+        target_result = await db.execute(
+            select(func.coalesce(func.sum(DealerTarget.revenue_target), 0))
+            .where(DealerTarget.dealer_id == row.id)
+        )
+        target_val = target_result.scalar() or Decimal("0")
+        achievement = (float(row.revenue) / float(target_val) * 100) if target_val > 0 else 0
+
+        top_performers.append(DMSTopPerformer(
+            dealer_id=str(row.id),
+            dealer_code=row.dealer_code,
+            name=row.name,
+            revenue=row.revenue,
+            orders=row.order_count,
+            achievement_pct=round(Decimal(str(achievement)), 1),
+        ))
+
+    # --- Credit Alerts (dealers > 80% utilization) ---
+    alerts_result = await db.execute(
+        select(Dealer).where(
+            and_(
+                Dealer.credit_limit > 0,
+                Dealer.outstanding_amount > Dealer.credit_limit * Decimal("0.8"),
+                Dealer.status == DealerStatus.ACTIVE.value,
+            )
+        ).order_by(desc(Dealer.outstanding_amount))
+        .limit(20)
+    )
+    credit_alerts = []
+    for dealer in alerts_result.scalars().all():
+        utilization = (float(dealer.outstanding_amount) / float(dealer.credit_limit) * 100) if dealer.credit_limit > 0 else 0
+        credit_alerts.append(DMSCreditAlert(
+            dealer_id=str(dealer.id),
+            dealer_code=dealer.dealer_code,
+            name=dealer.name,
+            outstanding=dealer.outstanding_amount,
+            overdue=dealer.overdue_amount,
+            credit_limit=dealer.credit_limit,
+            utilization_pct=round(Decimal(str(utilization)), 1),
+        ))
+
+    # --- Recent B2B Orders ---
+    recent_result = await db.execute(
+        select(Order)
+        .where(Order.dealer_id.isnot(None))
+        .options(selectinload(Order.dealer))
+        .order_by(Order.created_at.desc())
+        .limit(10)
+    )
+    recent_orders = []
+    for order in recent_result.scalars().all():
+        recent_orders.append(DMSRecentOrder(
+            order_id=str(order.id),
+            order_number=order.order_number or "",
+            dealer_name=order.dealer.name if order.dealer else "Unknown",
+            amount=order.total_amount or Decimal("0"),
+            status=order.status or "",
+            date=order.created_at.strftime("%Y-%m-%d") if order.created_at else "",
+        ))
+
+    return DMSDashboardResponse(
+        summary=summary,
+        by_region=by_region,
+        by_tier=by_tier,
+        monthly_trend=monthly_trend,
+        top_performers=top_performers,
+        credit_alerts=credit_alerts,
+        recent_orders=recent_orders,
+    )
+
+
+# ==================== DMS Orders ====================
+
+@router.get("/dms/orders", response_model=DMSOrderListResponse)
+@require_module("dms")
+async def list_dms_orders(
+    db: DB,
+    page: int = Query(1, ge=1),
+    size: int = Query(50, ge=1, le=100),
+    dealer_id: Optional[UUID] = None,
+    status_filter: Optional[str] = Query(None, alias="status"),
+    date_from: Optional[date] = None,
+    date_to: Optional[date] = None,
+    current_user: User = Depends(get_current_user),
+):
+    """List B2B orders (orders with dealer_id)."""
+    from app.models.order import Order
+
+    query = select(Order).where(Order.dealer_id.isnot(None))
+    count_query = select(func.count(Order.id)).where(Order.dealer_id.isnot(None))
+
+    filters = []
+    if dealer_id:
+        filters.append(Order.dealer_id == dealer_id)
+    if status_filter:
+        filters.append(Order.status == status_filter)
+    if date_from:
+        filters.append(Order.created_at >= datetime.combine(date_from, datetime.min.time()))
+    if date_to:
+        filters.append(Order.created_at <= datetime.combine(date_to, datetime.max.time()))
+
+    if filters:
+        query = query.where(and_(*filters))
+        count_query = count_query.where(and_(*filters))
+
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+
+    skip = (page - 1) * size
+    query = (
+        query.options(selectinload(Order.dealer))
+        .order_by(Order.created_at.desc())
+        .offset(skip)
+        .limit(size)
+    )
+    result = await db.execute(query)
+    orders = result.scalars().all()
+
+    items = []
+    for order in orders:
+        items.append(DMSOrderResponse(
+            id=str(order.id),
+            order_number=order.order_number or "",
+            dealer_id=str(order.dealer_id),
+            dealer_name=order.dealer.name if order.dealer else "Unknown",
+            dealer_code=order.dealer.dealer_code if order.dealer else "",
+            subtotal=order.subtotal or Decimal("0"),
+            tax_amount=order.tax_amount or Decimal("0"),
+            discount_amount=order.discount_amount or Decimal("0"),
+            total_amount=order.total_amount or Decimal("0"),
+            status=order.status or "",
+            payment_status=order.payment_status or "",
+            created_at=order.created_at.isoformat() if order.created_at else "",
+        ))
+
+    return DMSOrderListResponse(items=items, total=total, page=page, size=size)
+
+
+@router.post("/{dealer_id}/orders", response_model=DMSOrderResponse, status_code=status.HTTP_201_CREATED)
+@require_module("dms")
+async def create_dms_order(
+    dealer_id: UUID,
+    order_in: DMSOrderCreate,
+    db: DB,
+    current_user: User = Depends(get_current_user),
+):
+    """Create a B2B order for a dealer with auto-pricing and credit check."""
+    from app.models.order import Order, OrderItem
+    from app.models.product import Product, ProductVariant
+
+    # Verify dealer
+    dealer_result = await db.execute(
+        select(Dealer).where(Dealer.id == dealer_id)
+    )
+    dealer = dealer_result.scalar_one_or_none()
+    if not dealer:
+        raise HTTPException(status_code=404, detail="Dealer not found")
+
+    if dealer.status != DealerStatus.ACTIVE.value:
+        raise HTTPException(status_code=400, detail="Dealer is not active")
+
+    if not dealer.can_place_orders:
+        raise HTTPException(status_code=400, detail="Dealer is not allowed to place orders")
+
+    # Build order items with pricing
+    order_items = []
+    subtotal = Decimal("0")
+
+    for item in order_in.items:
+        # Get product
+        prod_result = await db.execute(
+            select(Product).where(Product.id == item.product_id)
+        )
+        product = prod_result.scalar_one_or_none()
+        if not product:
+            raise HTTPException(status_code=404, detail=f"Product {item.product_id} not found")
+
+        # Determine unit price: dealer-specific > tier pricing > product selling price
+        unit_price = product.selling_price or Decimal("0")
+        unit_mrp = product.mrp or unit_price
+
+        # Check dealer-specific pricing
+        dp_result = await db.execute(
+            select(DealerPricing).where(
+                and_(
+                    DealerPricing.dealer_id == dealer_id,
+                    DealerPricing.product_id == item.product_id,
+                    DealerPricing.is_active == True,
+                )
+            )
+        )
+        dealer_pricing = dp_result.scalar_one_or_none()
+        if dealer_pricing:
+            unit_price = dealer_pricing.special_price or dealer_pricing.dealer_price
+        else:
+            # Check tier pricing
+            if dealer.tier:
+                tp_result = await db.execute(
+                    select(DealerTierPricing).where(
+                        and_(
+                            DealerTierPricing.tier == dealer.tier,
+                            DealerTierPricing.product_id == item.product_id,
+                            DealerTierPricing.is_active == True,
+                        )
+                    )
+                )
+                tier_pricing = tp_result.scalar_one_or_none()
+                if tier_pricing:
+                    if tier_pricing.fixed_price:
+                        unit_price = tier_pricing.fixed_price
+                    elif tier_pricing.discount_percentage:
+                        unit_price = unit_price * (1 - tier_pricing.discount_percentage / 100)
+
+        line_total = unit_price * item.quantity
+        subtotal += line_total
+
+        order_items.append({
+            "product_id": item.product_id,
+            "product_name": product.name,
+            "sku": product.sku or "",
+            "unit_mrp": unit_mrp,
+            "quantity": item.quantity,
+            "unit_price": unit_price,
+            "total": line_total,
+        })
+
+    # Estimate tax (18% GST default)
+    tax_amount = subtotal * Decimal("0.18")
+    total_amount = subtotal + tax_amount
+
+    # Credit check
+    available_credit = dealer.credit_limit - dealer.outstanding_amount
+    if total_amount > available_credit and dealer.credit_limit > 0:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Order amount ₹{total_amount:.2f} exceeds available credit ₹{available_credit:.2f}"
+        )
+
+    # Generate order number
+    count_result = await db.execute(
+        select(func.count(Order.id)).where(Order.dealer_id.isnot(None))
+    )
+    count = count_result.scalar() or 0
+    order_number = f"DMS-{date.today().strftime('%Y%m%d')}-{str(count + 1).zfill(5)}"
+
+    # Create order
+    order = Order(
+        order_number=order_number,
+        dealer_id=dealer_id,
+        customer_id=dealer.user_id,
+        status="CONFIRMED",
+        payment_status="PENDING",
+        subtotal=subtotal,
+        tax_amount=tax_amount,
+        discount_amount=Decimal("0"),
+        total_amount=total_amount,
+        internal_notes=order_in.notes,
+        source="DEALER",
+    )
+    db.add(order)
+    await db.flush()
+
+    # Create order items
+    for oi in order_items:
+        item_tax = oi["total"] * Decimal("0.18")
+        order_item = OrderItem(
+            order_id=order.id,
+            product_id=oi["product_id"],
+            product_name=oi["product_name"],
+            product_sku=oi["sku"],
+            quantity=oi["quantity"],
+            unit_price=oi["unit_price"],
+            unit_mrp=oi["unit_mrp"],
+            tax_amount=item_tax,
+            total_amount=oi["total"] + item_tax,
+        )
+        db.add(order_item)
+
+    # Create credit ledger entry (debit)
+    ledger = DealerCreditLedger(
+        dealer_id=dealer_id,
+        transaction_type=TransactionType.INVOICE,
+        transaction_date=date.today(),
+        reference_type="ORDER",
+        reference_number=order_number,
+        reference_id=order.id,
+        debit_amount=total_amount,
+        credit_amount=Decimal("0"),
+        balance=dealer.outstanding_amount + total_amount,
+        remarks=f"B2B Order {order_number}",
+    )
+    db.add(ledger)
+
+    # Update dealer outstanding
+    dealer.outstanding_amount += total_amount
+
+    # Update credit status
+    if dealer.credit_limit > 0 and dealer.outstanding_amount > dealer.credit_limit * Decimal("0.9"):
+        dealer.credit_status = CreditStatus.ON_HOLD.value
+
+    await db.commit()
+    await db.refresh(order)
+
+    return DMSOrderResponse(
+        id=str(order.id),
+        order_number=order.order_number,
+        dealer_id=str(dealer_id),
+        dealer_name=dealer.name,
+        dealer_code=dealer.dealer_code,
+        items=[DMSOrderItemResponse(
+            product_id=str(oi["product_id"]),
+            product_name=oi["product_name"],
+            sku=oi["sku"],
+            quantity=oi["quantity"],
+            unit_price=oi["unit_price"],
+            total=oi["total"],
+        ) for oi in order_items],
+        subtotal=subtotal,
+        tax_amount=tax_amount,
+        discount_amount=Decimal("0"),
+        total_amount=total_amount,
+        status=order.status,
+        payment_status=order.payment_status or "",
+        credit_impact=total_amount,
+        notes=order_in.notes,
+        created_at=order.created_at.isoformat() if order.created_at else "",
+    )
+
+
+@router.get("/dms/orders/{order_id}", response_model=DMSOrderResponse)
+@require_module("dms")
+async def get_dms_order(
+    order_id: UUID,
+    db: DB,
+    current_user: User = Depends(get_current_user),
+):
+    """Get a single B2B order with dealer context."""
+    from app.models.order import Order, OrderItem
+
+    result = await db.execute(
+        select(Order)
+        .where(and_(Order.id == order_id, Order.dealer_id.isnot(None)))
+        .options(selectinload(Order.dealer), selectinload(Order.items))
+    )
+    order = result.scalar_one_or_none()
+
+    if not order:
+        raise HTTPException(status_code=404, detail="DMS Order not found")
+
+    items = []
+    for oi in order.items:
+        items.append(DMSOrderItemResponse(
+            product_id=str(oi.product_id),
+            product_name=oi.product_name or "",
+            sku=oi.sku or "",
+            quantity=oi.quantity or 0,
+            unit_price=oi.unit_price or Decimal("0"),
+            total=oi.total_price or Decimal("0"),
+        ))
+
+    return DMSOrderResponse(
+        id=str(order.id),
+        order_number=order.order_number or "",
+        dealer_id=str(order.dealer_id),
+        dealer_name=order.dealer.name if order.dealer else "Unknown",
+        dealer_code=order.dealer.dealer_code if order.dealer else "",
+        items=items,
+        subtotal=order.subtotal or Decimal("0"),
+        tax_amount=order.tax_amount or Decimal("0"),
+        discount_amount=order.discount_amount or Decimal("0"),
+        total_amount=order.total_amount or Decimal("0"),
+        status=order.status or "",
+        payment_status=order.payment_status or "",
+        credit_impact=order.total_amount or Decimal("0"),
+        notes=order.notes,
+        created_at=order.created_at.isoformat() if order.created_at else "",
+    )

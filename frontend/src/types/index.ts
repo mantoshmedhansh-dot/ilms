@@ -623,6 +623,70 @@ export interface Dealer {
   updated_at?: string;
 }
 
+// ==================== DMS Types ====================
+
+export interface DMSDashboardSummary {
+  total_distributors: number;
+  active_distributors: number;
+  pending_approval: number;
+  total_orders_mtd: number;
+  revenue_mtd: number;
+  collection_mtd: number;
+  total_outstanding: number;
+  total_overdue: number;
+  avg_order_value: number;
+  credit_utilization_avg: number;
+}
+
+export interface DMSDashboardResponse {
+  summary: DMSDashboardSummary;
+  by_region: Array<{ region: string; count: number; revenue: number; outstanding: number }>;
+  by_tier: Array<{ tier: string; count: number; revenue: number }>;
+  monthly_trend: Array<{ month: string; orders: number; revenue: number; collection: number }>;
+  top_performers: Array<{ dealer_id: string; dealer_code: string; name: string; revenue: number; orders: number; achievement_pct: number }>;
+  credit_alerts: Array<{ dealer_id: string; dealer_code: string; name: string; outstanding: number; overdue: number; credit_limit: number; utilization_pct: number }>;
+  recent_orders: Array<{ order_id: string; order_number: string; dealer_name: string; amount: number; status: string; date: string }>;
+}
+
+export interface DMSOrderItem {
+  product_id: string;
+  variant_id?: string;
+  quantity: number;
+}
+
+export interface DMSOrder {
+  id: string;
+  order_number: string;
+  dealer_id: string;
+  dealer_name: string;
+  dealer_code: string;
+  items: Array<{
+    product_id: string;
+    product_name: string;
+    sku: string;
+    quantity: number;
+    unit_price: number;
+    total: number;
+  }>;
+  subtotal: number;
+  tax_amount: number;
+  discount_amount: number;
+  total_amount: number;
+  status: string;
+  payment_status: string;
+  schemes_applied: string[];
+  credit_impact: number;
+  notes?: string;
+  created_at: string;
+}
+
+export interface DMSOrderListResponse {
+  items: DMSOrder[];
+  total: number;
+  page: number;
+  size: number;
+}
+
 // Common Types
 export interface SelectOption {
   label: string;

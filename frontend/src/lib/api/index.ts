@@ -1480,6 +1480,26 @@ interface DealerScheme {
   utilized_budget: number;
 }
 
+// DMS (Distribution Management System) API
+export const dmsApi = {
+  getDashboard: async () => {
+    const { data } = await apiClient.get('/dealers/dms/dashboard');
+    return data;
+  },
+  listOrders: async (params?: { page?: number; size?: number; dealer_id?: string; status?: string; date_from?: string; date_to?: string }) => {
+    const { data } = await apiClient.get('/dealers/dms/orders', { params });
+    return data;
+  },
+  getOrder: async (orderId: string) => {
+    const { data } = await apiClient.get(`/dealers/dms/orders/${orderId}`);
+    return data;
+  },
+  createOrder: async (dealerId: string, order: { items: Array<{ product_id: string; variant_id?: string; quantity: number }>; notes?: string; payment_terms?: string }) => {
+    const { data } = await apiClient.post(`/dealers/${dealerId}/orders`, order);
+    return data;
+  },
+};
+
 // Dashboard API - aggregates data from multiple real endpoints
 export const dashboardApi = {
   getStats: async () => {
