@@ -1286,6 +1286,17 @@ async def create_dms_order(
     count = count_result.scalar() or 0
     order_number = f"DMS-{date.today().strftime('%Y%m%d')}-{str(count + 1).zfill(5)}"
 
+    # Build shipping address from dealer
+    shipping_address = {
+        "name": dealer.name,
+        "contact_person": dealer.contact_person,
+        "phone": dealer.phone,
+        "address_line1": dealer.registered_address_line1,
+        "city": dealer.registered_city,
+        "state": dealer.registered_state,
+        "pincode": dealer.registered_pincode,
+    }
+
     # Create order
     order = Order(
         order_number=order_number,
@@ -1297,6 +1308,7 @@ async def create_dms_order(
         tax_amount=tax_amount,
         discount_amount=Decimal("0"),
         total_amount=total_amount,
+        shipping_address=shipping_address,
         internal_notes=order_in.notes,
         source="DEALER",
     )
@@ -2059,6 +2071,17 @@ async def create_secondary_sale(
     count = count_result.scalar() or 0
     order_number = f"SEC-{date.today().strftime('%Y%m%d')}-{str(count + 1).zfill(5)}"
 
+    # Build shipping address from retailer outlet
+    shipping_address = {
+        "name": retailer.name,
+        "contact_person": retailer.owner_name,
+        "phone": retailer.phone,
+        "address_line1": retailer.address_line1,
+        "city": retailer.city,
+        "state": retailer.state,
+        "pincode": retailer.pincode,
+    }
+
     # Create order with source=SECONDARY
     order = Order(
         order_number=order_number,
@@ -2070,6 +2093,7 @@ async def create_secondary_sale(
         tax_amount=tax_amount,
         discount_amount=Decimal("0"),
         total_amount=total_amount,
+        shipping_address=shipping_address,
         internal_notes=f"Secondary sale to {retailer.name} ({retailer.outlet_code}). {sale_in.notes or ''}",
         source="SECONDARY",
     )
