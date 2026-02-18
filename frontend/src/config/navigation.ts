@@ -423,6 +423,8 @@ export const navigation: NavItem[] = [
       { title: 'Franchisees', href: '/dashboard/distribution/franchisees', icon: Building2, permissions: ['ORDERS_VIEW'] },
       { title: 'Targets', href: '/dashboard/distribution/targets', icon: Target, permissions: ['ORDERS_VIEW'] },
       { title: 'Credit Ledger', href: '/dashboard/distribution/credit-ledger', icon: IndianRupee, permissions: ['ORDERS_VIEW'] },
+      { title: 'DMS Command Center', href: '/dashboard/dms/ai/command-center', icon: Brain, badge: 'AI', permissions: ['ORDERS_VIEW'] },
+      { title: 'DMS AI Chat', href: '/dashboard/dms/ai/chat', icon: MessageSquare, badge: 'AI', permissions: ['ORDERS_VIEW'] },
     ],
   },
 

@@ -160,6 +160,8 @@ from app.api.v1.endpoints import (
     wms_ai,
     # OMS AI (Order Management AI Agents)
     oms_ai,
+    # DMS AI (Distribution Management AI Agents)
+    dms_ai,
 )
 
 
@@ -784,4 +786,11 @@ api_router.include_router(
     oms_ai.router,
     prefix="/oms-ai",
     tags=["OMS AI"]
+)
+
+# ==================== DMS AI (Distribution Management AI Agents) ====================
+api_router.include_router(
+    dms_ai.router,
+    prefix="/dms-ai",
+    tags=["DMS AI"]
 )
