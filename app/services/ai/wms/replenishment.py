@@ -154,7 +154,7 @@ class WMSReplenishmentAgent:
                 WarehouseBin.bin_code,
                 WarehouseBin.max_capacity,
                 WarehouseZone.id.label("zone_id"),
-                WarehouseZone.name.label("zone_name"),
+                WarehouseZone.zone_name.label("zone_name"),
                 StockItem.product_id,
                 func.count(StockItem.id).label("current_qty"),
             )
@@ -172,7 +172,7 @@ class WMSReplenishmentAgent:
                 WarehouseBin.bin_code,
                 WarehouseBin.max_capacity,
                 WarehouseZone.id,
-                WarehouseZone.name,
+                WarehouseZone.zone_name,
                 StockItem.product_id,
             )
         )

@@ -132,25 +132,25 @@ class WMSChatbotService:
         """Handle zone utilization queries."""
         result = await self.db.execute(
             select(
-                WarehouseZone.name,
+                WarehouseZone.zone_name,
                 WarehouseZone.zone_type,
-                WarehouseZone.current_utilization,
+                WarehouseZone.current_capacity,
                 WarehouseZone.max_capacity,
             )
-            .order_by(desc(WarehouseZone.current_utilization))
+            .order_by(desc(WarehouseZone.current_capacity))
             .limit(20)
         )
         zones = result.all()
 
         zone_data = []
         for z in zones:
-            util_pct = (float(z.current_utilization or 0) / float(z.max_capacity or 1) * 100) if z.max_capacity else 0
+            util_pct = (float(z.current_capacity or 0) / float(z.max_capacity or 1) * 100) if z.max_capacity else 0
             zone_data.append({
-                "zone": z.name,
+                "zone": z.zone_name,
                 "type": z.zone_type,
                 "utilization": f"{util_pct:.1f}%",
                 "capacity": z.max_capacity or 0,
-                "used": z.current_utilization or 0,
+                "used": z.current_capacity or 0,
             })
 
         avg_util = sum(float(z["utilization"].rstrip('%')) for z in zone_data) / max(len(zone_data), 1)
