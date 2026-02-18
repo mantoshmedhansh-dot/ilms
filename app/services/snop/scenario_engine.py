@@ -177,10 +177,15 @@ class ScenarioEngine:
         price_std = base_revenue_per_unit * price_cv
         simulated_price = max(0.01, random.gauss(base_revenue_per_unit, price_std))
 
+        # Lead time impact: longer lead time causes demand loss (customer defection)
+        lt_ratio = simulated_lead_time / base_lead_time if base_lead_time > 0 else 1.0
+        service_penalty = max(0.5, 1 - (lt_ratio - 1) * 0.3)
+        effective_demand = simulated_demand * service_penalty
+
         # Calculate outcomes
-        units_sold = min(simulated_demand, simulated_supply)
-        lost_sales = max(0, simulated_demand - simulated_supply)
-        excess_inventory = max(0, simulated_supply - simulated_demand)
+        units_sold = min(effective_demand, simulated_supply)
+        lost_sales = max(0, effective_demand - simulated_supply)
+        excess_inventory = max(0, simulated_supply - effective_demand)
 
         revenue = units_sold * simulated_price
         cogs = units_sold * base_cost_per_unit

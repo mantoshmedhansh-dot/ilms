@@ -336,7 +336,7 @@ export default function DemandForecastsPage() {
     ? Object.entries(modelComparison.model_comparison).map(([name, data]: [string, any]) => ({
         name: algorithmLabels[name] || name,
         mape: data.mape,
-        accuracy: data.accuracy ?? Math.max(0, 100 - data.mape),
+        accuracy: data.accuracy ?? (data.mape != null ? Math.max(0, 100 - data.mape) : 0),
         weight: (data.weight * 100),
         fill: algorithmColors[name] || '#6B7280',
       }))

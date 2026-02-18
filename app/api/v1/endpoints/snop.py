@@ -390,6 +390,7 @@ async def list_forecasts(
             "mape": mape_val,
             "accuracy": accuracy,
             "status": f.status,
+            "forecast_data": f.forecast_data,
             "created_at": f.created_at.isoformat(),
         })
 

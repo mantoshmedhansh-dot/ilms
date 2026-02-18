@@ -870,7 +870,8 @@ class SNOPService:
             }
 
         # Calculate overall metrics
-        overall_mape = sum(f.mape for f in forecasts if f.mape) / len(forecasts)
+        mape_forecasts = [f for f in forecasts if f.mape is not None]
+        overall_mape = sum(f.mape for f in mape_forecasts) / len(mape_forecasts) if mape_forecasts else 0
         overall_mae = sum(f.mae for f in forecasts if f.mae) / len([f for f in forecasts if f.mae]) if any(f.mae for f in forecasts) else 0
         overall_bias = sum(f.forecast_bias for f in forecasts if f.forecast_bias) / len([f for f in forecasts if f.forecast_bias]) if any(f.forecast_bias for f in forecasts) else 0
 
