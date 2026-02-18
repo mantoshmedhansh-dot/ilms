@@ -259,7 +259,7 @@
 }
 
 .card-lift:hover {
-  @apply -translate-y-px shadow-md;
+  @apply -translate-y-0.5 shadow-lg;
 }
 
 /* Hover lift utility */
@@ -301,4 +301,52 @@
 .backdrop-blur-soft {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+}
+
+/* Glass card utility */
+.glass-card {
+  @apply bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-white/20 dark:border-slate-700/30 shadow-sm;
+}
+
+/* Stat value typography */
+.stat-value {
+  @apply text-2xl font-bold tracking-tight;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Dashboard page header styling */
+.page-header {
+  @apply rounded-xl border p-6;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.06) 0%, rgba(139, 92, 246, 0.03) 50%, rgba(59, 130, 246, 0.06) 100%);
+}
+
+.dark .page-header {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.04) 50%, rgba(59, 130, 246, 0.08) 100%);
+}
+
+/* Gradient text utility */
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400;
+}
+
+/* Status dot indicator */
+.status-dot {
+  @apply h-2 w-2 rounded-full shrink-0;
+}
+
+.status-dot-online {
+  @apply h-2 w-2 rounded-full shrink-0 bg-emerald-500;
+}
+
+.status-dot-warning {
+  @apply h-2 w-2 rounded-full shrink-0 bg-amber-500;
+}
+
+.status-dot-error {
+  @apply h-2 w-2 rounded-full shrink-0 bg-red-500;
+}
+
+/* Better table row highlight */
+.table-row-highlight:hover {
+  @apply bg-indigo-50/50 dark:bg-indigo-950/20;
 }

@@ -153,11 +153,14 @@ export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       )}
     >
       {/* Header */}
-      <div className="flex h-14 items-center justify-between border-b border-slate-200 dark:border-slate-800 px-4">
+      <div className="flex h-14 items-center justify-between border-b border-slate-200 dark:border-slate-800 px-4 bg-gradient-to-r from-indigo-50/60 to-transparent dark:from-indigo-950/30 dark:to-transparent">
         {!isCollapsed && (
-          <Link href="/dashboard" className="flex items-center gap-3 group">
+          <Link href="/dashboard" className="flex items-center gap-2.5 group">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-indigo-700 text-white text-xs font-bold shadow-sm shrink-0">
+              IL
+            </div>
             <div className="flex flex-col">
-              <span className="font-bold text-lg text-foreground">
+              <span className="font-bold text-base text-foreground tracking-tight">
                 ILMS.AI
               </span>
               <span className="text-[10px] text-muted-foreground font-medium">
