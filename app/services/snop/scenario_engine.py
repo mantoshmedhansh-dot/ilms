@@ -556,15 +556,25 @@ class ScenarioEngine:
             elif param == "holding_cost":
                 holding_cost_rate *= factor
 
+        # Lead time impact: longer lead time causes customer defection (lost demand)
+        base_lt = baseline["lead_time_days"]
+        if base_lt > 0 and lead_time > 0:
+            lt_ratio = lead_time / base_lt
+            # Each 10% increase in lead time reduces effective demand by 3%
+            service_penalty = max(0.5, 1 - (lt_ratio - 1) * 0.3)
+        else:
+            service_penalty = 1.0
+        effective_demand = demand * service_penalty
+
         # Outcomes
-        units_sold = min(demand, supply_cap)
+        units_sold = min(effective_demand, supply_cap)
         revenue = units_sold * price
         cogs = revenue * cost_pct / 100
         gross_margin = revenue - cogs
         opex = revenue * opex_pct / 100
         ebitda = gross_margin - opex
 
-        excess = max(0, supply_cap - demand)
+        excess = max(0, supply_cap - effective_demand)
         holding_cost = excess * baseline["cost_per_unit"] * holding_cost_rate / 12
 
         net_income = ebitda - holding_cost

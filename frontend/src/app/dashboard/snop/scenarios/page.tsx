@@ -689,16 +689,16 @@ export default function ScenariosPage() {
               {/* Tornado Chart */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Revenue Sensitivity (Tornado Chart)</CardTitle>
-                  <CardDescription>Impact of +/-{sensitivityResult.variation_pct}% change in each parameter on revenue</CardDescription>
+                  <CardTitle className="text-base">Net Income Sensitivity (Tornado Chart)</CardTitle>
+                  <CardDescription>Impact of +/-{sensitivityResult.variation_pct}% change in each parameter on net income</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={50 * (sensitivityResult.tornado_data?.length || 1) + 60}>
                     <BarChart
                       data={(sensitivityResult.tornado_data || []).map((d: any) => ({
                         parameter: d.parameter_label,
-                        low: d.revenue.impact_low,
-                        high: d.revenue.impact_high,
+                        low: d.net_income.impact_low,
+                        high: d.net_income.impact_high,
                       }))}
                       layout="vertical"
                     >
