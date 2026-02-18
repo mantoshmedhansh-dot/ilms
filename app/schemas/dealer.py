@@ -773,3 +773,195 @@ class DMSOrderListResponse(BaseModel):
     total: int = 0
     page: int = 1
     size: int = 50
+
+
+# ==================== DMS Phase 2 Schemas ====================
+
+# --- Claims ---
+
+class DealerClaimCreate(BaseModel):
+    """Schema for creating a dealer claim."""
+    dealer_id: UUID
+    claim_type: str = Field(..., pattern="^(PRODUCT_DEFECT|TRANSIT_DAMAGE|QUANTITY_SHORT|PRICING_ERROR|SCHEME_DISPUTE|WARRANTY)$")
+    order_id: Optional[UUID] = None
+    items: Optional[List[dict]] = None  # [{product_id, product_name, quantity, issue_description}]
+    evidence_urls: Optional[List[str]] = None
+    amount_claimed: Decimal = Field(..., gt=0)
+    remarks: Optional[str] = None
+
+
+class DealerClaimReview(BaseModel):
+    """Schema for reviewing/approving a claim."""
+    status: str = Field(..., pattern="^(APPROVED|PARTIALLY_APPROVED|REJECTED|SETTLED)$")
+    amount_approved: Optional[Decimal] = Field(None, ge=0)
+    resolution: Optional[str] = Field(None, pattern="^(REPLACEMENT|CREDIT_NOTE|REFUND|REPAIR)$")
+    resolution_notes: Optional[str] = None
+
+
+class DealerClaimResponse(BaseModel):
+    """Response schema for a dealer claim."""
+    id: UUID
+    claim_number: str
+    dealer_id: UUID
+    dealer_name: Optional[str] = None
+    dealer_code: Optional[str] = None
+    claim_type: str
+    status: str
+    order_id: Optional[UUID] = None
+    items: Optional[List[dict]] = None
+    evidence_urls: Optional[List[str]] = None
+    amount_claimed: Decimal
+    amount_approved: Decimal = Decimal("0")
+    resolution: Optional[str] = None
+    resolution_notes: Optional[str] = None
+    submitted_at: Optional[datetime] = None
+    reviewed_at: Optional[datetime] = None
+    settled_at: Optional[datetime] = None
+    assigned_to: Optional[UUID] = None
+    remarks: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
+class DealerClaimListResponse(BaseModel):
+    """Paginated response for claims."""
+    items: List[DealerClaimResponse] = []
+    total: int = 0
+    page: int = 1
+    size: int = 50
+
+
+# --- Retailer Outlets ---
+
+class RetailerOutletCreate(BaseModel):
+    """Schema for creating a retailer outlet."""
+    dealer_id: UUID
+    name: str = Field(..., min_length=2, max_length=200)
+    owner_name: str = Field(..., min_length=2, max_length=200)
+    outlet_type: str = Field(..., pattern="^(KIRANA|MODERN_TRADE|SUPERMARKET|PHARMACY|HARDWARE|ELECTRONICS|GENERAL_STORE|OTHER)$")
+    phone: str = Field(..., min_length=10, max_length=20)
+    email: Optional[str] = None
+    address_line1: str = Field(..., min_length=5, max_length=255)
+    city: str = Field(..., max_length=100)
+    state: str = Field(..., max_length=100)
+    pincode: str = Field(..., min_length=6, max_length=10)
+    latitude: Optional[Decimal] = None
+    longitude: Optional[Decimal] = None
+    beat_day: Optional[str] = Field(None, pattern="^(MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY)$")
+
+
+class RetailerOutletUpdate(BaseModel):
+    """Schema for updating a retailer outlet."""
+    name: Optional[str] = None
+    owner_name: Optional[str] = None
+    outlet_type: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+    address_line1: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    pincode: Optional[str] = None
+    latitude: Optional[Decimal] = None
+    longitude: Optional[Decimal] = None
+    beat_day: Optional[str] = None
+    status: Optional[str] = None
+
+
+class RetailerOutletResponse(BaseModel):
+    """Response schema for a retailer outlet."""
+    id: UUID
+    outlet_code: str
+    dealer_id: UUID
+    dealer_name: Optional[str] = None
+    dealer_code: Optional[str] = None
+    name: str
+    owner_name: str
+    outlet_type: str
+    phone: str
+    email: Optional[str] = None
+    address_line1: str
+    city: str
+    state: str
+    pincode: str
+    latitude: Optional[Decimal] = None
+    longitude: Optional[Decimal] = None
+    beat_day: Optional[str] = None
+    status: str = "ACTIVE"
+    last_order_date: Optional[datetime] = None
+    total_orders: int = 0
+    total_revenue: Decimal = Decimal("0")
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
+class RetailerOutletListResponse(BaseModel):
+    """Paginated response for retailer outlets."""
+    items: List[RetailerOutletResponse] = []
+    total: int = 0
+    page: int = 1
+    size: int = 50
+
+
+# --- Collections ---
+
+class DMSAgingBucket(BaseModel):
+    """Single aging bucket data."""
+    label: str
+    amount: Decimal = Decimal("0")
+    count: int = 0
+
+
+class DMSOverdueDealer(BaseModel):
+    """Overdue dealer in collections."""
+    dealer_id: str
+    dealer_code: str
+    dealer_name: str
+    outstanding: Decimal = Decimal("0")
+    overdue: Decimal = Decimal("0")
+    days_overdue: int = 0
+    credit_limit: Decimal = Decimal("0")
+    utilization_pct: Decimal = Decimal("0")
+    last_payment_date: Optional[str] = None
+
+
+class DMSCollectionsResponse(BaseModel):
+    """Response for collections & aging analysis."""
+    aging_buckets: List[DMSAgingBucket] = []
+    overdue_dealers: List[DMSOverdueDealer] = []
+    total_outstanding: Decimal = Decimal("0")
+    total_overdue: Decimal = Decimal("0")
+    collection_this_month: Decimal = Decimal("0")
+    overdue_count: int = 0
+
+
+# --- Secondary Sales ---
+
+class DMSSecondarySaleCreate(BaseModel):
+    """Schema for recording a secondary sale (dealer→retailer)."""
+    dealer_id: UUID
+    retailer_id: UUID
+    items: List[DMSOrderItemCreate]
+    notes: Optional[str] = None
+
+
+class DMSSecondarySaleResponse(BaseModel):
+    """Response for a secondary sale."""
+    id: str
+    order_number: str
+    dealer_id: str
+    dealer_name: str = ""
+    retailer_id: str
+    retailer_name: str = ""
+    items: List[DMSOrderItemResponse] = []
+    total_amount: Decimal = Decimal("0")
+    status: str = ""
+    created_at: Optional[str] = None
+
+
+class DMSSecondarySaleListResponse(BaseModel):
+    """Paginated response for secondary sales."""
+    items: List[DMSSecondarySaleResponse] = []
+    total: int = 0
+    page: int = 1
+    size: int = 50
+    summary: Optional[dict] = None

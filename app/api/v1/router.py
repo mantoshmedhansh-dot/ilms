@@ -14,6 +14,8 @@ from app.api.v1.endpoints import (
     permissions,
     users,
     access_control,
+    # Regions (Geo Hierarchy)
+    regions,
     # GST e-Filing & ITC
     gst_filing,
     # CMS (D2C Content Management)
@@ -223,6 +225,13 @@ api_router.include_router(
     access_control.router,
     prefix="/access-control",
     tags=["Access Control"]
+)
+
+# ==================== Regions (Geo Hierarchy) ====================
+api_router.include_router(
+    regions.router,
+    prefix="/regions",
+    tags=["Regions"]
 )
 
 # ==================== Product Catalog ====================

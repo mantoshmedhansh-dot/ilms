@@ -1004,3 +1004,284 @@ class DealerSchemeApplication(Base):
 
     def __repr__(self) -> str:
         return f"<DealerSchemeApplication(scheme={self.scheme_id}, dealer={self.dealer_id})>"
+
+
+class ClaimType(str, Enum):
+    """Dealer claim type."""
+    PRODUCT_DEFECT = "PRODUCT_DEFECT"
+    TRANSIT_DAMAGE = "TRANSIT_DAMAGE"
+    QUANTITY_SHORT = "QUANTITY_SHORT"
+    PRICING_ERROR = "PRICING_ERROR"
+    SCHEME_DISPUTE = "SCHEME_DISPUTE"
+    WARRANTY = "WARRANTY"
+
+
+class ClaimStatus(str, Enum):
+    """Dealer claim status."""
+    SUBMITTED = "SUBMITTED"
+    UNDER_REVIEW = "UNDER_REVIEW"
+    APPROVED = "APPROVED"
+    PARTIALLY_APPROVED = "PARTIALLY_APPROVED"
+    REJECTED = "REJECTED"
+    SETTLED = "SETTLED"
+
+
+class ClaimResolution(str, Enum):
+    """Claim resolution type."""
+    REPLACEMENT = "REPLACEMENT"
+    CREDIT_NOTE = "CREDIT_NOTE"
+    REFUND = "REFUND"
+    REPAIR = "REPAIR"
+
+
+class OutletType(str, Enum):
+    """Retailer outlet type."""
+    KIRANA = "KIRANA"
+    MODERN_TRADE = "MODERN_TRADE"
+    SUPERMARKET = "SUPERMARKET"
+    PHARMACY = "PHARMACY"
+    HARDWARE = "HARDWARE"
+    ELECTRONICS = "ELECTRONICS"
+    GENERAL_STORE = "GENERAL_STORE"
+    OTHER = "OTHER"
+
+
+class OutletStatus(str, Enum):
+    """Retailer outlet status."""
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    CLOSED = "CLOSED"
+
+
+class BeatDay(str, Enum):
+    """Beat day for retailer visits."""
+    MONDAY = "MONDAY"
+    TUESDAY = "TUESDAY"
+    WEDNESDAY = "WEDNESDAY"
+    THURSDAY = "THURSDAY"
+    FRIDAY = "FRIDAY"
+    SATURDAY = "SATURDAY"
+    SUNDAY = "SUNDAY"
+
+
+class DealerClaim(Base):
+    """
+    Dealer claims management.
+    Handles product defects, transit damage, quantity shortages, pricing errors, etc.
+    """
+    __tablename__ = "dealer_claims"
+    __table_args__ = (
+        Index("ix_dealer_claims_dealer", "dealer_id", "status"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4
+    )
+
+    claim_number: Mapped[str] = mapped_column(
+        String(30),
+        unique=True,
+        nullable=False,
+        index=True,
+        comment="Auto: CLM-YYYYMMDD-00001"
+    )
+
+    dealer_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("dealers.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+
+    claim_type: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False,
+        comment="PRODUCT_DEFECT, TRANSIT_DAMAGE, QUANTITY_SHORT, PRICING_ERROR, SCHEME_DISPUTE, WARRANTY"
+    )
+
+    status: Mapped[str] = mapped_column(
+        String(50),
+        default="SUBMITTED",
+        nullable=False,
+        index=True,
+        comment="SUBMITTED, UNDER_REVIEW, APPROVED, PARTIALLY_APPROVED, REJECTED, SETTLED"
+    )
+
+    # Related order (optional)
+    order_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("orders.id", ondelete="SET NULL"),
+        nullable=True
+    )
+
+    # Items in the claim
+    items: Mapped[Optional[dict]] = mapped_column(
+        JSONB,
+        nullable=True,
+        comment="[{product_id, product_name, quantity, issue_description}]"
+    )
+
+    # Evidence/attachments
+    evidence_urls: Mapped[Optional[dict]] = mapped_column(
+        JSONB,
+        nullable=True,
+        comment="List of photo/document URLs"
+    )
+
+    # Amounts
+    amount_claimed: Mapped[Decimal] = mapped_column(
+        Numeric(14, 2),
+        nullable=False,
+        comment="Total amount claimed"
+    )
+    amount_approved: Mapped[Decimal] = mapped_column(
+        Numeric(14, 2),
+        default=Decimal("0"),
+        comment="Approved amount"
+    )
+
+    # Resolution
+    resolution: Mapped[Optional[str]] = mapped_column(
+        String(50),
+        nullable=True,
+        comment="REPLACEMENT, CREDIT_NOTE, REFUND, REPAIR"
+    )
+    resolution_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Timestamps
+    submitted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    reviewed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    settled_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    # Assignment
+    assigned_to: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True
+    )
+
+    # Audit
+    created_by: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=True
+    )
+    remarks: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False
+    )
+
+    # Relationships
+    dealer: Mapped["Dealer"] = relationship("Dealer", foreign_keys=[dealer_id])
+
+    def __repr__(self) -> str:
+        return f"<DealerClaim(number='{self.claim_number}', type='{self.claim_type}')>"
+
+
+class RetailerOutlet(Base):
+    """
+    Retailer outlets managed by dealers/distributors.
+    Tracks the secondary sales network (dealer → retailer).
+    """
+    __tablename__ = "retailer_outlets"
+    __table_args__ = (
+        Index("ix_retailer_outlets_dealer", "dealer_id", "status"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4
+    )
+
+    outlet_code: Mapped[str] = mapped_column(
+        String(30),
+        unique=True,
+        nullable=False,
+        index=True,
+        comment="Auto: RTL-00001"
+    )
+
+    # Parent distributor
+    dealer_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("dealers.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True
+    )
+
+    # Outlet details
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    owner_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    outlet_type: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False,
+        comment="KIRANA, MODERN_TRADE, SUPERMARKET, PHARMACY, HARDWARE, ELECTRONICS, GENERAL_STORE, OTHER"
+    )
+
+    # Contact
+    phone: Mapped[str] = mapped_column(String(20), nullable=False)
+    email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+
+    # Address
+    address_line1: Mapped[str] = mapped_column(String(255), nullable=False)
+    city: Mapped[str] = mapped_column(String(100), nullable=False)
+    state: Mapped[str] = mapped_column(String(100), nullable=False)
+    pincode: Mapped[str] = mapped_column(String(10), nullable=False)
+
+    # Geolocation
+    latitude: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 7), nullable=True)
+    longitude: Mapped[Optional[Decimal]] = mapped_column(Numeric(10, 7), nullable=True)
+
+    # Beat planning
+    beat_day: Mapped[Optional[str]] = mapped_column(
+        String(20),
+        nullable=True,
+        comment="MONDAY..SUNDAY"
+    )
+
+    # Status
+    status: Mapped[str] = mapped_column(
+        String(20),
+        default="ACTIVE",
+        nullable=False,
+        comment="ACTIVE, INACTIVE, CLOSED"
+    )
+
+    # Performance
+    last_order_date: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    total_orders: Mapped[int] = mapped_column(Integer, default=0)
+    total_revenue: Mapped[Decimal] = mapped_column(
+        Numeric(14, 2),
+        default=Decimal("0")
+    )
+
+    # Timestamps
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False
+    )
+
+    # Relationships
+    dealer: Mapped["Dealer"] = relationship("Dealer", foreign_keys=[dealer_id])
+
+    def __repr__(self) -> str:
+        return f"<RetailerOutlet(code='{self.outlet_code}', name='{self.name}')>"

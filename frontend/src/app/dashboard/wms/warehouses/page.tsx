@@ -45,7 +45,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { DataTable } from '@/components/data-table/data-table';
 import { PageHeader, StatusBadge } from '@/components/common';
-import { warehousesApi } from '@/lib/api';
+import { warehousesApi, regionsApi } from '@/lib/api';
 import { Warehouse as WarehouseType } from '@/types';
 
 const warehouseTypes = [
@@ -77,6 +77,8 @@ export default function WarehousesPage() {
     pincode: string;
     capacity: string;
     is_active: boolean;
+    regionId: string;
+    clusterId: string;
   }>({
     name: '',
     code: '',
@@ -87,9 +89,24 @@ export default function WarehousesPage() {
     pincode: '',
     capacity: '',
     is_active: true,
+    regionId: '',
+    clusterId: '',
   });
 
   const queryClient = useQueryClient();
+
+  // Fetch regions (zones) for dropdown
+  const { data: regionOptions = [] } = useQuery({
+    queryKey: ['regions-dropdown', 'ZONE'],
+    queryFn: () => regionsApi.dropdown({ type: 'ZONE' }),
+  });
+
+  // Fetch clusters (states) under selected region
+  const { data: clusterOptions = [] } = useQuery({
+    queryKey: ['regions-dropdown', 'STATE', newWarehouse.regionId],
+    queryFn: () => regionsApi.dropdown({ type: 'STATE', parent_id: newWarehouse.regionId }),
+    enabled: !!newWarehouse.regionId,
+  });
 
   // Fetch next warehouse code when opening dialog for new warehouse
   useEffect(() => {
@@ -110,8 +127,29 @@ export default function WarehousesPage() {
     fetchNextCode();
   }, [isDialogOpen, isEditMode]);
 
-  const handleEdit = (warehouse: WarehouseType) => {
+  const handleEdit = async (warehouse: WarehouseType) => {
     setEditingWarehouse(warehouse);
+
+    // Resolve region/cluster from warehouse's region_id
+    let regionId = '';
+    let clusterId = '';
+    if (warehouse.region_id) {
+      try {
+        const regionData = await regionsApi.getById(warehouse.region_id);
+        if (regionData.type === 'ZONE') {
+          regionId = warehouse.region_id;
+        } else if (regionData.type === 'STATE' && regionData.parent_id) {
+          regionId = regionData.parent_id;
+          clusterId = warehouse.region_id;
+        } else {
+          // Fallback: assign directly as region
+          regionId = warehouse.region_id;
+        }
+      } catch {
+        // If lookup fails, leave empty
+      }
+    }
+
     setNewWarehouse({
       name: warehouse.name,
       code: warehouse.code,
@@ -122,6 +160,8 @@ export default function WarehousesPage() {
       pincode: warehouse.pincode || '',
       capacity: warehouse.capacity?.toString() || '',
       is_active: warehouse.is_active,
+      regionId,
+      clusterId,
     });
     setIsEditMode(true);
     setIsDialogOpen(true);
@@ -141,6 +181,8 @@ export default function WarehousesPage() {
       pincode: '',
       capacity: '',
       is_active: true,
+      regionId: '',
+      clusterId: '',
     });
   };
 
@@ -289,6 +331,9 @@ export default function WarehousesPage() {
       return;
     }
 
+    // Use most specific geo selection: cluster > region
+    const selectedRegionId = newWarehouse.clusterId || newWarehouse.regionId || undefined;
+
     const warehouseData = {
       name: newWarehouse.name,
       code: newWarehouse.code.toUpperCase(),
@@ -299,6 +344,7 @@ export default function WarehousesPage() {
       pincode: newWarehouse.pincode,
       capacity: newWarehouse.capacity ? parseInt(newWarehouse.capacity) : undefined,
       is_active: newWarehouse.is_active,
+      region_id: selectedRegionId,
     };
 
     if (isEditMode && editingWarehouse) {
@@ -360,6 +406,51 @@ export default function WarehousesPage() {
                 <p className="text-xs text-muted-foreground">
                   Auto-generated code (cannot be modified)
                 </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="region">Region (Zone)</Label>
+                <Select
+                  value={newWarehouse.regionId || '_none'}
+                  onValueChange={(value) =>
+                    setNewWarehouse({ ...newWarehouse, regionId: value === '_none' ? '' : value, clusterId: '' })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select region" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">-- None --</SelectItem>
+                    {regionOptions.map((r: { id: string; name: string; code: string }) => (
+                      <SelectItem key={r.id} value={r.id}>
+                        {r.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cluster">Cluster (State)</Label>
+                <Select
+                  value={newWarehouse.clusterId || '_none'}
+                  onValueChange={(value) =>
+                    setNewWarehouse({ ...newWarehouse, clusterId: value === '_none' ? '' : value })
+                  }
+                  disabled={!newWarehouse.regionId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={newWarehouse.regionId ? 'Select cluster' : 'Select region first'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="_none">-- None --</SelectItem>
+                    {clusterOptions.map((c: { id: string; name: string; code: string }) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="space-y-2">

@@ -324,6 +324,7 @@ export interface Warehouse {
   pincode: string;
   is_active: boolean;
   capacity?: number;
+  region_id?: string;
 }
 
 export interface StockItem {
@@ -682,6 +683,146 @@ export interface DMSOrder {
 
 export interface DMSOrderListResponse {
   items: DMSOrder[];
+  total: number;
+  page: number;
+  size: number;
+}
+
+// ==================== DMS Phase 2 Types ====================
+
+export interface DealerClaim {
+  id: string;
+  claim_number: string;
+  dealer_id: string;
+  dealer_name?: string;
+  dealer_code?: string;
+  claim_type: 'PRODUCT_DEFECT' | 'TRANSIT_DAMAGE' | 'QUANTITY_SHORT' | 'PRICING_ERROR' | 'SCHEME_DISPUTE' | 'WARRANTY';
+  status: 'SUBMITTED' | 'UNDER_REVIEW' | 'APPROVED' | 'PARTIALLY_APPROVED' | 'REJECTED' | 'SETTLED';
+  order_id?: string;
+  items?: Array<{ product_id: string; product_name: string; quantity: number; issue_description: string }>;
+  evidence_urls?: string[];
+  amount_claimed: number;
+  amount_approved: number;
+  resolution?: 'REPLACEMENT' | 'CREDIT_NOTE' | 'REFUND' | 'REPAIR';
+  resolution_notes?: string;
+  submitted_at?: string;
+  reviewed_at?: string;
+  settled_at?: string;
+  assigned_to?: string;
+  remarks?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface DealerClaimListResponse {
+  items: DealerClaim[];
+  total: number;
+  page: number;
+  size: number;
+}
+
+export interface RetailerOutlet {
+  id: string;
+  outlet_code: string;
+  dealer_id: string;
+  dealer_name?: string;
+  dealer_code?: string;
+  name: string;
+  owner_name: string;
+  outlet_type: 'KIRANA' | 'MODERN_TRADE' | 'SUPERMARKET' | 'PHARMACY' | 'HARDWARE' | 'ELECTRONICS' | 'GENERAL_STORE' | 'OTHER';
+  phone: string;
+  email?: string;
+  address_line1: string;
+  city: string;
+  state: string;
+  pincode: string;
+  latitude?: number;
+  longitude?: number;
+  beat_day?: 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY';
+  status: 'ACTIVE' | 'INACTIVE' | 'CLOSED';
+  last_order_date?: string;
+  total_orders: number;
+  total_revenue: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface RetailerOutletListResponse {
+  items: RetailerOutlet[];
+  total: number;
+  page: number;
+  size: number;
+}
+
+export interface DMSCollections {
+  aging_buckets: Array<{ label: string; amount: number; count: number }>;
+  overdue_dealers: Array<{
+    dealer_id: string;
+    dealer_code: string;
+    dealer_name: string;
+    outstanding: number;
+    overdue: number;
+    days_overdue: number;
+    credit_limit: number;
+    utilization_pct: number;
+    last_payment_date?: string;
+  }>;
+  total_outstanding: number;
+  total_overdue: number;
+  collection_this_month: number;
+  overdue_count: number;
+}
+
+export interface DMSSecondarySale {
+  id: string;
+  order_number: string;
+  dealer_id: string;
+  dealer_name: string;
+  retailer_id: string;
+  retailer_name: string;
+  items: Array<{ product_id: string; product_name: string; sku: string; quantity: number; unit_price: number; total: number }>;
+  total_amount: number;
+  status: string;
+  created_at?: string;
+}
+
+export interface DMSSecondarySaleListResponse {
+  items: DMSSecondarySale[];
+  total: number;
+  page: number;
+  size: number;
+  summary?: { total_sales: number; volume_this_month: number; count_this_month: number };
+}
+
+export interface DealerScheme {
+  id: string;
+  scheme_code: string;
+  scheme_name: string;
+  description?: string;
+  scheme_type: string;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+  applicable_dealer_types?: string[];
+  applicable_tiers?: string[];
+  applicable_regions?: string[];
+  applicable_products?: string[];
+  applicable_categories?: string[];
+  rules: Record<string, unknown>;
+  total_budget?: number;
+  utilized_budget: number;
+  budget_remaining?: number;
+  is_valid: boolean;
+  terms_and_conditions?: string;
+  can_combine: boolean;
+  created_by?: string;
+  approved_by?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface DealerSchemeListResponse {
+  items: DealerScheme[];
   total: number;
   page: number;
   size: number;

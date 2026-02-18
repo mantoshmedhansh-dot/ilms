@@ -13,6 +13,7 @@ from app.models.dealer import (
     Dealer, DealerType, DealerStatus, DealerTier, CreditStatus,
     DealerPricing, DealerTierPricing, DealerCreditLedger, TransactionType,
     DealerTarget, DealerScheme, SchemeType, DealerSchemeApplication,
+    DealerClaim, RetailerOutlet,
 )
 from app.models.user import User
 from app.schemas.dealer import (
@@ -26,7 +27,7 @@ from app.schemas.dealer import (
     # Target
     DealerTargetCreate, DealerTargetUpdate, DealerTargetResponse,
     # Scheme
-    DealerSchemeCreate, DealerSchemeResponse, DealerSchemeListResponse,
+    DealerSchemeCreate, DealerSchemeUpdate, DealerSchemeResponse, DealerSchemeListResponse,
     DealerSchemeApplicationCreate, DealerSchemeApplicationResponse,
     # Reports
     DealerPerformanceResponse, DealerAgingResponse,
@@ -34,6 +35,11 @@ from app.schemas.dealer import (
     DMSDashboardResponse, DMSDashboardSummary, DMSRegionData, DMSTierData,
     DMSMonthlyTrend, DMSTopPerformer, DMSCreditAlert, DMSRecentOrder,
     DMSOrderCreate, DMSOrderResponse, DMSOrderItemResponse, DMSOrderListResponse,
+    # DMS Phase 2
+    DealerClaimCreate, DealerClaimReview, DealerClaimResponse, DealerClaimListResponse,
+    RetailerOutletCreate, RetailerOutletUpdate, RetailerOutletResponse, RetailerOutletListResponse,
+    DMSCollectionsResponse, DMSAgingBucket, DMSOverdueDealer,
+    DMSSecondarySaleCreate, DMSSecondarySaleResponse, DMSSecondarySaleListResponse,
 )
 from app.api.deps import DB, CurrentUser, get_current_user, require_permissions
 from app.services.audit_service import AuditService
@@ -1412,3 +1418,812 @@ async def get_dms_order(
         notes=order.notes,
         created_at=order.created_at.isoformat() if order.created_at else "",
     )
+
+
+# ==================== DMS Phase 2: Claims ====================
+
+@router.post("/dms/claims", response_model=DealerClaimResponse, status_code=status.HTTP_201_CREATED)
+@require_module("dms")
+async def create_claim(
+    claim_in: DealerClaimCreate,
+    db: DB,
+    current_user: User = Depends(get_current_user),
+):
+    """Create a new dealer claim."""
+    # Verify dealer
+    dealer_result = await db.execute(
+        select(Dealer).where(Dealer.id == claim_in.dealer_id)
+    )
+    dealer = dealer_result.scalar_one_or_none()
+    if not dealer:
+        raise HTTPException(status_code=404, detail="Dealer not found")
+
+    # Generate claim number
+    count_result = await db.execute(select(func.count(DealerClaim.id)))
+    count = count_result.scalar() or 0
+    claim_number = f"CLM-{date.today().strftime('%Y%m%d')}-{str(count + 1).zfill(5)}"
+
+    claim = DealerClaim(
+        claim_number=claim_number,
+        dealer_id=claim_in.dealer_id,
+        claim_type=claim_in.claim_type,
+        order_id=claim_in.order_id,
+        items=claim_in.items,
+        evidence_urls=claim_in.evidence_urls,
+        amount_claimed=claim_in.amount_claimed,
+        remarks=claim_in.remarks,
+        status="SUBMITTED",
+        submitted_at=datetime.now(timezone.utc),
+        created_by=current_user.id,
+    )
+
+    db.add(claim)
+    await db.commit()
+    await db.refresh(claim)
+
+    return DealerClaimResponse(
+        **{k: v for k, v in claim.__dict__.items() if not k.startswith("_")},
+        dealer_name=dealer.name,
+        dealer_code=dealer.dealer_code,
+    )
+
+
+@router.get("/dms/claims", response_model=DealerClaimListResponse)
+@require_module("dms")
+async def list_claims(
+    db: DB,
+    page: int = Query(1, ge=1),
+    size: int = Query(50, ge=1, le=100),
+    dealer_id: Optional[UUID] = None,
+    status_filter: Optional[str] = Query(None, alias="status"),
+    claim_type: Optional[str] = None,
+    date_from: Optional[date] = None,
+    date_to: Optional[date] = None,
+    current_user: User = Depends(get_current_user),
+):
+    """List claims with filters."""
+    query = select(DealerClaim)
+    count_query = select(func.count(DealerClaim.id))
+
+    filters = []
+    if dealer_id:
+        filters.append(DealerClaim.dealer_id == dealer_id)
+    if status_filter:
+        filters.append(DealerClaim.status == status_filter)
+    if claim_type:
+        filters.append(DealerClaim.claim_type == claim_type)
+    if date_from:
+        filters.append(DealerClaim.created_at >= datetime.combine(date_from, datetime.min.time()))
+    if date_to:
+        filters.append(DealerClaim.created_at <= datetime.combine(date_to, datetime.max.time()))
+
+    if filters:
+        query = query.where(and_(*filters))
+        count_query = count_query.where(and_(*filters))
+
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+
+    skip = (page - 1) * size
+    query = query.order_by(DealerClaim.created_at.desc()).offset(skip).limit(size)
+    result = await db.execute(query)
+    claims = result.scalars().all()
+
+    # Get dealer info for each claim
+    items = []
+    for claim in claims:
+        dealer_result = await db.execute(
+            select(Dealer.name, Dealer.dealer_code).where(Dealer.id == claim.dealer_id)
+        )
+        dealer_row = dealer_result.one_or_none()
+        items.append(DealerClaimResponse(
+            id=claim.id,
+            claim_number=claim.claim_number,
+            dealer_id=claim.dealer_id,
+            dealer_name=dealer_row.name if dealer_row else "",
+            dealer_code=dealer_row.dealer_code if dealer_row else "",
+            claim_type=claim.claim_type,
+            status=claim.status,
+            order_id=claim.order_id,
+            items=claim.items,
+            evidence_urls=claim.evidence_urls,
+            amount_claimed=claim.amount_claimed,
+            amount_approved=claim.amount_approved,
+            resolution=claim.resolution,
+            resolution_notes=claim.resolution_notes,
+            submitted_at=claim.submitted_at,
+            reviewed_at=claim.reviewed_at,
+            settled_at=claim.settled_at,
+            assigned_to=claim.assigned_to,
+            remarks=claim.remarks,
+            created_at=claim.created_at,
+            updated_at=claim.updated_at,
+        ))
+
+    return DealerClaimListResponse(items=items, total=total, page=page, size=size)
+
+
+@router.get("/dms/claims/{claim_id}", response_model=DealerClaimResponse)
+@require_module("dms")
+async def get_claim(
+    claim_id: UUID,
+    db: DB,
+    current_user: User = Depends(get_current_user),
+):
+    """Get a single claim."""
+    result = await db.execute(
+        select(DealerClaim).where(DealerClaim.id == claim_id)
+    )
+    claim = result.scalar_one_or_none()
+    if not claim:
+        raise HTTPException(status_code=404, detail="Claim not found")
+
+    dealer_result = await db.execute(
+        select(Dealer.name, Dealer.dealer_code).where(Dealer.id == claim.dealer_id)
+    )
+    dealer_row = dealer_result.one_or_none()
+
+    return DealerClaimResponse(
+        id=claim.id,
+        claim_number=claim.claim_number,
+        dealer_id=claim.dealer_id,
+        dealer_name=dealer_row.name if dealer_row else "",
+        dealer_code=dealer_row.dealer_code if dealer_row else "",
+        claim_type=claim.claim_type,
+        status=claim.status,
+        order_id=claim.order_id,
+        items=claim.items,
+        evidence_urls=claim.evidence_urls,
+        amount_claimed=claim.amount_claimed,
+        amount_approved=claim.amount_approved,
+        resolution=claim.resolution,
+        resolution_notes=claim.resolution_notes,
+        submitted_at=claim.submitted_at,
+        reviewed_at=claim.reviewed_at,
+        settled_at=claim.settled_at,
+        assigned_to=claim.assigned_to,
+        remarks=claim.remarks,
+        created_at=claim.created_at,
+        updated_at=claim.updated_at,
+    )
+
+
+@router.put("/dms/claims/{claim_id}/review", response_model=DealerClaimResponse)
+@require_module("dms")
+async def review_claim(
+    claim_id: UUID,
+    review_in: DealerClaimReview,
+    db: DB,
+    current_user: User = Depends(get_current_user),
+):
+    """Approve/reject a claim. If approved with CREDIT_NOTE resolution, auto-creates credit ledger entry."""
+    result = await db.execute(
+        select(DealerClaim).where(DealerClaim.id == claim_id)
+    )
+    claim = result.scalar_one_or_none()
+    if not claim:
+        raise HTTPException(status_code=404, detail="Claim not found")
+
+    if claim.status not in ("SUBMITTED", "UNDER_REVIEW"):
+        raise HTTPException(status_code=400, detail="Claim is not in a reviewable state")
+
+    claim.status = review_in.status
+    claim.reviewed_at = datetime.now(timezone.utc)
+
+    if review_in.amount_approved is not None:
+        claim.amount_approved = review_in.amount_approved
+    if review_in.resolution:
+        claim.resolution = review_in.resolution
+    if review_in.resolution_notes:
+        claim.resolution_notes = review_in.resolution_notes
+
+    if review_in.status == "SETTLED":
+        claim.settled_at = datetime.now(timezone.utc)
+
+    # If approved with CREDIT_NOTE, auto-create credit ledger entry
+    if review_in.status in ("APPROVED", "PARTIALLY_APPROVED", "SETTLED") and review_in.resolution == "CREDIT_NOTE":
+        approved_amount = review_in.amount_approved or claim.amount_claimed
+        if approved_amount > 0:
+            dealer_result = await db.execute(
+                select(Dealer).where(Dealer.id == claim.dealer_id)
+            )
+            dealer = dealer_result.scalar_one_or_none()
+            if dealer:
+                new_balance = dealer.outstanding_amount - approved_amount
+                ledger = DealerCreditLedger(
+                    dealer_id=claim.dealer_id,
+                    transaction_type=TransactionType.CREDIT_NOTE,
+                    transaction_date=date.today(),
+                    reference_type="CLAIM",
+                    reference_number=claim.claim_number,
+                    reference_id=claim.id,
+                    debit_amount=Decimal("0"),
+                    credit_amount=approved_amount,
+                    balance=new_balance,
+                    remarks=f"Credit note for claim {claim.claim_number}",
+                )
+                db.add(ledger)
+                dealer.outstanding_amount = new_balance
+
+    await db.commit()
+    await db.refresh(claim)
+
+    dealer_result = await db.execute(
+        select(Dealer.name, Dealer.dealer_code).where(Dealer.id == claim.dealer_id)
+    )
+    dealer_row = dealer_result.one_or_none()
+
+    return DealerClaimResponse(
+        id=claim.id,
+        claim_number=claim.claim_number,
+        dealer_id=claim.dealer_id,
+        dealer_name=dealer_row.name if dealer_row else "",
+        dealer_code=dealer_row.dealer_code if dealer_row else "",
+        claim_type=claim.claim_type,
+        status=claim.status,
+        order_id=claim.order_id,
+        items=claim.items,
+        evidence_urls=claim.evidence_urls,
+        amount_claimed=claim.amount_claimed,
+        amount_approved=claim.amount_approved,
+        resolution=claim.resolution,
+        resolution_notes=claim.resolution_notes,
+        submitted_at=claim.submitted_at,
+        reviewed_at=claim.reviewed_at,
+        settled_at=claim.settled_at,
+        assigned_to=claim.assigned_to,
+        remarks=claim.remarks,
+        created_at=claim.created_at,
+        updated_at=claim.updated_at,
+    )
+
+
+# ==================== DMS Phase 2: Collections ====================
+
+@router.get("/dms/collections", response_model=DMSCollectionsResponse)
+@require_module("dms")
+async def get_collections(
+    db: DB,
+    current_user: User = Depends(get_current_user),
+):
+    """Get collections & aging analysis."""
+    today = date.today()
+    month_start = today.replace(day=1)
+
+    # Aging buckets from unsettled debit entries
+    ledger_result = await db.execute(
+        select(DealerCreditLedger).where(
+            and_(
+                DealerCreditLedger.is_settled == False,
+                DealerCreditLedger.debit_amount > 0,
+            )
+        )
+    )
+    entries = ledger_result.scalars().all()
+
+    buckets = {
+        "0-30": {"amount": Decimal("0"), "count": 0},
+        "31-60": {"amount": Decimal("0"), "count": 0},
+        "61-90": {"amount": Decimal("0"), "count": 0},
+        "90+": {"amount": Decimal("0"), "count": 0},
+    }
+
+    for entry in entries:
+        days = (today - entry.transaction_date).days
+        amount = entry.debit_amount
+        if days <= 30:
+            buckets["0-30"]["amount"] += amount
+            buckets["0-30"]["count"] += 1
+        elif days <= 60:
+            buckets["31-60"]["amount"] += amount
+            buckets["31-60"]["count"] += 1
+        elif days <= 90:
+            buckets["61-90"]["amount"] += amount
+            buckets["61-90"]["count"] += 1
+        else:
+            buckets["90+"]["amount"] += amount
+            buckets["90+"]["count"] += 1
+
+    aging_buckets = [
+        DMSAgingBucket(label=k, amount=v["amount"], count=v["count"])
+        for k, v in buckets.items()
+    ]
+
+    # Total outstanding and overdue
+    outstanding_result = await db.execute(
+        select(
+            func.coalesce(func.sum(Dealer.outstanding_amount), 0).label("outstanding"),
+            func.coalesce(func.sum(Dealer.overdue_amount), 0).label("overdue"),
+        )
+    )
+    outstanding_row = outstanding_result.one()
+
+    # Collection this month
+    collection_result = await db.execute(
+        select(
+            func.coalesce(func.sum(DealerCreditLedger.credit_amount), 0)
+        ).where(
+            and_(
+                DealerCreditLedger.transaction_date >= month_start,
+                DealerCreditLedger.credit_amount > 0,
+            )
+        )
+    )
+    collection_this_month = collection_result.scalar() or Decimal("0")
+
+    # Overdue dealers (outstanding > 0, sorted by overdue desc)
+    overdue_result = await db.execute(
+        select(Dealer).where(
+            Dealer.outstanding_amount > 0
+        ).order_by(desc(Dealer.overdue_amount)).limit(50)
+    )
+    overdue_dealers = []
+    for dealer in overdue_result.scalars().all():
+        utilization = (float(dealer.outstanding_amount) / float(dealer.credit_limit) * 100) if dealer.credit_limit > 0 else 0
+        overdue_dealers.append(DMSOverdueDealer(
+            dealer_id=str(dealer.id),
+            dealer_code=dealer.dealer_code,
+            dealer_name=dealer.name,
+            outstanding=dealer.outstanding_amount,
+            overdue=dealer.overdue_amount,
+            days_overdue=0,
+            credit_limit=dealer.credit_limit,
+            utilization_pct=round(Decimal(str(utilization)), 1),
+            last_payment_date=None,
+        ))
+
+    overdue_count_result = await db.execute(
+        select(func.count(Dealer.id)).where(Dealer.overdue_amount > 0)
+    )
+    overdue_count = overdue_count_result.scalar() or 0
+
+    return DMSCollectionsResponse(
+        aging_buckets=aging_buckets,
+        overdue_dealers=overdue_dealers,
+        total_outstanding=outstanding_row.outstanding,
+        total_overdue=outstanding_row.overdue,
+        collection_this_month=collection_this_month,
+        overdue_count=overdue_count,
+    )
+
+
+# ==================== DMS Phase 2: Retailers ====================
+
+@router.post("/dms/retailers", response_model=RetailerOutletResponse, status_code=status.HTTP_201_CREATED)
+@require_module("dms")
+async def create_retailer(
+    outlet_in: RetailerOutletCreate,
+    db: DB,
+    current_user: User = Depends(get_current_user),
+):
+    """Create a retailer outlet linked to a dealer."""
+    # Verify dealer
+    dealer_result = await db.execute(
+        select(Dealer).where(Dealer.id == outlet_in.dealer_id)
+    )
+    dealer = dealer_result.scalar_one_or_none()
+    if not dealer:
+        raise HTTPException(status_code=404, detail="Dealer not found")
+
+    # Generate outlet code
+    count_result = await db.execute(select(func.count(RetailerOutlet.id)))
+    count = count_result.scalar() or 0
+    outlet_code = f"RTL-{str(count + 1).zfill(5)}"
+
+    outlet = RetailerOutlet(
+        outlet_code=outlet_code,
+        **outlet_in.model_dump(),
+    )
+
+    db.add(outlet)
+    await db.commit()
+    await db.refresh(outlet)
+
+    return RetailerOutletResponse(
+        **{k: v for k, v in outlet.__dict__.items() if not k.startswith("_")},
+        dealer_name=dealer.name,
+        dealer_code=dealer.dealer_code,
+    )
+
+
+@router.get("/dms/retailers", response_model=RetailerOutletListResponse)
+@require_module("dms")
+async def list_retailers(
+    db: DB,
+    page: int = Query(1, ge=1),
+    size: int = Query(50, ge=1, le=100),
+    dealer_id: Optional[UUID] = None,
+    city: Optional[str] = None,
+    status_filter: Optional[str] = Query(None, alias="status"),
+    outlet_type: Optional[str] = None,
+    current_user: User = Depends(get_current_user),
+):
+    """List retailer outlets with filters."""
+    query = select(RetailerOutlet)
+    count_query = select(func.count(RetailerOutlet.id))
+
+    filters = []
+    if dealer_id:
+        filters.append(RetailerOutlet.dealer_id == dealer_id)
+    if city:
+        filters.append(RetailerOutlet.city.ilike(f"%{city}%"))
+    if status_filter:
+        filters.append(RetailerOutlet.status == status_filter)
+    if outlet_type:
+        filters.append(RetailerOutlet.outlet_type == outlet_type)
+
+    if filters:
+        query = query.where(and_(*filters))
+        count_query = count_query.where(and_(*filters))
+
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+
+    skip = (page - 1) * size
+    query = query.order_by(RetailerOutlet.created_at.desc()).offset(skip).limit(size)
+    result = await db.execute(query)
+    outlets = result.scalars().all()
+
+    items = []
+    for outlet in outlets:
+        dealer_result = await db.execute(
+            select(Dealer.name, Dealer.dealer_code).where(Dealer.id == outlet.dealer_id)
+        )
+        dealer_row = dealer_result.one_or_none()
+        items.append(RetailerOutletResponse(
+            id=outlet.id,
+            outlet_code=outlet.outlet_code,
+            dealer_id=outlet.dealer_id,
+            dealer_name=dealer_row.name if dealer_row else "",
+            dealer_code=dealer_row.dealer_code if dealer_row else "",
+            name=outlet.name,
+            owner_name=outlet.owner_name,
+            outlet_type=outlet.outlet_type,
+            phone=outlet.phone,
+            email=outlet.email,
+            address_line1=outlet.address_line1,
+            city=outlet.city,
+            state=outlet.state,
+            pincode=outlet.pincode,
+            latitude=outlet.latitude,
+            longitude=outlet.longitude,
+            beat_day=outlet.beat_day,
+            status=outlet.status,
+            last_order_date=outlet.last_order_date,
+            total_orders=outlet.total_orders,
+            total_revenue=outlet.total_revenue,
+            created_at=outlet.created_at,
+            updated_at=outlet.updated_at,
+        ))
+
+    return RetailerOutletListResponse(items=items, total=total, page=page, size=size)
+
+
+@router.get("/dms/retailers/{outlet_id}", response_model=RetailerOutletResponse)
+@require_module("dms")
+async def get_retailer(
+    outlet_id: UUID,
+    db: DB,
+    current_user: User = Depends(get_current_user),
+):
+    """Get a single retailer outlet."""
+    result = await db.execute(
+        select(RetailerOutlet).where(RetailerOutlet.id == outlet_id)
+    )
+    outlet = result.scalar_one_or_none()
+    if not outlet:
+        raise HTTPException(status_code=404, detail="Retailer outlet not found")
+
+    dealer_result = await db.execute(
+        select(Dealer.name, Dealer.dealer_code).where(Dealer.id == outlet.dealer_id)
+    )
+    dealer_row = dealer_result.one_or_none()
+
+    return RetailerOutletResponse(
+        id=outlet.id,
+        outlet_code=outlet.outlet_code,
+        dealer_id=outlet.dealer_id,
+        dealer_name=dealer_row.name if dealer_row else "",
+        dealer_code=dealer_row.dealer_code if dealer_row else "",
+        name=outlet.name,
+        owner_name=outlet.owner_name,
+        outlet_type=outlet.outlet_type,
+        phone=outlet.phone,
+        email=outlet.email,
+        address_line1=outlet.address_line1,
+        city=outlet.city,
+        state=outlet.state,
+        pincode=outlet.pincode,
+        latitude=outlet.latitude,
+        longitude=outlet.longitude,
+        beat_day=outlet.beat_day,
+        status=outlet.status,
+        last_order_date=outlet.last_order_date,
+        total_orders=outlet.total_orders,
+        total_revenue=outlet.total_revenue,
+        created_at=outlet.created_at,
+        updated_at=outlet.updated_at,
+    )
+
+
+@router.put("/dms/retailers/{outlet_id}", response_model=RetailerOutletResponse)
+@require_module("dms")
+async def update_retailer(
+    outlet_id: UUID,
+    outlet_in: RetailerOutletUpdate,
+    db: DB,
+    current_user: User = Depends(get_current_user),
+):
+    """Update a retailer outlet."""
+    result = await db.execute(
+        select(RetailerOutlet).where(RetailerOutlet.id == outlet_id)
+    )
+    outlet = result.scalar_one_or_none()
+    if not outlet:
+        raise HTTPException(status_code=404, detail="Retailer outlet not found")
+
+    update_data = outlet_in.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(outlet, field, value)
+
+    await db.commit()
+    await db.refresh(outlet)
+
+    dealer_result = await db.execute(
+        select(Dealer.name, Dealer.dealer_code).where(Dealer.id == outlet.dealer_id)
+    )
+    dealer_row = dealer_result.one_or_none()
+
+    return RetailerOutletResponse(
+        id=outlet.id,
+        outlet_code=outlet.outlet_code,
+        dealer_id=outlet.dealer_id,
+        dealer_name=dealer_row.name if dealer_row else "",
+        dealer_code=dealer_row.dealer_code if dealer_row else "",
+        name=outlet.name,
+        owner_name=outlet.owner_name,
+        outlet_type=outlet.outlet_type,
+        phone=outlet.phone,
+        email=outlet.email,
+        address_line1=outlet.address_line1,
+        city=outlet.city,
+        state=outlet.state,
+        pincode=outlet.pincode,
+        latitude=outlet.latitude,
+        longitude=outlet.longitude,
+        beat_day=outlet.beat_day,
+        status=outlet.status,
+        last_order_date=outlet.last_order_date,
+        total_orders=outlet.total_orders,
+        total_revenue=outlet.total_revenue,
+        created_at=outlet.created_at,
+        updated_at=outlet.updated_at,
+    )
+
+
+# ==================== DMS Phase 2: Secondary Sales ====================
+
+@router.post("/dms/secondary-sales", response_model=DMSSecondarySaleResponse, status_code=status.HTTP_201_CREATED)
+@require_module("dms")
+async def create_secondary_sale(
+    sale_in: DMSSecondarySaleCreate,
+    db: DB,
+    current_user: User = Depends(get_current_user),
+):
+    """Record a secondary sale (dealer → retailer)."""
+    from app.models.order import Order, OrderItem
+    from app.models.product import Product
+
+    # Verify dealer
+    dealer_result = await db.execute(select(Dealer).where(Dealer.id == sale_in.dealer_id))
+    dealer = dealer_result.scalar_one_or_none()
+    if not dealer:
+        raise HTTPException(status_code=404, detail="Dealer not found")
+
+    # Verify retailer
+    retailer_result = await db.execute(
+        select(RetailerOutlet).where(RetailerOutlet.id == sale_in.retailer_id)
+    )
+    retailer = retailer_result.scalar_one_or_none()
+    if not retailer:
+        raise HTTPException(status_code=404, detail="Retailer outlet not found")
+
+    # Build order items
+    order_items = []
+    subtotal = Decimal("0")
+
+    for item in sale_in.items:
+        prod_result = await db.execute(select(Product).where(Product.id == item.product_id))
+        product = prod_result.scalar_one_or_none()
+        if not product:
+            raise HTTPException(status_code=404, detail=f"Product {item.product_id} not found")
+
+        unit_price = product.selling_price or Decimal("0")
+        line_total = unit_price * item.quantity
+        subtotal += line_total
+
+        order_items.append({
+            "product_id": item.product_id,
+            "product_name": product.name,
+            "sku": product.sku or "",
+            "quantity": item.quantity,
+            "unit_price": unit_price,
+            "total": line_total,
+        })
+
+    tax_amount = subtotal * Decimal("0.18")
+    total_amount = subtotal + tax_amount
+
+    # Generate order number
+    count_result = await db.execute(select(func.count(Order.id)))
+    count = count_result.scalar() or 0
+    order_number = f"SEC-{date.today().strftime('%Y%m%d')}-{str(count + 1).zfill(5)}"
+
+    # Create order with source=SECONDARY
+    order = Order(
+        order_number=order_number,
+        dealer_id=sale_in.dealer_id,
+        customer_id=dealer.user_id,
+        status="CONFIRMED",
+        payment_status="PENDING",
+        subtotal=subtotal,
+        tax_amount=tax_amount,
+        discount_amount=Decimal("0"),
+        total_amount=total_amount,
+        internal_notes=f"Secondary sale to {retailer.name} ({retailer.outlet_code}). {sale_in.notes or ''}",
+        source="SECONDARY",
+    )
+    db.add(order)
+    await db.flush()
+
+    # Create order items
+    for oi in order_items:
+        item_tax = oi["total"] * Decimal("0.18")
+        order_item = OrderItem(
+            order_id=order.id,
+            product_id=oi["product_id"],
+            product_name=oi["product_name"],
+            product_sku=oi["sku"],
+            quantity=oi["quantity"],
+            unit_price=oi["unit_price"],
+            unit_mrp=oi["unit_price"],
+            tax_amount=item_tax,
+            total_amount=oi["total"] + item_tax,
+        )
+        db.add(order_item)
+
+    # Update retailer stats
+    retailer.total_orders += 1
+    retailer.total_revenue += total_amount
+    retailer.last_order_date = datetime.now(timezone.utc)
+
+    await db.commit()
+    await db.refresh(order)
+
+    return DMSSecondarySaleResponse(
+        id=str(order.id),
+        order_number=order.order_number,
+        dealer_id=str(sale_in.dealer_id),
+        dealer_name=dealer.name,
+        retailer_id=str(sale_in.retailer_id),
+        retailer_name=retailer.name,
+        items=[DMSOrderItemResponse(
+            product_id=str(oi["product_id"]),
+            product_name=oi["product_name"],
+            sku=oi["sku"],
+            quantity=oi["quantity"],
+            unit_price=oi["unit_price"],
+            total=oi["total"],
+        ) for oi in order_items],
+        total_amount=total_amount,
+        status=order.status,
+        created_at=order.created_at.isoformat() if order.created_at else "",
+    )
+
+
+@router.get("/dms/secondary-sales", response_model=DMSSecondarySaleListResponse)
+@require_module("dms")
+async def list_secondary_sales(
+    db: DB,
+    page: int = Query(1, ge=1),
+    size: int = Query(50, ge=1, le=100),
+    dealer_id: Optional[UUID] = None,
+    date_from: Optional[date] = None,
+    date_to: Optional[date] = None,
+    current_user: User = Depends(get_current_user),
+):
+    """Get secondary sales list with summary."""
+    from app.models.order import Order
+
+    query = select(Order).where(Order.source == "SECONDARY")
+    count_query = select(func.count(Order.id)).where(Order.source == "SECONDARY")
+
+    filters = []
+    if dealer_id:
+        filters.append(Order.dealer_id == dealer_id)
+    if date_from:
+        filters.append(Order.created_at >= datetime.combine(date_from, datetime.min.time()))
+    if date_to:
+        filters.append(Order.created_at <= datetime.combine(date_to, datetime.max.time()))
+
+    if filters:
+        query = query.where(and_(*filters))
+        count_query = count_query.where(and_(*filters))
+
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+
+    skip = (page - 1) * size
+    query = (
+        query.options(selectinload(Order.dealer))
+        .order_by(Order.created_at.desc())
+        .offset(skip)
+        .limit(size)
+    )
+    result = await db.execute(query)
+    orders = result.scalars().all()
+
+    items = []
+    for order in orders:
+        items.append(DMSSecondarySaleResponse(
+            id=str(order.id),
+            order_number=order.order_number or "",
+            dealer_id=str(order.dealer_id) if order.dealer_id else "",
+            dealer_name=order.dealer.name if order.dealer else "",
+            retailer_id="",
+            retailer_name="",
+            total_amount=order.total_amount or Decimal("0"),
+            status=order.status or "",
+            created_at=order.created_at.isoformat() if order.created_at else "",
+        ))
+
+    # Summary stats
+    today = date.today()
+    month_start = today.replace(day=1)
+    month_query = select(
+        func.count(Order.id).label("count"),
+        func.coalesce(func.sum(Order.total_amount), 0).label("volume"),
+    ).where(
+        and_(
+            Order.source == "SECONDARY",
+            Order.created_at >= month_start,
+        )
+    )
+    month_result = await db.execute(month_query)
+    month_row = month_result.one()
+
+    summary = {
+        "total_sales": total,
+        "volume_this_month": float(month_row.volume),
+        "count_this_month": month_row.count,
+    }
+
+    return DMSSecondarySaleListResponse(items=items, total=total, page=page, size=size, summary=summary)
+
+
+# ==================== DMS Phase 2: Scheme Update ====================
+
+@router.put("/dms/schemes/{scheme_id}", response_model=DealerSchemeResponse)
+@require_module("dms")
+async def update_scheme(
+    scheme_id: UUID,
+    scheme_in: DealerSchemeUpdate,
+    db: DB,
+    current_user: User = Depends(get_current_user),
+):
+    """Update a dealer scheme."""
+    result = await db.execute(
+        select(DealerScheme).where(DealerScheme.id == scheme_id)
+    )
+    scheme = result.scalar_one_or_none()
+    if not scheme:
+        raise HTTPException(status_code=404, detail="Scheme not found")
+
+    update_data = scheme_in.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(scheme, field, value)
+
+    await db.commit()
+    await db.refresh(scheme)
+
+    return DealerSchemeResponse.model_validate(scheme)

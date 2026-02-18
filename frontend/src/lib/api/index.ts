@@ -475,6 +475,37 @@ export const customersApi = {
   },
 };
 
+// Regions API (Geo Hierarchy)
+export const regionsApi = {
+  list: async (params?: { page?: number; size?: number; type?: string; parent_id?: string; is_active?: boolean; search?: string }) => {
+    const { data } = await apiClient.get('/regions', { params });
+    return data;
+  },
+  tree: async () => {
+    const { data } = await apiClient.get('/regions/tree');
+    return data;
+  },
+  dropdown: async (params?: { type?: string; parent_id?: string }) => {
+    const { data } = await apiClient.get<Array<{ id: string; name: string; code: string; type: string }>>('/regions/dropdown', { params });
+    return data;
+  },
+  getById: async (id: string) => {
+    const { data } = await apiClient.get(`/regions/${id}`);
+    return data;
+  },
+  create: async (region: { name: string; code: string; type: string; parent_id?: string; description?: string }) => {
+    const { data } = await apiClient.post('/regions', region);
+    return data;
+  },
+  update: async (id: string, region: { name?: string; description?: string; parent_id?: string; is_active?: boolean }) => {
+    const { data } = await apiClient.put(`/regions/${id}`, region);
+    return data;
+  },
+  delete: async (id: string) => {
+    await apiClient.delete(`/regions/${id}`);
+  },
+};
+
 // Warehouses API
 export const warehousesApi = {
   list: async (params?: { page?: number; size?: number; type?: string; is_active?: boolean }) => {
@@ -495,9 +526,10 @@ export const warehousesApi = {
     pincode?: string;
     capacity?: number;
     is_active?: boolean;
+    region_id?: string;
   }) => {
     // Transform frontend fields to backend fields
-    const payload = {
+    const payload: Record<string, unknown> = {
       name: warehouse.name,
       code: warehouse.code,
       warehouse_type: (warehouse.type || 'MAIN').toUpperCase(),
@@ -508,6 +540,7 @@ export const warehousesApi = {
       total_capacity: warehouse.capacity || 0,
       is_active: warehouse.is_active ?? true,
     };
+    if (warehouse.region_id) payload.region_id = warehouse.region_id;
     const { data } = await apiClient.post<Warehouse>('/warehouses', payload);
     return data;
   },
@@ -521,6 +554,7 @@ export const warehousesApi = {
     pincode: string;
     capacity: number;
     is_active: boolean;
+    region_id: string;
   }>) => {
     // Transform frontend fields to backend fields
     const payload: Record<string, unknown> = {};
@@ -533,6 +567,7 @@ export const warehousesApi = {
     if (warehouse.pincode !== undefined) payload.pincode = warehouse.pincode;
     if (warehouse.capacity !== undefined) payload.total_capacity = warehouse.capacity;
     if (warehouse.is_active !== undefined) payload.is_active = warehouse.is_active;
+    if (warehouse.region_id !== undefined) payload.region_id = warehouse.region_id || null;
     const { data } = await apiClient.put<Warehouse>(`/warehouses/${id}`, payload);
     return data;
   },
@@ -1496,6 +1531,67 @@ export const dmsApi = {
   },
   createOrder: async (dealerId: string, order: { items: Array<{ product_id: string; variant_id?: string; quantity: number }>; notes?: string; payment_terms?: string }) => {
     const { data } = await apiClient.post(`/dealers/${dealerId}/orders`, order);
+    return data;
+  },
+  // --- Claims ---
+  listClaims: async (params?: { page?: number; size?: number; dealer_id?: string; status?: string; claim_type?: string; date_from?: string; date_to?: string }) => {
+    const { data } = await apiClient.get('/dealers/dms/claims', { params });
+    return data;
+  },
+  getClaim: async (claimId: string) => {
+    const { data } = await apiClient.get(`/dealers/dms/claims/${claimId}`);
+    return data;
+  },
+  createClaim: async (claim: { dealer_id: string; claim_type: string; order_id?: string; items?: Array<{ product_id: string; product_name: string; quantity: number; issue_description: string }>; evidence_urls?: string[]; amount_claimed: number; remarks?: string }) => {
+    const { data } = await apiClient.post('/dealers/dms/claims', claim);
+    return data;
+  },
+  reviewClaim: async (claimId: string, review: { status: string; amount_approved?: number; resolution?: string; resolution_notes?: string }) => {
+    const { data } = await apiClient.put(`/dealers/dms/claims/${claimId}/review`, review);
+    return data;
+  },
+  // --- Collections ---
+  getCollections: async () => {
+    const { data } = await apiClient.get('/dealers/dms/collections');
+    return data;
+  },
+  // --- Retailers ---
+  listRetailers: async (params?: { page?: number; size?: number; dealer_id?: string; city?: string; status?: string; outlet_type?: string }) => {
+    const { data } = await apiClient.get('/dealers/dms/retailers', { params });
+    return data;
+  },
+  getRetailer: async (outletId: string) => {
+    const { data } = await apiClient.get(`/dealers/dms/retailers/${outletId}`);
+    return data;
+  },
+  createRetailer: async (outlet: { dealer_id: string; name: string; owner_name: string; outlet_type: string; phone: string; email?: string; address_line1: string; city: string; state: string; pincode: string; beat_day?: string }) => {
+    const { data } = await apiClient.post('/dealers/dms/retailers', outlet);
+    return data;
+  },
+  updateRetailer: async (outletId: string, outlet: Record<string, unknown>) => {
+    const { data } = await apiClient.put(`/dealers/dms/retailers/${outletId}`, outlet);
+    return data;
+  },
+  // --- Secondary Sales ---
+  listSecondarySales: async (params?: { page?: number; size?: number; dealer_id?: string; date_from?: string; date_to?: string }) => {
+    const { data } = await apiClient.get('/dealers/dms/secondary-sales', { params });
+    return data;
+  },
+  createSecondarySale: async (sale: { dealer_id: string; retailer_id: string; items: Array<{ product_id: string; quantity: number }>; notes?: string }) => {
+    const { data } = await apiClient.post('/dealers/dms/secondary-sales', sale);
+    return data;
+  },
+  // --- Schemes ---
+  listSchemes: async (params?: { skip?: number; limit?: number; scheme_type?: string; is_active?: boolean }) => {
+    const { data } = await apiClient.get('/dealers/schemes', { params });
+    return data;
+  },
+  createScheme: async (scheme: Record<string, unknown>) => {
+    const { data } = await apiClient.post('/dealers/schemes', scheme);
+    return data;
+  },
+  updateScheme: async (schemeId: string, scheme: Record<string, unknown>) => {
+    const { data } = await apiClient.put(`/dealers/dms/schemes/${schemeId}`, scheme);
     return data;
   },
 };
