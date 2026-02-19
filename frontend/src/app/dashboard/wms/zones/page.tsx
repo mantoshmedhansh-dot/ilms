@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, Plus, Pencil, Trash2, Layers, Warehouse, Package } from 'lucide-react';
+import { MoreHorizontal, Plus, Pencil, Trash2, Layers, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
@@ -51,14 +51,11 @@ import { warehousesApi } from '@/lib/api';
 interface Zone {
   id: string;
   warehouse_id: string;
-  warehouse_name: string;
-  code: string;
-  name: string;
+  zone_code: string;
+  zone_name: string;
   zone_type: 'STORAGE' | 'PICKING' | 'PACKING' | 'RECEIVING' | 'SHIPPING' | 'QUARANTINE' | 'RETURNS';
-  temperature_controlled: boolean;
   max_capacity: number;
-  current_occupancy: number;
-  bins_count: number;
+  current_capacity: number;
   is_active: boolean;
 }
 
@@ -76,7 +73,6 @@ interface ZoneCreateInput {
   warehouse_id: string;
   zone_type: string;
   max_capacity?: number;
-  temperature_controlled?: boolean;
   is_active?: boolean;
 }
 
@@ -91,8 +87,19 @@ const zonesApi = {
   },
   getStats: async (): Promise<ZoneStats> => {
     try {
-      const { data } = await apiClient.get('/wms/zones/stats');
-      return data;
+      // Compute stats from full zone list since no stats endpoint exists
+      const { data } = await apiClient.get('/wms/zones', { params: { size: 1000 } });
+      const zones = data?.items || [];
+      const active = zones.filter((z: Zone) => z.is_active);
+      const totalCap = zones.reduce((s: number, z: Zone) => s + (z.max_capacity || 0), 0);
+      const currentOcc = zones.reduce((s: number, z: Zone) => s + (z.current_capacity || 0), 0);
+      return {
+        total_zones: zones.length,
+        active_zones: active.length,
+        total_capacity: totalCap,
+        current_occupancy: currentOcc,
+        utilization_percent: totalCap > 0 ? (currentOcc / totalCap) * 100 : 0,
+      };
     } catch {
       return { total_zones: 0, active_zones: 0, total_capacity: 0, current_occupancy: 0, utilization_percent: 0 };
     }
@@ -157,7 +164,7 @@ function ZoneActionsCell({ zone, onEdit, onDelete }: { zone: Zone; onEdit: (zone
 
 const createColumns = (onEdit: (zone: Zone) => void, onDelete: (zone: Zone) => void): ColumnDef<Zone>[] => [
   {
-    accessorKey: 'name',
+    accessorKey: 'zone_name',
     header: 'Zone',
     cell: ({ row }) => (
       <div className="flex items-center gap-3">
@@ -165,19 +172,9 @@ const createColumns = (onEdit: (zone: Zone) => void, onDelete: (zone: Zone) => v
           <Layers className="h-5 w-5 text-muted-foreground" />
         </div>
         <div>
-          <div className="font-medium">{row.original.name}</div>
-          <div className="text-sm text-muted-foreground">{row.original.code}</div>
+          <div className="font-medium">{row.original.zone_name}</div>
+          <div className="text-sm text-muted-foreground">{row.original.zone_code}</div>
         </div>
-      </div>
-    ),
-  },
-  {
-    accessorKey: 'warehouse_name',
-    header: 'Warehouse',
-    cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        <Warehouse className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm">{row.original.warehouse_name}</span>
       </div>
     ),
   },
@@ -191,18 +188,11 @@ const createColumns = (onEdit: (zone: Zone) => void, onDelete: (zone: Zone) => v
     ),
   },
   {
-    accessorKey: 'bins_count',
-    header: 'Bins',
-    cell: ({ row }) => (
-      <span className="font-mono text-sm">{row.original.bins_count}</span>
-    ),
-  },
-  {
     accessorKey: 'utilization',
     header: 'Utilization',
     cell: ({ row }) => {
       const utilization = row.original.max_capacity > 0
-        ? (row.original.current_occupancy / row.original.max_capacity) * 100
+        ? ((row.original.current_capacity || 0) / row.original.max_capacity) * 100
         : 0;
       const color = utilization > 90 ? 'text-red-600' : utilization > 70 ? 'text-yellow-600' : 'text-green-600';
       return (
@@ -219,14 +209,10 @@ const createColumns = (onEdit: (zone: Zone) => void, onDelete: (zone: Zone) => v
     },
   },
   {
-    accessorKey: 'temperature_controlled',
-    header: 'Temp Control',
+    accessorKey: 'max_capacity',
+    header: 'Capacity',
     cell: ({ row }) => (
-      <span className={`text-xs px-2 py-1 rounded ${
-        row.original.temperature_controlled ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-500'
-      }`}>
-        {row.original.temperature_controlled ? 'Yes' : 'No'}
-      </span>
+      <span className="font-mono text-sm">{(row.original.max_capacity || 0).toLocaleString()}</span>
     ),
   },
   {
@@ -253,7 +239,6 @@ export default function ZonesPage() {
     warehouse_id: string;
     zone_type: 'STORAGE' | 'PICKING' | 'PACKING' | 'RECEIVING' | 'SHIPPING' | 'QUARANTINE' | 'RETURNS';
     max_capacity: string;
-    temperature_controlled: boolean;
     is_active: boolean;
   }>({
     name: '',
@@ -261,7 +246,6 @@ export default function ZonesPage() {
     warehouse_id: '',
     zone_type: 'STORAGE',
     max_capacity: '',
-    temperature_controlled: false,
     is_active: true,
   });
 
@@ -270,12 +254,11 @@ export default function ZonesPage() {
   const handleEditClick = (zone: Zone) => {
     setEditingZone(zone);
     setNewZone({
-      name: zone.name,
-      code: zone.code,
+      name: zone.zone_name,
+      code: zone.zone_code,
       warehouse_id: zone.warehouse_id,
       zone_type: zone.zone_type,
       max_capacity: zone.max_capacity?.toString() || '',
-      temperature_controlled: zone.temperature_controlled,
       is_active: zone.is_active,
     });
     setIsEditMode(true);
@@ -314,7 +297,6 @@ export default function ZonesPage() {
       warehouse_id: '',
       zone_type: 'STORAGE',
       max_capacity: '',
-      temperature_controlled: false,
       is_active: true,
     });
   };
@@ -373,8 +355,7 @@ export default function ZonesPage() {
       zone_code: newZone.code || undefined,
       warehouse_id: newZone.warehouse_id,
       zone_type: newZone.zone_type,
-      max_capacity: parseInt(newZone.max_capacity) || 0,
-      temperature_controlled: newZone.temperature_controlled,
+      max_capacity: parseInt(newZone.max_capacity) || undefined,
       is_active: newZone.is_active,
     };
 
@@ -478,23 +459,13 @@ export default function ZonesPage() {
                 />
               </div>
             </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="temp_controlled"
-                  checked={newZone.temperature_controlled}
-                  onCheckedChange={(checked) => setNewZone({ ...newZone, temperature_controlled: checked })}
-                />
-                <Label htmlFor="temp_controlled">Temperature Controlled</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="is_active"
-                  checked={newZone.is_active}
-                  onCheckedChange={(checked) => setNewZone({ ...newZone, is_active: checked })}
-                />
-                <Label htmlFor="is_active">Active</Label>
-              </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="is_active"
+                checked={newZone.is_active}
+                onCheckedChange={(checked) => setNewZone({ ...newZone, is_active: checked })}
+              />
+              <Label htmlFor="is_active">Active</Label>
             </div>
           </div>
           <DialogFooter>
@@ -512,7 +483,7 @@ export default function ZonesPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Zone</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the zone &quot;{deleteZone?.name}&quot;? This action cannot be undone.
+              Are you sure you want to delete the zone &quot;{deleteZone?.zone_name}&quot;? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -574,7 +545,7 @@ export default function ZonesPage() {
       <DataTable
         columns={columns}
         data={data?.items ?? []}
-        searchKey="name"
+        searchKey="zone_name"
         searchPlaceholder="Search zones..."
         isLoading={isLoading}
         manualPagination

@@ -62,7 +62,7 @@ interface CreateRMAPayload {
 const returnsApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
-      const { data } = await apiClient.get('/returns/', { params });
+      const { data } = await apiClient.get('/returns/rma', { params });
       return data;
     } catch {
       return { items: [], total: 0, pages: 0 };
@@ -70,14 +70,14 @@ const returnsApi = {
   },
   getStats: async (): Promise<ReturnsStats> => {
     try {
-      const { data } = await apiClient.get('/returns/stats');
+      const { data } = await apiClient.get('/returns/rma/stats');
       return data;
     } catch {
       return { total_returns: 0, pending_receipt: 0, in_inspection: 0, processed_today: 0 };
     }
   },
   create: async (payload: CreateRMAPayload) => {
-    const { data } = await apiClient.post('/returns/', payload);
+    const { data } = await apiClient.post('/returns/rma', payload);
     return data;
   },
 };

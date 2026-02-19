@@ -75,7 +75,7 @@ const qualityApi = {
   },
   getStats: async (): Promise<QualityStats> => {
     try {
-      const { data } = await apiClient.get('/qc/stats');
+      const { data } = await apiClient.get('/qc/inspections/stats');
       return data;
     } catch {
       return { total_inspections: 0, pass_rate: 0, pending_inspections: 0, failed_today: 0 };

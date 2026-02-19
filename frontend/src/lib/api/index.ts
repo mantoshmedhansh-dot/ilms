@@ -1791,11 +1791,24 @@ export const zonesApi = {
     return data;
   },
   create: async (zone: { name: string; code: string; warehouse_id: string; zone_type?: string; description?: string; is_active?: boolean }) => {
-    const { data } = await apiClient.post('/wms/zones', zone);
+    const payload = {
+      zone_name: zone.name,
+      zone_code: zone.code,
+      warehouse_id: zone.warehouse_id,
+      zone_type: zone.zone_type,
+      description: zone.description,
+      is_active: zone.is_active,
+    };
+    const { data } = await apiClient.post('/wms/zones', payload);
     return data;
   },
   update: async (id: string, zone: Partial<{ name: string; code: string; zone_type?: string; description?: string; is_active?: boolean }>) => {
-    const { data } = await apiClient.put(`/wms/zones/${id}`, zone);
+    const payload: Record<string, unknown> = {};
+    if (zone.name !== undefined) payload.zone_name = zone.name;
+    if (zone.zone_type !== undefined) payload.zone_type = zone.zone_type;
+    if (zone.description !== undefined) payload.description = zone.description;
+    if (zone.is_active !== undefined) payload.is_active = zone.is_active;
+    const { data } = await apiClient.put(`/wms/zones/${id}`, payload);
     return data;
   },
   delete: async (id: string) => {
@@ -1813,16 +1826,47 @@ export const binsApi = {
     const { data } = await apiClient.get(`/wms/bins/${id}`);
     return data;
   },
-  create: async (bin: { name: string; code: string; zone_id: string; aisle?: string; rack?: string; level?: string; position?: string; capacity?: number; is_active?: boolean }) => {
-    const { data } = await apiClient.post('/wms/bins', bin);
+  create: async (bin: { name: string; code: string; zone_id: string; warehouse_id?: string; aisle?: string; rack?: string; level?: string; position?: string; capacity?: number; is_active?: boolean }) => {
+    const payload = {
+      bin_code: bin.code,
+      bin_name: bin.name,
+      zone_id: bin.zone_id,
+      warehouse_id: bin.warehouse_id,
+      aisle: bin.aisle,
+      rack: bin.rack,
+      shelf: bin.level,
+      position: bin.position,
+      max_capacity: bin.capacity,
+      is_active: bin.is_active,
+    };
+    const { data } = await apiClient.post('/wms/bins', payload);
     return data;
   },
-  bulkCreate: async (data: { zone_id: string; prefix: string; aisles: number; racks_per_aisle: number; levels_per_rack: number; positions_per_level: number }) => {
-    const { data: response } = await apiClient.post('/wms/bins/bulk', data);
+  bulkCreate: async (data: { zone_id: string; warehouse_id?: string; prefix: string; aisles: number; racks_per_aisle: number; levels_per_rack: number; positions_per_level: number }) => {
+    const payload = {
+      zone_id: data.zone_id,
+      warehouse_id: data.warehouse_id,
+      prefix: data.prefix,
+      aisle_start: 'A',
+      aisle_end: String.fromCharCode(64 + data.aisles),
+      rack_start: 1,
+      rack_end: data.racks_per_aisle,
+      shelf_start: 1,
+      shelf_end: data.levels_per_rack,
+    };
+    const { data: response } = await apiClient.post('/wms/bins/bulk', payload);
     return response;
   },
   update: async (id: string, bin: Partial<{ name: string; code: string; aisle?: string; rack?: string; level?: string; position?: string; capacity?: number; is_active?: boolean }>) => {
-    const { data } = await apiClient.put(`/wms/bins/${id}`, bin);
+    const payload: Record<string, unknown> = {};
+    if (bin.name !== undefined) payload.bin_name = bin.name;
+    if (bin.aisle !== undefined) payload.aisle = bin.aisle;
+    if (bin.rack !== undefined) payload.rack = bin.rack;
+    if (bin.level !== undefined) payload.shelf = bin.level;
+    if (bin.position !== undefined) payload.position = bin.position;
+    if (bin.capacity !== undefined) payload.max_capacity = bin.capacity;
+    if (bin.is_active !== undefined) payload.is_active = bin.is_active;
+    const { data } = await apiClient.put(`/wms/bins/${id}`, payload);
     return data;
   },
   delete: async (id: string) => {

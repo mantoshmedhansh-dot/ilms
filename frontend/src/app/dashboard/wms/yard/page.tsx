@@ -100,7 +100,7 @@ const yardApi = {
   },
   getStats: async (): Promise<YardStats> => {
     try {
-      const { data } = await apiClient.get('/yard/stats');
+      const { data } = await apiClient.get('/yard/appointments/stats');
       return data;
     } catch {
       return { total_appointments: 0, in_yard: 0, awaiting_arrival: 0, delayed: 0 };

@@ -60,7 +60,6 @@ interface Bin {
   zone_id: string;
   zone?: { id: string; zone_code: string; zone_name: string };
   warehouse_id?: string;
-  warehouse?: { id: string; name: string };
   bin_code: string;
   aisle?: string;
   rack?: string;
@@ -122,10 +121,17 @@ const binsApi = {
 };
 
 const zonesApi = {
-  dropdown: async (): Promise<Zone[]> => {
+  dropdown: async (warehouseId?: string): Promise<Zone[]> => {
     try {
-      const { data } = await apiClient.get('/wms/zones/dropdown');
-      return data;
+      const params: Record<string, string> = {};
+      if (warehouseId) params.warehouse_id = warehouseId;
+      const { data } = await apiClient.get('/wms/zones', { params: { ...params, size: 200 } });
+      return (data?.items || []).map((z: { id: string; zone_code: string; zone_name: string; zone_type: string }) => ({
+        id: z.id,
+        zone_code: z.zone_code,
+        zone_name: z.zone_name,
+        zone_type: z.zone_type,
+      }));
     } catch {
       return [];
     }
@@ -233,11 +239,11 @@ const createColumns = (onView: (bin: Bin) => void, onEdit: (bin: Bin) => void, o
   },
   {
     accessorKey: 'zone',
-    header: 'Zone / Warehouse',
+    header: 'Zone',
     cell: ({ row }) => (
       <div>
         <div className="text-sm font-medium">{row.original.zone?.zone_name || '-'}</div>
-        <div className="text-xs text-muted-foreground">{row.original.warehouse?.name || '-'}</div>
+        <div className="text-xs text-muted-foreground">{row.original.zone?.zone_code || ''}</div>
       </div>
     ),
   },
@@ -390,9 +396,9 @@ export default function BinsPage() {
   });
 
   // Fetch zones for dropdown
-  const { data: zones = [] } = useQuery({
+  const { data: zones = [] } = useQuery<Zone[]>({
     queryKey: ['wms-zones-dropdown'],
-    queryFn: zonesApi.dropdown,
+    queryFn: () => zonesApi.dropdown(),
   });
 
   const { data, isLoading } = useQuery({
@@ -673,7 +679,7 @@ export default function BinsPage() {
               </div>
               <div>
                 <div className="text-sm text-muted-foreground">Warehouse</div>
-                <div className="font-medium">{viewBin?.warehouse?.name || '-'}</div>
+                <div className="font-medium">{viewBin?.warehouse_id || '-'}</div>
               </div>
               <div>
                 <div className="text-sm text-muted-foreground">Type</div>

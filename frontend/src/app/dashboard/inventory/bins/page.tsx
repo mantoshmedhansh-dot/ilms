@@ -246,6 +246,7 @@ export default function BinsPage() {
         name: formData.name,
         code: formData.code.toUpperCase(),
         zone_id: formData.zone_id,
+        warehouse_id: warehouseFilter || undefined,
         aisle: formData.aisle || undefined,
         rack: formData.rack || undefined,
         level: formData.level || undefined,
@@ -261,7 +262,10 @@ export default function BinsPage() {
       toast.error('Please select a zone');
       return;
     }
-    bulkCreateMutation.mutate(bulkFormData);
+    bulkCreateMutation.mutate({
+      ...bulkFormData,
+      warehouse_id: warehouseFilter || undefined,
+    });
   };
 
   const columns: ColumnDef<Bin>[] = [

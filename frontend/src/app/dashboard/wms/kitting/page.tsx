@@ -63,7 +63,7 @@ interface CreateKitOrderData {
 const kittingApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
-      const { data } = await apiClient.get('/kitting/orders', { params });
+      const { data } = await apiClient.get('/kitting/work-orders', { params });
       return data;
     } catch {
       return { items: [], total: 0, pages: 0 };
@@ -71,14 +71,14 @@ const kittingApi = {
   },
   getStats: async (): Promise<KittingStats> => {
     try {
-      const { data } = await apiClient.get('/kitting/stats');
+      const { data } = await apiClient.get('/kitting/work-orders/stats');
       return data;
     } catch {
       return { total_kits: 0, in_progress: 0, completed_today: 0, pending_components: 0 };
     }
   },
   create: async (orderData: CreateKitOrderData) => {
-    const { data } = await apiClient.post('/kitting/orders', orderData);
+    const { data } = await apiClient.post('/kitting/work-orders', orderData);
     return data;
   },
 };

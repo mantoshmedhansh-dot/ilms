@@ -176,7 +176,6 @@ export default function ZonesPage() {
         id: formData.id,
         data: {
           name: formData.name,
-          code: formData.code.toUpperCase(),
           zone_type: formData.zone_type,
           description: formData.description || undefined,
           is_active: formData.is_active,

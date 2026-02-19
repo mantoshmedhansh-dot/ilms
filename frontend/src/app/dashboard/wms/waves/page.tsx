@@ -87,7 +87,7 @@ const wavesApi = {
   },
   getStats: async (): Promise<WaveStats> => {
     try {
-      const { data } = await apiClient.get('/wms-advanced/waves/stats');
+      const { data } = await apiClient.get('/wms-advanced/stats');
       return data;
     } catch {
       return { total_waves: 0, active_waves: 0, completed_today: 0, pending_orders: 0 };

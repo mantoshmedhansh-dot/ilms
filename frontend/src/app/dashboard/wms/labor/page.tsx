@@ -60,7 +60,7 @@ interface NewWorkerForm {
 const laborApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
-      const { data } = await apiClient.get('/labor/', { params });
+      const { data } = await apiClient.get('/labor/workers', { params });
       return data;
     } catch {
       return { items: [], total: 0, pages: 0 };
@@ -81,7 +81,7 @@ const laborApi = {
     shift: 'MORNING' | 'AFTERNOON' | 'NIGHT';
     current_zone?: string;
   }) => {
-    const { data } = await apiClient.post('/labor/', workerData);
+    const { data } = await apiClient.post('/labor/workers', workerData);
     return data;
   },
 };

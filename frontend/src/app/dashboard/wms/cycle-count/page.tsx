@@ -64,7 +64,7 @@ interface ScheduleCycleCountData {
 const cycleCountApi = {
   list: async (params?: { page?: number; size?: number }) => {
     try {
-      const { data } = await apiClient.get('/cycle-count/', { params });
+      const { data } = await apiClient.get('/cycle-count/plans', { params });
       return data;
     } catch {
       return { items: [], total: 0, pages: 0 };
@@ -72,14 +72,14 @@ const cycleCountApi = {
   },
   getStats: async (): Promise<CycleCountStats> => {
     try {
-      const { data } = await apiClient.get('/cycle-count/stats');
+      const { data } = await apiClient.get('/cycle-count/plans/stats');
       return data;
     } catch {
       return { total_counts: 0, in_progress: 0, avg_accuracy: 0, variances_pending: 0 };
     }
   },
   schedule: async (data: ScheduleCycleCountData) => {
-    const response = await apiClient.post('/cycle-count/', data);
+    const response = await apiClient.post('/cycle-count/plans', data);
     return response.data;
   },
 };
