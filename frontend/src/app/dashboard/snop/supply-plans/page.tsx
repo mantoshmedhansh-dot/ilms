@@ -71,10 +71,13 @@ export default function SupplyPlansPage() {
 
   const createPlanMutation = useMutation({
     mutationFn: async () => {
+      const today = new Date();
+      const endDate = new Date(today);
+      endDate.setDate(endDate.getDate() + 90);
       return await snopApi.createSupplyPlan({
-        plan_name: `Supply Plan - ${new Date().toLocaleDateString()}`,
-        plan_type: 'PROCUREMENT',
-        horizon_days: 90,
+        plan_name: `Supply Plan - ${today.toLocaleDateString()}`,
+        plan_start_date: today.toISOString().split('T')[0],
+        plan_end_date: endDate.toISOString().split('T')[0],
       });
     },
     onSuccess: () => {
@@ -519,15 +522,15 @@ export default function SupplyPlansPage() {
                                 <div className="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden flex">
                                   <div
                                     className="h-full bg-red-500"
-                                    style={{ width: `${Math.min(100, (item.top_of_red / item.total_buffer) * 100)}%` }}
+                                    style={{ width: `${item.total_buffer ? Math.min(100, (item.top_of_red / item.total_buffer) * 100) : 0}%` }}
                                   />
                                   <div
                                     className="h-full bg-amber-400"
-                                    style={{ width: `${Math.min(100, (item.yellow_zone / item.total_buffer) * 100)}%` }}
+                                    style={{ width: `${item.total_buffer ? Math.min(100, (item.yellow_zone / item.total_buffer) * 100) : 0}%` }}
                                   />
                                   <div
                                     className="h-full bg-green-500"
-                                    style={{ width: `${Math.min(100, (item.green_zone / item.total_buffer) * 100)}%` }}
+                                    style={{ width: `${item.total_buffer ? Math.min(100, (item.green_zone / item.total_buffer) * 100) : 0}%` }}
                                   />
                                 </div>
                                 <span className="text-xs font-mono text-muted-foreground">

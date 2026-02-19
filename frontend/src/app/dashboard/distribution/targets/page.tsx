@@ -585,7 +585,7 @@ export default function DistributionTargetsPage() {
                 <SelectContent>
                   <SelectItem value="MONTHLY">Monthly</SelectItem>
                   <SelectItem value="QUARTERLY">Quarterly</SelectItem>
-                  <SelectItem value="YEARLY">Yearly</SelectItem>
+                  <SelectItem value="ANNUAL">Annual</SelectItem>
                 </SelectContent>
               </Select>
             </div>

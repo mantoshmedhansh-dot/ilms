@@ -1416,8 +1416,21 @@ export const dealersApi = {
     const { data } = await apiClient.post<Dealer>('/dealers', payload);
     return data;
   },
-  update: async (id: string, dealer: Partial<Dealer>) => {
-    const { data } = await apiClient.put<Dealer>(`/dealers/${id}`, dealer);
+  update: async (id: string, dealer: Partial<Dealer> & Record<string, unknown>) => {
+    // Map frontend field names to backend DealerUpdate schema fields
+    const payload: Record<string, unknown> = { ...dealer };
+    // Transform aliased fields
+    if ('gst_number' in dealer) { payload.gstin = dealer.gst_number; delete payload.gst_number; }
+    if ('pricing_tier' in dealer) { payload.tier = dealer.pricing_tier; delete payload.pricing_tier; }
+    if ('city' in dealer) { payload.registered_city = dealer.city; delete payload.city; }
+    if ('address_line1' in dealer) { payload.registered_address_line1 = dealer.address_line1; delete payload.address_line1; }
+    if ('state' in dealer) { payload.registered_state = dealer.state; delete payload.state; }
+    if ('pincode' in dealer) { payload.registered_pincode = dealer.pincode; delete payload.pincode; }
+    if ('district' in dealer) { payload.registered_district = dealer.district; delete payload.district; }
+    if ('state_code' in dealer) { payload.registered_state_code = dealer.state_code; delete payload.state_code; }
+    if ('code' in dealer) { delete payload.code; }
+    if ('type' in dealer) { payload.dealer_type = dealer.type; delete payload.type; }
+    const { data } = await apiClient.put<Dealer>(`/dealers/${id}`, payload);
     return data;
   },
   getLedger: async (id: string, params?: { skip?: number; limit?: number; start_date?: string; end_date?: string }) => {
@@ -1442,8 +1455,8 @@ export const dealersApi = {
     debit_amount: number;
     credit_amount: number;
     payment_mode?: string;
-    payment_reference?: string;
-    narration?: string;
+    transaction_reference?: string;
+    remarks?: string;
   }) => {
     const { data } = await apiClient.post<DealerCreditTransaction>(`/dealers/${id}/payment`, payment);
     return data;
@@ -1479,7 +1492,8 @@ interface DealerCreditTransaction {
   credit_amount: number;
   balance: number;
   payment_mode?: string;
-  narration?: string;
+  transaction_reference?: string;
+  remarks?: string;
   created_at: string;
 }
 
@@ -2243,15 +2257,15 @@ export const ledgerApi = {
 // Financial Reports API
 export const reportsApi = {
   getTrialBalance: async (params?: { as_of_date?: string; period_id?: string }) => {
-    const { data } = await apiClient.get('/accounting/reports/trial-balance', { params });
+    const { data } = await apiClient.get('/reports/trial-balance', { params });
     return data;
   },
   getBalanceSheet: async (params?: { as_of_date?: string; period_id?: string }) => {
-    const { data } = await apiClient.get('/accounting/reports/balance-sheet', { params });
+    const { data } = await apiClient.get('/reports/balance-sheet', { params });
     return data;
   },
   getProfitLoss: async (params?: { from_date?: string; to_date?: string; period_id?: string }) => {
-    const { data } = await apiClient.get('/accounting/reports/profit-loss', { params });
+    const { data } = await apiClient.get('/reports/profit-loss', { params });
     return data;
   },
 };
@@ -5863,7 +5877,7 @@ export const snopApi = {
     return data;
   },
   createSupplyPlan: async (payload: Record<string, unknown>) => {
-    const { data } = await apiClient.post('/snop/supply-plans', payload);
+    const { data } = await apiClient.post('/snop/supply-plan', payload);
     return data;
   },
   // Scenarios
@@ -5872,11 +5886,11 @@ export const snopApi = {
     return data;
   },
   createScenario: async (payload: Record<string, unknown>) => {
-    const { data } = await apiClient.post('/snop/scenarios', payload);
+    const { data } = await apiClient.post('/snop/scenario', payload);
     return data;
   },
   runScenario: async (scenarioId: string) => {
-    const { data } = await apiClient.post(`/snop/scenarios/${scenarioId}/run`);
+    const { data } = await apiClient.post(`/snop/scenario/${scenarioId}/run`);
     return data;
   },
   // Inventory Optimization

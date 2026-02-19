@@ -98,7 +98,7 @@ interface CreditTransaction {
 interface SalesTarget {
   id: string;
   period: string;
-  period_type: 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
+  period_type: 'MONTHLY' | 'QUARTERLY' | 'ANNUAL';
   target_amount: number;
   achieved_amount: number;
   target_quantity: number;
@@ -207,7 +207,7 @@ export default function DealerDetailPage({ params }: { params: Promise<{ id: str
   const [creditForm, setCreditForm] = useState({ type: 'CREDIT' as 'CREDIT' | 'ADJUSTMENT', amount: '', description: '' });
   const [targetForm, setTargetForm] = useState({
     period: '',
-    period_type: 'MONTHLY' as 'MONTHLY' | 'QUARTERLY' | 'YEARLY',
+    period_type: 'MONTHLY' as 'MONTHLY' | 'QUARTERLY' | 'ANNUAL',
     target_amount: '',
     target_quantity: '',
   });
@@ -240,7 +240,7 @@ export default function DealerDetailPage({ params }: { params: Promise<{ id: str
         balance_after: item.balance,
         reference_number: item.reference_number,
         reference_type: item.reference_type as 'ORDER' | 'PAYMENT' | 'CREDIT_NOTE' | 'ADJUSTMENT' | 'REFUND',
-        description: item.narration || `${item.transaction_type} - ${item.reference_number}`,
+        description: item.remarks || `${item.transaction_type} - ${item.reference_number}`,
         created_at: item.created_at,
         created_by: 'System',
       }));
@@ -260,7 +260,7 @@ export default function DealerDetailPage({ params }: { params: Promise<{ id: str
           : t.target_quarter
             ? `Q${t.target_quarter} ${t.target_year}`
             : `${t.target_year}`,
-        period_type: t.target_period as 'MONTHLY' | 'QUARTERLY' | 'YEARLY',
+        period_type: t.target_period as 'MONTHLY' | 'QUARTERLY' | 'ANNUAL',
         target_amount: t.revenue_target,
         achieved_amount: t.revenue_achieved,
         target_quantity: t.quantity_target,
@@ -369,7 +369,7 @@ export default function DealerDetailPage({ params }: { params: Promise<{ id: str
         debit_amount: data.type === 'ADJUSTMENT' ? data.amount : 0,
         credit_amount: data.type === 'CREDIT' ? data.amount : 0,
         payment_mode: 'ADJUSTMENT',
-        narration: data.description,
+        remarks: data.description,
       });
     },
     onSuccess: () => {
@@ -1072,7 +1072,7 @@ export default function DealerDetailPage({ params }: { params: Promise<{ id: str
                 <Label>Period Type</Label>
                 <Select
                   value={targetForm.period_type}
-                  onValueChange={(value: 'MONTHLY' | 'QUARTERLY' | 'YEARLY') => setTargetForm({ ...targetForm, period_type: value })}
+                  onValueChange={(value: 'MONTHLY' | 'QUARTERLY' | 'ANNUAL') => setTargetForm({ ...targetForm, period_type: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -1080,7 +1080,7 @@ export default function DealerDetailPage({ params }: { params: Promise<{ id: str
                   <SelectContent>
                     <SelectItem value="MONTHLY">Monthly</SelectItem>
                     <SelectItem value="QUARTERLY">Quarterly</SelectItem>
-                    <SelectItem value="YEARLY">Yearly</SelectItem>
+                    <SelectItem value="ANNUAL">Annual</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

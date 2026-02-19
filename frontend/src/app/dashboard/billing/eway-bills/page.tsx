@@ -46,24 +46,33 @@ import { formatDate, formatCurrency } from '@/lib/utils';
 
 interface EWayBill {
   id: string;
-  ewb_number: string;
-  ewb_date: string;
-  valid_upto: string;
+  ewb_number?: string;
+  eway_bill_number?: string;
+  ewb_date?: string;
+  generated_at?: string;
+  valid_upto?: string;
+  valid_until?: string;
+  valid_from?: string;
   invoice_id?: string;
   invoice?: { invoice_number: string };
-  from_gstin: string;
-  to_gstin: string;
-  from_place: string;
-  to_place: string;
-  document_value: number;
+  from_gstin?: string;
+  to_gstin?: string;
+  from_place?: string;
+  from_name?: string;
+  to_place?: string;
+  to_name?: string;
+  document_value?: number;
+  total_value?: number;
   vehicle_number?: string;
   vehicle_type?: string;
   transporter_id?: string;
   transporter_name?: string;
   distance_km?: number;
-  status: 'GENERATED' | 'ACTIVE' | 'CANCELLED' | 'EXPIRED';
+  status: string;
   cancel_reason?: string;
-  created_at: string;
+  cancellation_reason?: string;
+  is_valid?: boolean;
+  created_at?: string;
 }
 
 interface Invoice {
@@ -213,12 +222,12 @@ export default function EWayBillsPage() {
 
   const columns: ColumnDef<EWayBill>[] = [
     {
-      accessorKey: 'ewb_number',
+      accessorKey: 'eway_bill_number',
       header: 'E-Way Bill #',
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <Truck className="h-4 w-4 text-muted-foreground" />
-          <span className="font-mono font-medium">{row.original.ewb_number}</span>
+          <span className="font-mono font-medium">{row.original.eway_bill_number || row.original.ewb_number || '-'}</span>
         </div>
       ),
     },
@@ -247,20 +256,22 @@ export default function EWayBillsPage() {
       ),
     },
     {
-      accessorKey: 'document_value',
+      accessorKey: 'total_value',
       header: 'Value',
       cell: ({ row }) => (
-        <span className="font-medium">{formatCurrency(row.original.document_value)}</span>
+        <span className="font-medium">{formatCurrency(row.original.total_value ?? row.original.document_value ?? 0)}</span>
       ),
     },
     {
-      accessorKey: 'valid_upto',
+      accessorKey: 'valid_until',
       header: 'Valid Till',
       cell: ({ row }) => {
-        const isExpired = new Date(row.original.valid_upto) < new Date();
+        const validDate = row.original.valid_until || row.original.valid_upto;
+        if (!validDate) return <span className="text-sm text-muted-foreground">-</span>;
+        const isExpired = new Date(validDate) < new Date();
         return (
           <span className={`text-sm ${isExpired ? 'text-red-600' : 'text-muted-foreground'}`}>
-            {formatDate(row.original.valid_upto)}
+            {formatDate(validDate)}
           </span>
         );
       },
@@ -468,7 +479,7 @@ export default function EWayBillsPage() {
       <DataTable
         columns={columns}
         data={data?.items ?? []}
-        searchKey="ewb_number"
+        searchKey="eway_bill_number"
         searchPlaceholder="Search E-Way bills..."
         isLoading={isLoading}
         manualPagination
@@ -485,7 +496,7 @@ export default function EWayBillsPage() {
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <Truck className="h-5 w-5" />
-              E-Way Bill {selectedBill?.ewb_number}
+              E-Way Bill {selectedBill?.eway_bill_number || selectedBill?.ewb_number}
             </SheetTitle>
             <SheetDescription>Transportation document details</SheetDescription>
           </SheetHeader>
@@ -494,7 +505,7 @@ export default function EWayBillsPage() {
               <div className="flex items-center gap-3">
                 <StatusBadge status={selectedBill.status} />
                 <span className="text-sm text-muted-foreground">
-                  Generated: {formatDate(selectedBill.ewb_date)}
+                  Generated: {formatDate(selectedBill.generated_at || selectedBill.ewb_date || selectedBill.created_at || '')}
                 </span>
               </div>
 
@@ -502,11 +513,11 @@ export default function EWayBillsPage() {
                 <CardContent className="pt-4 grid grid-cols-2 gap-4">
                   <div>
                     <div className="text-xs text-muted-foreground">Valid Until</div>
-                    <div className="font-medium">{formatDate(selectedBill.valid_upto)}</div>
+                    <div className="font-medium">{formatDate(selectedBill.valid_until || selectedBill.valid_upto || '')}</div>
                   </div>
                   <div>
                     <div className="text-xs text-muted-foreground">Document Value</div>
-                    <div className="font-medium">{formatCurrency(selectedBill.document_value)}</div>
+                    <div className="font-medium">{formatCurrency(selectedBill.total_value ?? selectedBill.document_value ?? 0)}</div>
                   </div>
                 </CardContent>
               </Card>
@@ -537,11 +548,11 @@ export default function EWayBillsPage() {
                 </Card>
               )}
 
-              {selectedBill.cancel_reason && (
+              {(selectedBill.cancellation_reason || selectedBill.cancel_reason) && (
                 <Card className="bg-red-50">
                   <CardContent className="pt-4">
                     <div className="text-xs text-red-600">Cancellation Reason</div>
-                    <div className="text-sm text-red-700">{selectedBill.cancel_reason}</div>
+                    <div className="text-sm text-red-700">{selectedBill.cancellation_reason || selectedBill.cancel_reason}</div>
                   </CardContent>
                 </Card>
               )}
@@ -573,7 +584,7 @@ export default function EWayBillsPage() {
           <DialogHeader>
             <DialogTitle>Extend E-Way Bill Validity</DialogTitle>
             <DialogDescription>
-              Extend validity for E-Way Bill {selectedBill?.ewb_number}
+              Extend validity for E-Way Bill {selectedBill?.eway_bill_number || selectedBill?.ewb_number}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">

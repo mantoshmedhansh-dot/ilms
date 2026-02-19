@@ -302,9 +302,25 @@ export default function DealersPage() {
       return;
     }
 
+    // API client handles field name mapping (gst_number→gstin, city→registered_city, etc.)
     const dealerData = {
-      ...formData,
+      name: formData.name,
+      code: formData.code,
+      type: formData.type,
+      email: formData.email,
+      phone: formData.phone,
+      gst_number: formData.gst_number,
+      pan: formData.pan,
+      contact_person: formData.contact_person,
+      pricing_tier: formData.pricing_tier,
       credit_limit: parseFloat(formData.credit_limit) || 0,
+      address_line1: formData.address_line1,
+      city: formData.city,
+      district: formData.district,
+      state: formData.state,
+      state_code: formData.state_code,
+      pincode: formData.pincode,
+      region: formData.region,
     };
 
     if (selectedDealer) {

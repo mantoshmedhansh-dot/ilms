@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Users,
@@ -67,7 +68,10 @@ function getStatusColor(status: string): string {
 }
 
 export default function DMSDashboardPage() {
-  const { data, isLoading, refetch, isFetching } = useQuery<DMSDashboardResponse>({
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  const { data, isLoading, error, refetch, isFetching } = useQuery<DMSDashboardResponse>({
     queryKey: ['dms-dashboard'],
     queryFn: () => dmsApi.getDashboard(),
     staleTime: 5 * 60 * 1000,
@@ -87,6 +91,27 @@ export default function DMSDashboardPage() {
         <div className="grid gap-4 md:grid-cols-2">
           <Skeleton className="h-72" />
           <Skeleton className="h-72" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6 p-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-red-100 rounded-lg">
+            <AlertCircle className="h-6 w-6 text-red-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Distribution Management</h1>
+            <p className="text-sm text-red-500">
+              Failed to load dashboard: {(error as Error).message || 'Unknown error'}
+            </p>
+          </div>
+          <Button onClick={() => refetch()} variant="outline" size="sm" className="ml-auto">
+            <RefreshCw className="h-4 w-4 mr-1" /> Retry
+          </Button>
         </div>
       </div>
     );
@@ -232,7 +257,7 @@ export default function DMSDashboardPage() {
             <CardDescription>Revenue & Collection over last 12 months</CardDescription>
           </CardHeader>
           <CardContent>
-            {monthlyTrend.length > 0 ? (
+            {mounted && monthlyTrend.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <AreaChart data={monthlyTrend}>
                   <defs>
@@ -274,7 +299,7 @@ export default function DMSDashboardPage() {
             <CardDescription>Geographic distribution of your network</CardDescription>
           </CardHeader>
           <CardContent>
-            {byRegion.length > 0 ? (
+            {mounted && byRegion.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
                   <Pie
@@ -334,9 +359,9 @@ export default function DMSDashboardPage() {
                         <span className="text-xs text-muted-foreground ml-2">{formatCurrency(performer.revenue)}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Progress value={Math.min(performer.achievement_pct, 100)} className="h-1.5 flex-1" />
+                        <Progress value={Math.min(Number(performer.achievement_pct) || 0, 100)} className="h-1.5 flex-1" />
                         <span className="text-xs tabular-nums text-muted-foreground w-10 text-right">
-                          {performer.achievement_pct.toFixed(0)}%
+                          {(Number(performer.achievement_pct) || 0).toFixed(0)}%
                         </span>
                       </div>
                     </div>
@@ -380,12 +405,12 @@ export default function DMSDashboardPage() {
                       <Badge
                         variant="outline"
                         className={`text-[10px] ${
-                          alert.utilization_pct > 95 ? 'border-red-300 text-red-600 bg-red-50'
-                            : alert.utilization_pct > 90 ? 'border-orange-300 text-orange-600 bg-orange-50'
+                          (Number(alert.utilization_pct) || 0) > 95 ? 'border-red-300 text-red-600 bg-red-50'
+                            : (Number(alert.utilization_pct) || 0) > 90 ? 'border-orange-300 text-orange-600 bg-orange-50'
                             : 'border-amber-300 text-amber-600 bg-amber-50'
                         }`}
                       >
-                        {alert.utilization_pct.toFixed(0)}%
+                        {(Number(alert.utilization_pct) || 0).toFixed(0)}%
                       </Badge>
                     </div>
                   </div>

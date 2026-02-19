@@ -222,7 +222,7 @@ export default function LeadsPage() {
       header: 'Lead',
       cell: ({ row }) => (
         <button
-          onClick={() => router.push(`/crm/leads/${row.original.id}`)}
+          onClick={() => router.push(`/dashboard/crm/leads/${row.original.id}`)}
           className="flex items-center gap-3 hover:text-primary transition-colors text-left"
         >
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
@@ -311,7 +311,7 @@ export default function LeadsPage() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => router.push(`/crm/leads/${row.original.id}`)}>
+            <DropdownMenuItem onClick={() => router.push(`/dashboard/crm/leads/${row.original.id}`)}>
               <Eye className="mr-2 h-4 w-4" />
               View Details
             </DropdownMenuItem>
@@ -326,7 +326,7 @@ export default function LeadsPage() {
               </DropdownMenuItem>
             )}
             {row.original.status === 'WON' && (
-              <DropdownMenuItem onClick={() => router.push(`/crm/leads/${row.original.id}`)}>
+              <DropdownMenuItem onClick={() => router.push(`/dashboard/crm/leads/${row.original.id}`)}>
                 <UserPlus className="mr-2 h-4 w-4" />
                 Convert to Customer
               </DropdownMenuItem>
@@ -343,7 +343,7 @@ export default function LeadsPage() {
     return (
       <Card
         className="cursor-pointer hover:shadow-md transition-shadow"
-        onClick={() => router.push(`/crm/leads/${lead.id}`)}
+        onClick={() => router.push(`/dashboard/crm/leads/${lead.id}`)}
       >
         <CardContent className="p-3">
           <div className="flex items-start justify-between mb-2">

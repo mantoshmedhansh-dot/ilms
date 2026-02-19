@@ -83,6 +83,7 @@ function formatSchemeType(type: string): string {
 }
 
 interface SchemeFormData {
+  scheme_code: string;
   scheme_name: string;
   description: string;
   scheme_type: string;
@@ -95,6 +96,7 @@ interface SchemeFormData {
 }
 
 const EMPTY_FORM: SchemeFormData = {
+  scheme_code: '',
   scheme_name: '',
   description: '',
   scheme_type: '',
@@ -172,6 +174,7 @@ export default function DMSSchemesPage() {
   const openEditDialog = (scheme: DealerScheme) => {
     setEditingScheme(scheme);
     setForm({
+      scheme_code: scheme.scheme_code || '',
       scheme_name: scheme.scheme_name || '',
       description: scheme.description || '',
       scheme_type: scheme.scheme_type || '',
@@ -186,15 +189,23 @@ export default function DMSSchemesPage() {
   };
 
   const handleSubmit = () => {
+    if (!editingScheme && !form.scheme_code.trim()) {
+      toast.error('Scheme code is required');
+      return;
+    }
+    if (!editingScheme && (form.scheme_code.trim().length < 3 || form.scheme_code.trim().length > 30)) {
+      toast.error('Scheme code must be 3-30 characters');
+      return;
+    }
     if (!form.scheme_name.trim()) {
       toast.error('Scheme name is required');
       return;
     }
-    if (!form.scheme_type) {
+    if (!editingScheme && !form.scheme_type) {
       toast.error('Scheme type is required');
       return;
     }
-    if (!form.start_date || !form.end_date) {
+    if (!editingScheme && (!form.start_date || !form.end_date)) {
       toast.error('Start date and end date are required');
       return;
     }
@@ -207,22 +218,32 @@ export default function DMSSchemesPage() {
       return;
     }
 
-    const payload: Record<string, unknown> = {
-      scheme_name: form.scheme_name.trim(),
-      description: form.description.trim() || undefined,
-      scheme_type: form.scheme_type,
-      start_date: form.start_date,
-      end_date: form.end_date,
-      rules: parsedRules,
-      total_budget: form.total_budget ? Number(form.total_budget) : undefined,
-      terms_and_conditions: form.terms_and_conditions.trim() || undefined,
-      can_combine: form.can_combine,
-    };
-
     if (editingScheme) {
-      updateMutation.mutate({ id: editingScheme.id, data: payload });
+      // DealerSchemeUpdate only accepts: scheme_name, description, end_date, is_active, rules, total_budget, terms_and_conditions
+      const updatePayload: Record<string, unknown> = {
+        scheme_name: form.scheme_name.trim(),
+        description: form.description.trim() || undefined,
+        end_date: form.end_date || undefined,
+        rules: parsedRules,
+        total_budget: form.total_budget ? Number(form.total_budget) : undefined,
+        terms_and_conditions: form.terms_and_conditions.trim() || undefined,
+      };
+      updateMutation.mutate({ id: editingScheme.id, data: updatePayload });
     } else {
-      createMutation.mutate(payload);
+      // DealerSchemeCreate requires all DealerSchemeBase fields including scheme_code
+      const createPayload: Record<string, unknown> = {
+        scheme_code: form.scheme_code.trim(),
+        scheme_name: form.scheme_name.trim(),
+        description: form.description.trim() || undefined,
+        scheme_type: form.scheme_type,
+        start_date: form.start_date,
+        end_date: form.end_date,
+        rules: parsedRules,
+        total_budget: form.total_budget ? Number(form.total_budget) : undefined,
+        terms_and_conditions: form.terms_and_conditions.trim() || undefined,
+        can_combine: form.can_combine,
+      };
+      createMutation.mutate(createPayload);
     }
   };
 
@@ -485,6 +506,23 @@ export default function DMSSchemesPage() {
           </DialogHeader>
 
           <div className="space-y-4">
+            {/* Scheme Code (only for creation, not editable after creation) */}
+            {!editingScheme && (
+              <div>
+                <Label htmlFor="scheme_code">Scheme Code *</Label>
+                <Input
+                  id="scheme_code"
+                  placeholder="e.g. SCH-Q1-2026"
+                  value={form.scheme_code}
+                  onChange={(e) => setForm({ ...form, scheme_code: e.target.value.toUpperCase() })}
+                  maxLength={30}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Unique code (3-30 characters). Cannot be changed after creation.
+                </p>
+              </div>
+            )}
+
             {/* Scheme Name */}
             <div>
               <Label htmlFor="scheme_name">Scheme Name *</Label>

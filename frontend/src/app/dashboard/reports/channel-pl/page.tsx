@@ -518,7 +518,7 @@ export default function ChannelPLPage() {
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Gross Margin</span>
                         <span className={`font-medium ${channel.cogs.gross_margin_pct >= 30 ? 'text-green-600' : 'text-orange-600'}`}>
-                          {channel.cogs.gross_margin_pct.toFixed(1)}%
+                          {(channel.cogs.gross_margin_pct ?? 0).toFixed(1)}%
                         </span>
                       </div>
                       <div className="flex justify-between border-t pt-2">
@@ -530,7 +530,7 @@ export default function ChannelPLPage() {
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">EBITDA Margin</span>
                         <span className={`font-medium ${channel.ebitda_margin_pct >= 10 ? 'text-green-600' : 'text-orange-600'}`}>
-                          {channel.ebitda_margin_pct.toFixed(1)}%
+                          {(channel.ebitda_margin_pct ?? 0).toFixed(1)}%
                         </span>
                       </div>
                     </div>
@@ -658,7 +658,7 @@ export default function ChannelPLPage() {
                         <TableCell>Gross Profit</TableCell>
                         <TableCell className="text-right font-mono">{formatCurrency(cogs.gross_profit)}</TableCell>
                         <TableCell className="text-right">
-                          <span className="text-green-600">{cogs.gross_margin_pct.toFixed(1)}%</span>
+                          <span className="text-green-600">{(cogs.gross_margin_pct ?? 0).toFixed(1)}%</span>
                         </TableCell>
                       </TableRow>
 
@@ -793,8 +793,8 @@ export default function ChannelPLPage() {
                           {formatCurrency(ebitda)}
                         </TableCell>
                         <TableCell className="text-right">
-                          <span className={ebitda_margin >= 0 ? 'text-green-600' : 'text-red-600'}>
-                            {ebitda_margin.toFixed(1)}%
+                          <span className={(ebitda_margin ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}>
+                            {(ebitda_margin ?? 0).toFixed(1)}%
                           </span>
                         </TableCell>
                       </TableRow>

@@ -60,19 +60,25 @@ interface Invoice {
   id: string;
   invoice_number: string;
   invoice_date: string;
-  due_date: string;
-  customer_id: string;
+  due_date?: string;
+  customer_id?: string;
+  customer_name?: string;
   customer?: { name: string; gstin?: string; address?: string };
-  items: InvoiceItem[];
-  subtotal: number;
-  tax_amount: number;
-  total_amount: number;
-  paid_amount: number;
+  customer_gstin?: string;
+  items?: InvoiceItem[];
+  subtotal?: number;
+  tax_amount?: number;
+  total_amount?: number;
+  grand_total?: number;
+  amount_paid?: number;
+  amount_due?: number;
   irn?: string;
   irn_generated_at?: string;
-  status: 'DRAFT' | 'SENT' | 'PAID' | 'PARTIALLY_PAID' | 'OVERDUE' | 'CANCELLED';
+  einvoice_status?: string;
+  generation_trigger?: string;
+  status: string;
   notes?: string;
-  created_at: string;
+  created_at?: string;
 }
 
 interface InvoiceItem {
@@ -272,13 +278,13 @@ export default function InvoicesPage() {
       ),
     },
     {
-      accessorKey: 'customer',
+      accessorKey: 'customer_name',
       header: 'Customer',
       cell: ({ row }) => (
         <div>
-          <div className="text-sm font-medium">{row.original.customer?.name || 'N/A'}</div>
-          {row.original.customer?.gstin && (
-            <div className="text-xs text-muted-foreground font-mono">{row.original.customer.gstin}</div>
+          <div className="text-sm font-medium">{row.original.customer_name || row.original.customer?.name || 'N/A'}</div>
+          {(row.original.customer_gstin || row.original.customer?.gstin) && (
+            <div className="text-xs text-muted-foreground font-mono">{row.original.customer_gstin || row.original.customer?.gstin}</div>
           )}
         </div>
       ),
@@ -296,6 +302,7 @@ export default function InvoicesPage() {
       accessorKey: 'due_date',
       header: 'Due Date',
       cell: ({ row }) => {
+        if (!row.original.due_date) return <span className="text-sm text-muted-foreground">-</span>;
         const isOverdue = new Date(row.original.due_date) < new Date() && row.original.status !== 'PAID';
         return (
           <span className={`text-sm ${isOverdue ? 'text-red-600 font-medium' : 'text-muted-foreground'}`}>
@@ -305,18 +312,22 @@ export default function InvoicesPage() {
       },
     },
     {
-      accessorKey: 'total_amount',
+      accessorKey: 'grand_total',
       header: 'Amount',
-      cell: ({ row }) => (
-        <div>
-          <div className="font-medium">{formatCurrency(row.original.total_amount)}</div>
-          {row.original.paid_amount > 0 && row.original.paid_amount < row.original.total_amount && (
-            <div className="text-xs text-muted-foreground">
-              Paid: {formatCurrency(row.original.paid_amount)}
-            </div>
-          )}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const total = row.original.grand_total ?? row.original.total_amount ?? 0;
+        const paid = row.original.amount_paid ?? 0;
+        return (
+          <div>
+            <div className="font-medium">{formatCurrency(total)}</div>
+            {paid > 0 && paid < total && (
+              <div className="text-xs text-muted-foreground">
+                Paid: {formatCurrency(paid)}
+              </div>
+            )}
+          </div>
+        );
+      },
     },
     {
       accessorKey: 'irn',
@@ -568,9 +579,9 @@ export default function InvoicesPage() {
                   <CardTitle className="text-sm">Customer</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-lg font-medium">{selectedInvoice.customer?.name}</div>
-                  {selectedInvoice.customer?.gstin && (
-                    <div className="text-sm text-muted-foreground">GSTIN: {selectedInvoice.customer.gstin}</div>
+                  <div className="text-lg font-medium">{selectedInvoice.customer_name || selectedInvoice.customer?.name || 'N/A'}</div>
+                  {(selectedInvoice.customer_gstin || selectedInvoice.customer?.gstin) && (
+                    <div className="text-sm text-muted-foreground">GSTIN: {selectedInvoice.customer_gstin || selectedInvoice.customer?.gstin}</div>
                   )}
                 </CardContent>
               </Card>
@@ -625,17 +636,17 @@ export default function InvoicesPage() {
                   </div>
                   <div className="flex justify-between font-bold text-lg border-t pt-2">
                     <span>Total</span>
-                    <span>{formatCurrency(selectedInvoice.total_amount)}</span>
+                    <span>{formatCurrency(selectedInvoice.grand_total ?? selectedInvoice.total_amount ?? 0)}</span>
                   </div>
-                  {selectedInvoice.paid_amount > 0 && (
+                  {(selectedInvoice.amount_paid ?? 0) > 0 && (
                     <>
                       <div className="flex justify-between text-green-600">
                         <span>Paid</span>
-                        <span>{formatCurrency(selectedInvoice.paid_amount)}</span>
+                        <span>{formatCurrency(selectedInvoice.amount_paid ?? 0)}</span>
                       </div>
                       <div className="flex justify-between font-medium">
                         <span>Balance</span>
-                        <span>{formatCurrency(selectedInvoice.total_amount - selectedInvoice.paid_amount)}</span>
+                        <span>{formatCurrency(selectedInvoice.amount_due ?? ((selectedInvoice.grand_total ?? 0) - (selectedInvoice.amount_paid ?? 0)))}</span>
                       </div>
                     </>
                   )}

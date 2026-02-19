@@ -58,20 +58,33 @@ interface CreditNoteLine {
 
 interface CreditNote {
   id: string;
-  credit_note_number: string;
-  credit_note_date: string;
+  credit_note_number?: string;
+  note_number?: string;
+  credit_note_date?: string;
+  note_date?: string;
   invoice_id?: string;
   invoice?: { invoice_number: string };
-  customer_id: string;
+  original_invoice_number?: string;
+  customer_id?: string;
+  customer_name?: string;
   customer?: { name: string; email?: string; phone?: string };
-  reason: string;
+  document_type?: string;
+  reason?: string;
+  reason_description?: string;
   lines?: CreditNoteLine[];
-  subtotal: number;
-  tax_amount: number;
-  total_amount: number;
-  status: 'DRAFT' | 'APPROVED' | 'APPLIED' | 'CANCELLED';
+  items?: Array<{ id: string; taxable_value: number; line_total: number; created_at: string }>;
+  subtotal?: number;
+  taxable_amount?: number;
+  tax_amount?: number;
+  total_tax?: number;
+  total_amount?: number;
+  grand_total?: number;
+  is_interstate?: boolean;
+  irn?: string;
+  status: string;
   applied_to_invoice_id?: string;
-  created_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface Customer {
@@ -287,12 +300,12 @@ export default function CreditNotesPage() {
 
   const columns: ColumnDef<CreditNote>[] = [
     {
-      accessorKey: 'credit_note_number',
+      accessorKey: 'note_number',
       header: 'Credit Note #',
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <FileX className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">{row.original.credit_note_number}</span>
+          <span className="font-medium">{row.original.note_number || row.original.credit_note_number}</span>
         </div>
       ),
     },
@@ -301,23 +314,23 @@ export default function CreditNotesPage() {
       header: 'Against Invoice',
       cell: ({ row }) => (
         <span className="text-sm text-muted-foreground font-mono">
-          {row.original.invoice?.invoice_number || '-'}
+          {row.original.original_invoice_number || row.original.invoice?.invoice_number || '-'}
         </span>
       ),
     },
     {
-      accessorKey: 'customer',
+      accessorKey: 'customer_name',
       header: 'Customer',
       cell: ({ row }) => (
-        <span className="text-sm">{row.original.customer?.name || 'N/A'}</span>
+        <span className="text-sm">{row.original.customer_name || row.original.customer?.name || 'N/A'}</span>
       ),
     },
     {
-      accessorKey: 'credit_note_date',
+      accessorKey: 'created_at',
       header: 'Date',
       cell: ({ row }) => (
         <span className="text-sm text-muted-foreground">
-          {formatDate(row.original.credit_note_date)}
+          {formatDate(row.original.note_date || row.original.credit_note_date || row.original.created_at || '')}
         </span>
       ),
     },
@@ -325,15 +338,15 @@ export default function CreditNotesPage() {
       accessorKey: 'reason',
       header: 'Reason',
       cell: ({ row }) => (
-        <span className="text-sm line-clamp-1">{row.original.reason}</span>
+        <span className="text-sm line-clamp-1">{row.original.reason_description || row.original.reason || '-'}</span>
       ),
     },
     {
-      accessorKey: 'total_amount',
+      accessorKey: 'grand_total',
       header: 'Amount',
       cell: ({ row }) => (
         <span className="font-medium text-red-600">
-          -{formatCurrency(row.original.total_amount)}
+          -{formatCurrency(row.original.grand_total ?? row.original.total_amount ?? 0)}
         </span>
       ),
     },
@@ -583,7 +596,7 @@ export default function CreditNotesPage() {
       <DataTable
         columns={columns}
         data={data?.items ?? []}
-        searchKey="credit_note_number"
+        searchKey="note_number"
         searchPlaceholder="Search credit notes..."
         isLoading={isLoading}
         manualPagination
@@ -600,7 +613,7 @@ export default function CreditNotesPage() {
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
               <FileX className="h-5 w-5" />
-              Credit Note {selectedNote?.credit_note_number}
+              Credit Note {selectedNote?.note_number || selectedNote?.credit_note_number}
             </SheetTitle>
             <SheetDescription>Credit note details</SheetDescription>
           </SheetHeader>
@@ -609,7 +622,7 @@ export default function CreditNotesPage() {
               <div className="flex items-center gap-3">
                 <StatusBadge status={selectedNote.status} />
                 <span className="text-sm text-muted-foreground">
-                  {formatDate(selectedNote.credit_note_date)}
+                  {formatDate(selectedNote.note_date || selectedNote.credit_note_date || selectedNote.created_at || '')}
                 </span>
               </div>
 
@@ -618,7 +631,7 @@ export default function CreditNotesPage() {
                   <CardTitle className="text-sm">Customer</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="font-medium">{selectedNote.customer?.name}</div>
+                  <div className="font-medium">{selectedNote.customer_name || selectedNote.customer?.name || 'N/A'}</div>
                   {selectedNote.customer?.email && (
                     <div className="text-sm text-muted-foreground">{selectedNote.customer.email}</div>
                   )}
@@ -637,7 +650,7 @@ export default function CreditNotesPage() {
               <Card>
                 <CardContent className="pt-4">
                   <div className="text-xs text-muted-foreground">Reason</div>
-                  <div className="text-sm">{selectedNote.reason}</div>
+                  <div className="text-sm">{selectedNote.reason_description || selectedNote.reason || '-'}</div>
                 </CardContent>
               </Card>
 
@@ -671,16 +684,16 @@ export default function CreditNotesPage() {
                   <div className="space-y-1">
                     <div className="flex justify-between text-sm">
                       <span>Subtotal</span>
-                      <span>{formatCurrency(selectedNote.subtotal)}</span>
+                      <span>{formatCurrency(selectedNote.taxable_amount ?? selectedNote.subtotal ?? 0)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Tax</span>
-                      <span>{formatCurrency(selectedNote.tax_amount)}</span>
+                      <span>{formatCurrency(selectedNote.total_tax ?? selectedNote.tax_amount ?? 0)}</span>
                     </div>
                     <Separator className="my-2" />
                     <div className="flex justify-between font-bold text-red-700">
                       <span>Total Credit</span>
-                      <span>-{formatCurrency(selectedNote.total_amount)}</span>
+                      <span>-{formatCurrency(selectedNote.grand_total ?? selectedNote.total_amount ?? 0)}</span>
                     </div>
                   </div>
                 </CardContent>

@@ -54,7 +54,7 @@ interface DealerCreditTransaction {
   credit_amount: number;
   balance: number;
   payment_mode?: string;
-  narration?: string;
+  remarks?: string;
   created_at: string;
 }
 
@@ -125,7 +125,7 @@ export default function CreditLedgerPage() {
   const [paymentDebit, setPaymentDebit] = useState('');
   const [paymentCredit, setPaymentCredit] = useState('');
   const [paymentMode, setPaymentMode] = useState('');
-  const [paymentNarration, setPaymentNarration] = useState('');
+  const [paymentRemarks, setPaymentRemarks] = useState('');
 
   // Fetch dealers for dropdown
   const { data: dealersData } = useQuery({
@@ -171,7 +171,7 @@ export default function CreditLedgerPage() {
       debit_amount: number;
       credit_amount: number;
       payment_mode?: string;
-      narration?: string;
+      remarks?: string;
     }) => dealersApi.recordPayment(selectedDealerId, data),
     onSuccess: () => {
       toast.success('Payment recorded successfully');
@@ -192,7 +192,7 @@ export default function CreditLedgerPage() {
     setPaymentDebit('');
     setPaymentCredit('');
     setPaymentMode('');
-    setPaymentNarration('');
+    setPaymentRemarks('');
   };
 
   const handleRecordPayment = () => {
@@ -225,7 +225,7 @@ export default function CreditLedgerPage() {
       debit_amount: Number(paymentDebit) || 0,
       credit_amount: Number(paymentCredit) || 0,
       payment_mode: paymentMode || undefined,
-      narration: paymentNarration || undefined,
+      remarks: paymentRemarks || undefined,
     });
   };
 
@@ -505,7 +505,7 @@ export default function CreditLedgerPage() {
                             Balance
                           </th>
                           <th className="pb-3 font-medium text-muted-foreground">
-                            Narration
+                            Remarks
                           </th>
                           <th className="pb-3 font-medium text-muted-foreground text-center">
                             Payment Mode
@@ -530,7 +530,7 @@ export default function CreditLedgerPage() {
                                 variant="outline"
                                 className={`text-[10px] ${getTransactionTypeBadge(txn.transaction_type)}`}
                               >
-                                {txn.transaction_type.replace(/_/g, ' ')}
+                                {(txn.transaction_type || '').replace(/_/g, ' ')}
                               </Badge>
                             </td>
                             <td className="py-3 text-xs">
@@ -553,7 +553,7 @@ export default function CreditLedgerPage() {
                               {formatCurrency(txn.balance)}
                             </td>
                             <td className="py-3 text-xs text-muted-foreground max-w-[200px] truncate">
-                              {txn.narration || '-'}
+                              {txn.remarks || '-'}
                             </td>
                             <td className="py-3 text-center">
                               {txn.payment_mode ? (
@@ -727,11 +727,11 @@ export default function CreditLedgerPage() {
             </div>
 
             <div>
-              <Label>Narration</Label>
+              <Label>Remarks</Label>
               <Textarea
                 placeholder="Add a note or description..."
-                value={paymentNarration}
-                onChange={(e) => setPaymentNarration(e.target.value)}
+                value={paymentRemarks}
+                onChange={(e) => setPaymentRemarks(e.target.value)}
                 rows={2}
               />
             </div>

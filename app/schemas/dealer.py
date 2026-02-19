@@ -441,7 +441,20 @@ class DealerCreditLedgerCreate(DealerCreditLedgerBase):
 class DealerCreditLedgerResponse(BaseResponseSchema):
     """Response schema for ledger entry."""
     id: UUID
+    dealer_id: UUID
+    transaction_type: Optional[str] = None
+    transaction_date: Optional[date] = None
+    due_date: Optional[date] = None
+    reference_type: Optional[str] = None
+    reference_number: Optional[str] = None
+    reference_id: Optional[UUID] = None
+    debit_amount: Decimal = Decimal("0")
+    credit_amount: Decimal = Decimal("0")
     balance: Decimal
+    payment_mode: Optional[str] = None
+    cheque_number: Optional[str] = None
+    transaction_reference: Optional[str] = None
+    remarks: Optional[str] = None
     is_settled: bool
     settled_date: Optional[date] = None
     days_overdue: int
