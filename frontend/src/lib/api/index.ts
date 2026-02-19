@@ -2366,7 +2366,9 @@ export const taxConfigApi = {
 // Invoices API
 export const invoicesApi = {
   list: async (params?: { page?: number; size?: number; status?: string; customer_id?: string }) => {
-    const { data } = await apiClient.get('/billing/invoices', { params });
+    const { page, size, ...rest } = params || {};
+    const queryParams = { skip: page && size ? (page - 1) * size : 0, limit: size || 50, ...rest };
+    const { data } = await apiClient.get('/billing/invoices', { params: queryParams });
     return data;
   },
   getById: async (id: string) => {
@@ -2401,7 +2403,9 @@ export const invoicesApi = {
 // Credit/Debit Notes API
 export const creditDebitNotesApi = {
   list: async (params?: { page?: number; size?: number; type?: string; status?: string }) => {
-    const { data } = await apiClient.get('/billing/credit-debit-notes', { params });
+    const { page, size, ...rest } = params || {};
+    const queryParams = { skip: page && size ? (page - 1) * size : 0, limit: size || 50, ...rest };
+    const { data } = await apiClient.get('/billing/credit-debit-notes', { params: queryParams });
     return data;
   },
   getById: async (id: string) => {
@@ -2437,7 +2441,9 @@ export const creditDebitNotesApi = {
 // E-Way Bills API
 export const ewayBillsApi = {
   list: async (params?: { page?: number; size?: number; status?: string }) => {
-    const { data } = await apiClient.get('/billing/eway-bills', { params });
+    const { page, size, ...rest } = params || {};
+    const queryParams = { skip: page && size ? (page - 1) * size : 0, limit: size || 50, ...rest };
+    const { data } = await apiClient.get('/billing/eway-bills', { params: queryParams });
     return data;
   },
   getById: async (id: string) => {
@@ -2483,7 +2489,9 @@ export const ewayBillsApi = {
 // Payment Receipts API
 export const receiptsApi = {
   list: async (params?: { page?: number; size?: number; customer_id?: string }) => {
-    const { data } = await apiClient.get('/billing/receipts', { params });
+    const { page, size, ...rest } = params || {};
+    const queryParams = { skip: page && size ? (page - 1) * size : 0, limit: size || 50, ...rest };
+    const { data } = await apiClient.get('/billing/receipts', { params: queryParams });
     return data;
   },
   getById: async (id: string) => {
@@ -4981,7 +4989,9 @@ export const aiApi = {
 
 export const leadsApi = {
   list: async (params?: { page?: number; size?: number; search?: string; status?: string; source?: string; assigned_to?: string; temperature?: string }) => {
-    const { data } = await apiClient.get('/leads', { params });
+    const { page, size, temperature, ...rest } = params || {};
+    const queryParams = { skip: page && size ? (page - 1) * size : 0, limit: size || 50, ...rest };
+    const { data } = await apiClient.get('/leads', { params: queryParams });
     return data;
   },
   getById: async (id: string) => {
