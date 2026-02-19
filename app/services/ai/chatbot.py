@@ -500,10 +500,9 @@ class ERPChatbotService:
             if customers:
                 items = [
                     {
-                        "name": c.name,
+                        "name": c.full_name,
                         "phone": c.phone,
                         "email": c.email,
-                        "city": c.city
                     }
                     for c in customers
                 ]

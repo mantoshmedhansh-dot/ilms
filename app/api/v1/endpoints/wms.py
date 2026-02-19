@@ -684,7 +684,7 @@ async def bin_enquiry(
             serial_number=item.serial_number,
             product_id=item.product_id,
             product_name=item.product.name if item.product else "Unknown",
-            sku=item.sku,
+            sku=item.product.sku if item.product else "",
             variant_name=None,
             status=item.status if item.status else "unknown",
             received_date=item.received_date,

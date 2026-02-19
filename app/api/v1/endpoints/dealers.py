@@ -122,7 +122,7 @@ async def list_dealers(
     dealer_type: Optional[DealerType] = None,
     status: Optional[DealerStatus] = None,
     tier: Optional[DealerTier] = None,
-    region_id: Optional[UUID] = None,
+    region: Optional[str] = None,
     city: Optional[str] = None,
     credit_status: Optional[CreditStatus] = None,
     current_user: User = Depends(get_current_user),
@@ -144,10 +144,10 @@ async def list_dealers(
         filters.append(Dealer.status == status)
     if tier:
         filters.append(Dealer.tier == tier)
-    if region_id:
-        filters.append(Dealer.region_id == region_id)
+    if region:
+        filters.append(Dealer.region.ilike(f"%{region}%"))
     if city:
-        filters.append(Dealer.city.ilike(f"%{city}%"))
+        filters.append(Dealer.registered_city.ilike(f"%{city}%"))
     if credit_status:
         filters.append(Dealer.credit_status == credit_status)
 
@@ -232,8 +232,6 @@ async def update_dealer(
     update_data = dealer_in.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(dealer, field, value)
-
-    dealer.updated_by = current_user.id
 
     await db.commit()
     await db.refresh(dealer)
@@ -487,10 +485,10 @@ async def record_dealer_payment(
         reference_id=payment_in.reference_id,
         debit_amount=payment_in.debit_amount,
         credit_amount=payment_in.credit_amount,
-        running_balance=new_balance,
+        balance=new_balance,
         payment_mode=payment_in.payment_mode,
-        payment_reference=payment_in.payment_reference,
-        narration=payment_in.narration,
+        transaction_reference=payment_in.transaction_reference,
+        remarks=payment_in.remarks,
         created_by=current_user.id,
     )
 
@@ -710,7 +708,7 @@ async def get_dealer_performance_report(
     end_date: date,
     db: DB,
     dealer_id: Optional[UUID] = None,
-    region_id: Optional[UUID] = None,
+    region: Optional[str] = None,
     tier: Optional[DealerTier] = None,
     current_user: User = Depends(get_current_user),
 ):
@@ -722,8 +720,8 @@ async def get_dealer_performance_report(
     filters = []
     if dealer_id:
         filters.append(Dealer.id == dealer_id)
-    if region_id:
-        filters.append(Dealer.region_id == region_id)
+    if region:
+        filters.append(Dealer.region.ilike(f"%{region}%"))
     if tier:
         filters.append(Dealer.tier == tier)
 
@@ -805,14 +803,14 @@ async def get_dealer_performance_report(
 async def get_dealer_aging_report(
     db: DB,
     as_of_date: date = Query(default_factory=date.today),
-    region_id: Optional[UUID] = None,
+    region: Optional[str] = None,
     current_user: User = Depends(get_current_user),
 ):
     """Get dealer aging report (Accounts Receivable)."""
     query = select(Dealer).where(Dealer.outstanding_amount > 0)
 
-    if region_id:
-        query = query.where(Dealer.region_id == region_id)
+    if region:
+        query = query.where(Dealer.region.ilike(f"%{region}%"))
 
     result = await db.execute(query)
     dealers = result.scalars().all()

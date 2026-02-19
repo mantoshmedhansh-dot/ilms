@@ -47,12 +47,12 @@ class PaymentPredictionService:
             Invoice.id,
             Invoice.invoice_date,
             Invoice.due_date,
-            Invoice.total_amount,
+            Invoice.grand_total,
             Invoice.status,
             PaymentReceipt.receipt_date,
             PaymentReceipt.amount
         ).outerjoin(
-            Receipt, PaymentReceipt.invoice_id == Invoice.id
+            PaymentReceipt, PaymentReceipt.invoice_id == Invoice.id
         ).where(
             Invoice.customer_id == customer_id
         ).order_by(
@@ -86,7 +86,7 @@ class PaymentPredictionService:
         for invoice_id, payments in invoice_payments.items():
             first_payment = payments[0]
             total_invoices += 1
-            total_value += first_payment.total_amount or Decimal('0')
+            total_value += first_payment.grand_total or Decimal('0')
 
             if first_payment.receipt_date:
                 paid_invoices += 1
@@ -158,7 +158,7 @@ class PaymentPredictionService:
         # Calculate prediction factors
         invoice_date = invoice.invoice_date
         due_date = invoice.due_date
-        amount = float(invoice.total_amount or 0)
+        amount = float(invoice.grand_total or 0)
 
         if isinstance(invoice_date, datetime):
             invoice_date = invoice_date.date()
@@ -251,7 +251,7 @@ class PaymentPredictionService:
         return {
             "invoice_id": str(invoice_id),
             "invoice_number": invoice.invoice_number,
-            "customer_name": invoice.customer.name if invoice.customer else "Unknown",
+            "customer_name": invoice.customer.full_name if invoice.customer else "Unknown",
             "amount_due": amount,
             "invoice_date": invoice_date.isoformat(),
             "due_date": due_date.isoformat() if due_date else None,
@@ -347,7 +347,7 @@ class PaymentPredictionService:
 
             # Score components
             overdue_score = min(40, max(0, days_overdue * 2))  # Max 40 points
-            amount_score = min(30, float(invoice.total_amount or 0) / 10000 * 30)  # Max 30 points
+            amount_score = min(30, float(invoice.grand_total or 0) / 10000 * 30)  # Max 30 points
             risk_score = {"HIGH": 30, "MEDIUM": 15, "LOW": 5}.get(prediction["risk_category"], 10)
 
             total_score = overdue_score + amount_score + risk_score
@@ -356,11 +356,11 @@ class PaymentPredictionService:
                 "invoice_id": str(invoice.id),
                 "invoice_number": invoice.invoice_number,
                 "customer_id": str(invoice.customer_id),
-                "customer_name": invoice.customer.name if invoice.customer else "Unknown",
+                "customer_name": invoice.customer.full_name if invoice.customer else "Unknown",
                 "customer_phone": invoice.customer.phone if invoice.customer else None,
                 "customer_email": invoice.customer.email if invoice.customer else None,
 
-                "amount_due": float(invoice.total_amount or 0),
+                "amount_due": float(invoice.grand_total or 0),
                 "due_date": due_date.isoformat() if due_date else None,
                 "days_overdue": max(0, days_overdue),
 
@@ -546,7 +546,7 @@ class PaymentPredictionService:
 
         return {
             "customer_id": str(customer_id),
-            "customer_name": customer.name,
+            "customer_name": customer.full_name,
 
             "credit_score": round(total_score, 1),
             "grade": grade,

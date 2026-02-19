@@ -195,7 +195,7 @@ class WMSLaborForecastingAgent:
 
         standards_map = {}
         for s in standards:
-            task_type = s.task_type if hasattr(s, 'task_type') else "GENERAL"
+            task_type = s.function if hasattr(s, 'function') else "GENERAL"
             standards_map[task_type] = {
                 "units_per_hour": float(s.units_per_hour) if hasattr(s, 'units_per_hour') and s.units_per_hour else 20.0,
                 "standard_hours": float(s.standard_hours) if hasattr(s, 'standard_hours') and s.standard_hours else 8.0,
